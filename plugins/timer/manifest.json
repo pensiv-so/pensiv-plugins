@@ -1,0 +1,23 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.timer",
+  "name": { "en": "Timer", "ko": "타이머", "ja": "タイマー" },
+  "version": "1.0.0",
+  "description": {
+    "en": "A floating writing-session countdown timer with presets.",
+    "ko": "프리셋이 있는 플로팅 집필 카운트다운 타이머.",
+    "ja": "プリセット付きのフローティング執筆カウントダウンタイマー。"
+  },
+  "author": { "name": "Pensiv", "url": "https://pensiv.so" },
+  "icon": "Clock",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": [],
+  "platforms": ["desktop", "web", "mobile"],
+  "license": "MIT",
+  "contributes": {
+    "widgets": [{ "id": "timer", "surface": "floating" }],
+    "commands": [{ "id": "toggle", "name": "Timer: Start / pause" }],
+    "settings": { "schema": {} }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "@pensiv/plugin-sdk",
+  "version": "1.0.0",
+  "description": "The typed contract a Pensiv plugin is authored against (Plugin base class + Host API).",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "src"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "@tiptap/core": "^2.0.0 || ^3.0.0",
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@tiptap/core": { "optional": true },
+    "react": { "optional": true }
+  },
+  "devDependencies": {
+    "@tiptap/core": "^2.0.0",
+    "@types/react": "^18.3.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pensiv-so/pensiv-plugins.git",
+    "directory": "packages/plugin-sdk"
+  }
+}

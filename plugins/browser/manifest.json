@@ -1,0 +1,23 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.browser",
+  "name": { "en": "Browser", "ko": "브라우저", "ja": "ブラウザ" },
+  "version": "1.0.0",
+  "description": {
+    "en": "A built-in web browser pane with bookmarks and a configurable homepage.",
+    "ko": "북마크와 홈페이지 설정이 있는 내장 웹 브라우저 페인.",
+    "ja": "ブックマークと設定可能なホームページを備えた内蔵ウェブブラウザペイン。"
+  },
+  "author": { "name": "Pensiv", "url": "https://pensiv.so" },
+  "icon": "Globe",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": ["clipboard"],
+  "platforms": ["desktop"],
+  "license": "MIT",
+  "contributes": {
+    "panes": [{ "id": "browser", "title": "Browser", "icon": "Globe" }],
+    "commands": [{ "id": "open", "name": "Browser: Open" }],
+    "settings": { "schema": {} }
+  }
+}

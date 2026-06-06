@@ -1,0 +1,19 @@
+{
+  "name": "@pensiv-plugins/toolbox",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Command + app-header action + sidebar item example.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@pensiv/plugin-sdk": "*"
+  },
+  "devDependencies": {
+    "@pensiv/build-config": "*",
+    "vite": "^6.0.0"
+  }
+}

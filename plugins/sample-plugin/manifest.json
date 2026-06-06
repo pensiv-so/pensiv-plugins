@@ -1,0 +1,19 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.sample",
+  "name": "Sample Plugin",
+  "version": "1.0.0",
+  "description": "The canonical starting point for a Pensiv plugin. Clone, rename, edit.",
+  "author": { "name": "Pensiv", "url": "https://pensiv.so" },
+  "icon": "Sparkles",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": ["editor.read"],
+  "platforms": ["desktop", "web"],
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/sample-plugin",
+  "license": "MIT",
+  "contributes": {
+    "commands": [{ "id": "say-hello", "name": "Sample: Say hello" }],
+    "settings": { "schema": {} }
+  }
+}

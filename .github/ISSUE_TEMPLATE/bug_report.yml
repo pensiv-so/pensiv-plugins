@@ -1,0 +1,41 @@
+name: Bug report
+description: Something in the SDK, build config, scaffold, or an example plugin is broken
+labels: [bug]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - '@pensiv/plugin-sdk'
+        - '@pensiv/build-config'
+        - '@pensiv/plugin-ui'
+        - create-pensiv-plugin
+        - an example plugin (plugins/*)
+        - tooling / build / CI
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, including what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: Node version (`node -v`), OS, and relevant package versions.
+    validations:
+      required: false

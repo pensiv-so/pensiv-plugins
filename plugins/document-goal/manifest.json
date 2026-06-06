@@ -1,0 +1,22 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.document-goal",
+  "name": { "en": "Document Goal", "ko": "문서 목표", "ja": "文書目標" },
+  "version": "1.0.0",
+  "description": {
+    "en": "Track a per-document writing goal with a floating progress widget.",
+    "ko": "플로팅 진행률 위젯으로 문서별 집필 목표를 추적합니다.",
+    "ja": "フローティングの進捗ウィジェットで文書ごとの執筆目標を追跡します。"
+  },
+  "author": { "name": "Pensiv", "url": "https://pensiv.so" },
+  "icon": "FileText",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": ["editor.read"],
+  "platforms": ["desktop", "web", "mobile"],
+  "license": "MIT",
+  "contributes": {
+    "widgets": [{ "id": "document-goal", "surface": "floating" }],
+    "settings": { "schema": {} }
+  }
+}

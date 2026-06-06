@@ -1,0 +1,24 @@
+name: Feature request
+description: Propose an addition to the SDK contract, build tooling, or authoring kit
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What can't you do today as a plugin author? What are you trying to build?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What API / behavior would you like? Sketch the shape if you can.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
