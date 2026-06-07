@@ -1,0 +1,316 @@
+/* Dangerous Writing styles — matched to the Pensiv app (pensiv-app) design
+ * system: shadcn tokens (--primary, --destructive, --popover, --radius, shadow-*).
+ * Injected by the host while the plugin is enabled; sizes in rem so they track
+ * the app's text-size / zoom.
+ *
+ * UI: a launcher popover (document-header button) + a full-screen overlay whose
+ * result card mirrors the app's AlertDialog. */
+
+/* ── Buttons (mirror components/ui/button.tsx) ─────────────────────────────── */
+.dw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  height: 2.5rem;
+  padding: 0 0.875rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 0.15s ease,
+    filter 0.15s ease,
+    transform 0.1s ease,
+    box-shadow 0.15s ease;
+}
+.dw-btn:active {
+  transform: scale(0.98);
+}
+.dw-btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.dw-btn--sm {
+  height: 2rem;
+  padding: 0 0.75rem;
+  font-size: 0.8125rem;
+}
+.dw-btn--primary {
+  color: hsl(var(--primary-foreground));
+  border-color: hsl(var(--primary));
+  background: linear-gradient(
+    to top,
+    hsl(var(--primary)),
+    color-mix(in srgb, hsl(var(--primary)) 90%, white)
+  );
+  box-shadow: var(--shadow-sm);
+}
+.dw-btn--primary:hover {
+  filter: brightness(0.93);
+}
+.dw-btn--destructive {
+  color: hsl(var(--destructive-foreground));
+  border-color: hsl(var(--destructive));
+  background: linear-gradient(to bottom, #ef4444, hsl(var(--destructive)));
+  box-shadow: var(--shadow-sm);
+}
+.dw-btn--destructive:hover {
+  filter: brightness(0.95);
+}
+.dw-btn--outline {
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+  background: hsl(var(--card));
+  box-shadow: var(--shadow-sm);
+}
+.dw-btn--outline:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+.dw-btn--ghost {
+  color: hsl(var(--foreground));
+  background: transparent;
+}
+.dw-btn--ghost:hover {
+  background: hsl(var(--muted) / 0.8);
+}
+
+/* Equal-width button row (segmented toggle / preset row / full-width action). */
+.dw-btnrow {
+  display: flex;
+  gap: 0.35rem;
+}
+.dw-btnrow > .dw-btn {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Launcher popover (mirrors components/ui/popover.tsx; no blur, no icons) ── */
+.dw-pop {
+  position: fixed;
+  z-index: 2147483600;
+  width: 16.5rem;
+  max-width: calc(100vw - 1rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.625rem;
+  border-radius: 0.75rem;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  box-shadow: var(--shadow-xl);
+  pointer-events: auto;
+  font-family: inherit;
+  transform-origin: top right;
+  animation: dw-pop-in 0.3s cubic-bezier(0.47, 1.14, 0.41, 1);
+}
+@keyframes dw-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-6px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.01) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.dw-pop-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.dw-pop-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.dw-pop-settings {
+  margin-left: auto;
+  height: 1.625rem;
+  padding: 0 0.5rem;
+  border: none;
+  border-radius: calc(var(--radius) - 0.05rem);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+.dw-pop-settings:hover {
+  background: hsl(var(--muted) / 0.8);
+  color: hsl(var(--foreground));
+}
+.dw-pop-note {
+  margin: 0;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Result dialog (mirrors components/ui/alert-dialog.tsx) ─────────────────── */
+.dw-dialog {
+  width: 19rem;
+  max-width: calc(100vw - 2rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  box-shadow: var(--shadow-lg);
+  text-align: left;
+}
+.dw-dialog-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.25rem;
+}
+.dw-dialog-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+.dw-dialog-desc {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: hsl(var(--muted-foreground));
+}
+.dw-dialog-detail {
+  margin: 0;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+.dw-dialog-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* ── Full-screen overlay ───────────────────────────────────────────────────── */
+.dw-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  font-family: inherit;
+}
+.dw-overlay-wash {
+  position: absolute;
+  inset: 0;
+  opacity: var(--dw-wash, 0);
+  background: radial-gradient(
+    ellipse at center,
+    transparent 35%,
+    hsl(var(--destructive) / 0.55) 100%
+  );
+  transition: opacity 0.12s linear;
+}
+.dw-overlay-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0.25rem;
+  background: hsl(var(--primary));
+  transform-origin: left center;
+  transition:
+    transform 0.1s linear,
+    background-color 0.2s linear;
+}
+.dw-overlay-top.is-danger {
+  background: hsl(var(--destructive));
+}
+.dw-overlay-pill {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.875rem;
+  border-radius: 9999px;
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border: 1px solid hsl(var(--border));
+  box-shadow: var(--shadow-lg);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  pointer-events: auto;
+}
+.dw-pill-msg {
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+}
+.dw-overlay-pill.is-danger .dw-pill-msg {
+  color: hsl(var(--destructive));
+}
+.dw-banner-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.dw-banner {
+  pointer-events: auto;
+}
+
+/* ── Animations ────────────────────────────────────────────────────────────── */
+@keyframes dw-shake {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+  20% {
+    transform: translate(calc(-50% - 4px), 2px);
+  }
+  40% {
+    transform: translate(calc(-50% + 4px), -2px);
+  }
+  60% {
+    transform: translate(calc(-50% - 3px), -2px);
+  }
+  80% {
+    transform: translate(calc(-50% + 3px), 2px);
+  }
+}
+.dw-overlay-pill.dw-shake {
+  animation: dw-shake 0.32s linear infinite;
+}
+@keyframes dw-flash {
+  0% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.dw-flash {
+  position: absolute;
+  inset: 0;
+  background: hsl(var(--destructive));
+  pointer-events: none;
+  animation: dw-flash 0.6s ease-out forwards;
+}
