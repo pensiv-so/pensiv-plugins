@@ -1,0 +1,42 @@
+{
+  "name": "pensiv-plugins",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Public monorepo for the Pensiv plugin SDK, authoring kit, and first-party plugins.",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "plugins/*"
+  ],
+  "scripts": {
+    "build:sdk": "tsc -b",
+    "build": "npm run build:sdk && npm run build --workspaces --if-present",
+    "pack-plugin": "node scripts/pack-plugin.mjs",
+    "typecheck": "npm run build:sdk && npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "npm run build && changeset publish"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.0",
+    "@eslint/js": "^9.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "jsdom": "^25.0.0",
+    "prettier": "^3.3.0",
+    "react": "^18.3.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^4.1.8"
+  }
+}

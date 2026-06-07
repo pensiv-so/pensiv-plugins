@@ -1,0 +1,22 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.daily-goal",
+  "name": { "en": "Daily Goal", "ko": "일일 목표", "ja": "毎日の目標" },
+  "version": "1.0.0",
+  "description": {
+    "en": "Track a daily writing goal with a floating progress widget.",
+    "ko": "플로팅 진행률 위젯으로 일일 집필 목표를 추적합니다.",
+    "ja": "フローティングの進捗ウィジェットで毎日の執筆目標を追跡します。"
+  },
+  "author": { "name": "Pensiv", "url": "https://pensiv.so" },
+  "icon": "Target",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": ["session"],
+  "platforms": ["desktop", "web", "mobile"],
+  "license": "MIT",
+  "contributes": {
+    "widgets": [{ "id": "daily-goal", "surface": "floating" }],
+    "settings": { "schema": {} }
+  }
+}

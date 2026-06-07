@@ -1,0 +1,6 @@
+dist
+node_modules
+package-lock.json
+*.pnsv-plugin
+# mirror-generated from the Pensiv app — formatted at its source of truth
+packages/plugin-sdk/src

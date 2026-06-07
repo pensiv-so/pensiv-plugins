@@ -1,0 +1,17 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.toolbox",
+  "name": "Toolbox",
+  "version": "1.0.0",
+  "description": "Non-visual example: a command, an app-header button, and a sidebar item that toast the live focus context.",
+  "author": { "name": "Pensiv", "url": "https://pensiv.so" },
+  "icon": "Box",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": [],
+  "platforms": ["desktop", "web"],
+  "license": "MIT",
+  "contributes": {
+    "commands": [{ "id": "ping", "name": "Toolbox: Ping" }]
+  }
+}

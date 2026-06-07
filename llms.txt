@@ -1,0 +1,42 @@
+# Pensiv Plugins
+
+> Public monorepo for the Pensiv plugin ecosystem. A Pensiv plugin is a small
+> TypeScript package authored against the typed
+> `@pensiv/plugin-sdk` (a `Plugin` base class + a permission-gated Host API),
+> built to an ES module the Pensiv writing app installs. First-party plugins live
+> here too and install through the same pipeline — nothing is baked into the app.
+
+## Start here
+
+- [Agent reference](AGENTS.md): the full authoring contract — manifest,
+  lifecycle, what you can register, the Host API, permissions, settings schema.
+- [Sample plugin](plugins/sample-plugin/src/main.ts): the canonical
+  clone-and-edit starter (minimal shape — one command + settings tab).
+- [Timer plugin](plugins/timer): the reference for non-trivial plugins. Read
+  AGENTS.md "Reference plugin: Timer" for the patterns it encodes — one shared
+  singleton store across surfaces, ephemeral run-state vs durable `app.storage`,
+  a multi-surface `registerWidget` (floating + chip + sheet), and the i18n recipe.
+
+## SDK contract (read these for exact types)
+
+- [Plugin base class](packages/plugin-sdk/src/plugin.ts): onload/onunload,
+  addCommand, registerWidget, registerEditorExtension, addSettingTab, …
+- [Host API](packages/plugin-sdk/src/host-api.ts): app.editor / project /
+  session / storage / ui / platform / app.
+- [Contributions & settings schema](packages/plugin-sdk/src/contributions.ts):
+  header/pane/sidebar contributions and the declarative SettingsSchema.
+- [Widget contribution](packages/plugin-sdk/src/widget.ts).
+- [Data model](packages/plugin-sdk/src/types.ts): manifest, permissions,
+  installed-entry.
+
+## Build
+
+- [Shared vite config](packages/build-config/vite.shared.js): externalizes
+  react + @pensiv/plugin-sdk; emits main.js (+ styles.css).
+
+## Notes
+
+- Code plugins target desktop/web. Mobile (iOS) cannot run downloaded code
+  (Apple §2.5.2); declarative-only support comes later.
+- The SDK is mirror-generated from the Pensiv app; the published .d.ts is the
+  source of truth for authors.

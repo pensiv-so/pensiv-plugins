@@ -1,0 +1,17 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.panes-demo",
+  "name": "Panes Demo",
+  "version": "1.0.0",
+  "description": "Example of a document side-pane view and a full split-view tab pane.",
+  "author": { "name": "Pensiv", "url": "https://pensiv.so" },
+  "icon": "Boxes",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": ["editor.read"],
+  "platforms": ["desktop", "web"],
+  "license": "MIT",
+  "contributes": {
+    "commands": [{ "id": "open-pane", "name": "Panes Demo: Open full pane" }]
+  }
+}

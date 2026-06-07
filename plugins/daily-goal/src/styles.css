@@ -1,0 +1,61 @@
+/* Daily Goal widget styles — injected by the host while enabled. Tokens
+ * (`--popover`, `--primary`, …) come from the app theme for exact parity.
+ * Sizes are in rem so they track the app's root font-size (text-size / zoom),
+ * exactly like the native rem-based Tailwind sizes. */
+.pnsv-goal-card {
+  width: 16rem;
+  border-radius: calc(var(--radius) + 0.25rem); /* matches app rounded-xl */
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--popover) / 0.95);
+  color: hsl(var(--popover-foreground));
+  padding: 0.5rem;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: inherit;
+  transition: border-color 0.5s ease, box-shadow 0.5s ease;
+}
+.pnsv-goal-card.achieved {
+  border-color: hsl(var(--primary));
+}
+.pnsv-goal-card:hover {
+  box-shadow: var(--shadow-xl);
+}
+
+.pnsv-cog {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-left: auto;
+  border: none;
+  border-radius: calc(var(--radius) - 0.1rem);
+  background: transparent;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.pnsv-cog:hover {
+  background: hsl(var(--muted) / 0.8);
+  color: hsl(var(--foreground));
+}
+
+.pnsv-track {
+  position: relative;
+  height: 0.25rem;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: hsl(var(--muted));
+}
+.pnsv-bar {
+  height: 100%;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  transition: width 1s ease;
+}
+
+.pnsv-tabnum {
+  font-variant-numeric: tabular-nums;
+}
