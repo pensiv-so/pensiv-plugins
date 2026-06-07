@@ -12,9 +12,12 @@
       "import": "./vite.shared.js"
     }
   },
-  "files": ["vite.shared.js", "vite.shared.d.ts"],
+  "files": [
+    "vite.shared.js",
+    "vite.shared.d.ts"
+  ],
   "peerDependencies": {
-    "vite": "^5.0.0 || ^6.0.0"
+    "vite": "^8.0.16"
   },
   "publishConfig": {
     "access": "public"

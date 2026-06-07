@@ -28,8 +28,8 @@
     "react": { "optional": true }
   },
   "devDependencies": {
-    "@tiptap/core": "^2.0.0",
-    "@types/react": "^18.3.0"
+    "@tiptap/core": "^3.26.0",
+    "@types/react": "^19.2.17"
   },
   "publishConfig": {
     "access": "public"
