@@ -10,13 +10,10 @@
   color: hsl(var(--popover-foreground));
   padding: 0.5rem;
   box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   font-family: inherit;
-  transition: border-color 0.5s ease, box-shadow 0.5s ease;
-}
-.pnsv-goal-card.achieved {
-  border-color: hsl(var(--primary));
+  transition: box-shadow 0.5s ease;
 }
 .pnsv-goal-card:hover {
   box-shadow: var(--shadow-xl);

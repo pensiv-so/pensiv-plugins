@@ -279,7 +279,7 @@ function DailyGoalWidget({ app }: WidgetProps) {
   }, [achieved]);
 
   return (
-    <div className={`pnsv-goal-card${achieved ? ' achieved' : ''}`} role="status" aria-live="polite">
+    <div className="pnsv-goal-card" role="status" aria-live="polite">
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{ marginLeft: '0.25rem', fontSize: '0.875rem', fontWeight: 500, letterSpacing: '-0.01em' }}>
