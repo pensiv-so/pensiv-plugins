@@ -149,6 +149,25 @@ const settings: SettingsSchema = {
           ]
         }
       ]
+    },
+    {
+      type: 'group',
+      fields: [
+        {
+          key: 'showFloatingWidget',
+          type: 'toggle',
+          label: L('Show Floating Widget', '플로팅 위젯 표시', 'フローティングウィジェットを表示'),
+          description: L(
+            'Display a draggable progress widget on screen',
+            '드래그 가능한 진행률 위젯을 화면에 표시합니다',
+            'ドラッグ可能な進捗ウィジェットを画面上に表示する'
+          ),
+          // Shown by default (preserves prior always-on behavior); toggle off to hide.
+          default: true,
+          // Floating widget is a desktop/tablet surface — phones use the tray chip.
+          formFactors: ['desktop', 'tablet', 'web']
+        }
+      ]
     }
   ]
 };
@@ -360,6 +379,9 @@ export default class DailyGoalPlugin extends Plugin {
       frame: 'floating',
       defaultCorner: 'bottom-right',
       storageKey: WIDGET_STORAGE_KEY,
+      // Desktop/tablet floating widget, shown by default and hideable via the
+      // settings toggle; phones use the tray chip below, gated separately by `showChip`.
+      shouldRender: ({ app }) => app.storage.get<boolean>('showFloatingWidget') ?? true,
       // Tray chip shown by default; hideable from the pane "Widgets" manage sheet.
       chipShouldRender: ({ app }) => app.storage.get<boolean>('showChip') !== false,
       // Accent ring when today's goal is met (native parity).
