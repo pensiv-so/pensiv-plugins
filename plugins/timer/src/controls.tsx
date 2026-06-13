@@ -244,35 +244,36 @@ export const TimerControls: React.FC<ControlsProps> = ({ app, onRequestClose }) 
       {/* Preset / transport row (hidden when completed) */}
       {!isCompleted && (
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.25rem' }} data-no-drag>
-          {mode === 'timer' && (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                transition: 'all 0.4s cubic-bezier(.47,1.14,.41,1)',
-                ...(store.timerState === 'idle'
-                  ? { transform: 'scale(1)', opacity: 1, filter: 'blur(0)' }
-                  : {
-                      position: 'absolute',
-                      pointerEvents: 'none',
-                      transform: 'scale(0.9)',
-                      opacity: 0,
-                      filter: 'blur(4px)'
-                    })
-              }}
-            >
-              {presets.map((preset, index) => (
-                <button
-                  key={`preset-${preset}-${index}`}
-                  className="pnsv-tm-btn"
-                  onClick={() => handlePresetClick(preset)}
-                >
-                  {presetLabel(app, preset)}
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Presets stay mounted in every mode so toggling timer↔stopwatch
+              cross-fades (blur) instead of unmounting instantly — they're just
+              driven to the hidden state unless we're an idle timer. */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+              transition: 'all 0.4s cubic-bezier(.47,1.14,.41,1)',
+              ...(mode === 'timer' && store.timerState === 'idle'
+                ? { transform: 'scale(1)', opacity: 1, filter: 'blur(0)' }
+                : {
+                    position: 'absolute',
+                    pointerEvents: 'none',
+                    transform: 'scale(0.9)',
+                    opacity: 0,
+                    filter: 'blur(4px)'
+                  })
+            }}
+          >
+            {presets.map((preset, index) => (
+              <button
+                key={`preset-${preset}-${index}`}
+                className="pnsv-tm-btn"
+                onClick={() => handlePresetClick(preset)}
+              >
+                {presetLabel(app, preset)}
+              </button>
+            ))}
+          </div>
 
           <div
             style={{
