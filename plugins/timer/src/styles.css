@@ -94,40 +94,40 @@
 }
 
 /* Popover open/close animation — mirrors the native Radix popover bounce
- * (`popover-bounce-in` / `popover-bounce-out`), with the `-50%` X baked into
- * every keyframe so the manual horizontal centering survives the animated
- * transform. Opens below the trigger, so it scales from `top center`. */
+ * (`popover-bounce-in` / `popover-bounce-out`). The popover is positioned by its
+ * `right` edge (anchored to the trigger), so the keyframes only scale + slide
+ * vertically. Opens below the trigger's right edge, so it scales from `top right`. */
 @keyframes pnsv-tm-pop-in {
   0% {
     opacity: 0;
-    transform: translateX(-50%) scale(0.8) translateY(-8px);
+    transform: scale(0.8) translateY(-8px);
   }
   60% {
     opacity: 1;
-    transform: translateX(-50%) scale(1.01) translateY(0);
+    transform: scale(1.01) translateY(0);
   }
   100% {
     opacity: 1;
-    transform: translateX(-50%) scale(1) translateY(0);
+    transform: scale(1) translateY(0);
   }
 }
 @keyframes pnsv-tm-pop-out {
   0% {
     opacity: 1;
-    transform: translateX(-50%) scale(1) translateY(0);
+    transform: scale(1) translateY(0);
   }
   30% {
     opacity: 0.9;
-    transform: translateX(-50%) scale(1.01) translateY(0);
+    transform: scale(1.01) translateY(0);
   }
   100% {
     opacity: 0;
-    transform: translateX(-50%) scale(0.8) translateY(8px);
+    transform: scale(0.8) translateY(8px);
   }
 }
 .pnsv-tm-pop {
   -webkit-app-region: no-drag;
-  transform-origin: top center;
+  transform-origin: top right;
   animation: pnsv-tm-pop-in 0.35s cubic-bezier(0.47, 1.14, 0.41, 1);
 }
 .pnsv-tm-pop.closing {
