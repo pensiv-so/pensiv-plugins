@@ -50,7 +50,7 @@ export const TimerHeaderButton: React.FC<AppHeaderActionProps> = ({ app }) => {
   const closeTimer = React.useRef<ReturnType<typeof setTimeout>>();
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const contentRef = React.useRef<HTMLDivElement>(null);
-  const [coords, setCoords] = React.useState<{ top: number; right: number } | null>(null);
+  const [coords, setCoords] = React.useState<{ top: number; left: number } | null>(null);
 
   const menuBarIconMode = app.storage.get<string>('menuBarIconMode') ?? 'expanded';
   const isExpanded = menuBarIconMode === 'expanded';
@@ -92,12 +92,18 @@ export const TimerHeaderButton: React.FC<AppHeaderActionProps> = ({ app }) => {
   const reposition = React.useCallback(() => {
     const rect = triggerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    // Anchor the popover's right edge to the trigger's right edge. The Timer sits
-    // at the window's right edge, so right-aligning keeps the popover tucked
-    // directly under the button and on-screen — regardless of the popover's width
-    // (no measurement needed, which also avoids a first-open misalign before the
-    // portal has mounted and can be measured).
-    setCoords({ top: rect.bottom + 8, right: Math.max(8, window.innerWidth - rect.right) });
+    // Center the popover under the trigger (dropdown-menu behaviour), then clamp
+    // to the viewport so it only shifts when it would otherwise run off-screen.
+    // Width is taken from the mounted portal when available; before first mount we
+    // fall back to the popover's intrinsic width (20rem) resolved against the root
+    // font size, so first-open centering is correct without a measure flash.
+    const margin = 8;
+    const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    const width = contentRef.current?.offsetWidth || 20 * rootPx;
+    const center = rect.left + rect.width / 2;
+    const maxLeft = window.innerWidth - margin - width;
+    const left = Math.min(Math.max(margin, center - width / 2), Math.max(margin, maxLeft));
+    setCoords({ top: rect.bottom + 8, left });
   }, []);
 
   React.useLayoutEffect(() => {
@@ -158,7 +164,7 @@ export const TimerHeaderButton: React.FC<AppHeaderActionProps> = ({ app }) => {
             style={{
               position: 'fixed',
               top: coords.top,
-              right: coords.right,
+              left: coords.left,
               width: '20rem',
               padding: '0.5rem',
               borderRadius: '1rem',

@@ -94,9 +94,9 @@
 }
 
 /* Popover open/close animation — mirrors the native Radix popover bounce
- * (`popover-bounce-in` / `popover-bounce-out`). The popover is positioned by its
- * `right` edge (anchored to the trigger), so the keyframes only scale + slide
- * vertically. Opens below the trigger's right edge, so it scales from `top right`. */
+ * (`popover-bounce-in` / `popover-bounce-out`). The popover is centered under the
+ * trigger (clamped to the viewport), so the keyframes only scale + slide
+ * vertically and it scales from `top center`. */
 @keyframes pnsv-tm-pop-in {
   0% {
     opacity: 0;
@@ -127,7 +127,7 @@
 }
 .pnsv-tm-pop {
   -webkit-app-region: no-drag;
-  transform-origin: top right;
+  transform-origin: top center;
   animation: pnsv-tm-pop-in 0.35s cubic-bezier(0.47, 1.14, 0.41, 1);
 }
 .pnsv-tm-pop.closing {
