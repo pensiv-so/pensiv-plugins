@@ -121,6 +121,25 @@ const settings: SettingsSchema = {
           ]
         }
       ]
+    },
+    {
+      type: 'group',
+      fields: [
+        {
+          key: 'showFloatingWidget',
+          type: 'toggle',
+          label: L('Show Floating Widget', '플로팅 위젯 표시', 'フローティングウィジェットを表示'),
+          description: L(
+            'Display a draggable progress widget on screen',
+            '드래그 가능한 진행률 위젯을 화면에 표시합니다',
+            'ドラッグ可能な進捗ウィジェットを画面上に表示する'
+          ),
+          // Shown by default (preserves prior always-on behavior); toggle off to hide.
+          default: true,
+          // Floating widget is a desktop/tablet surface — phones use the tray chip.
+          formFactors: ['desktop', 'tablet', 'web']
+        }
+      ]
     }
   ]
 };
@@ -287,10 +306,13 @@ export default class DocumentGoalPlugin extends Plugin {
       frame: 'floating',
       defaultCorner: 'bottom-right',
       storageKey: WIDGET_STORAGE_KEY,
-      // Only while a document editor is focused (native parity) — not on sheets,
-      // canvases, plotboards, etc.
+      // Shown by default and hideable via the settings toggle, and only while a
+      // document editor is focused (native parity) — not on sheets, canvases,
+      // plotboards, etc.
       shouldRender: ({ app, projectId }) =>
-        !!projectId && app.app.fileType === 'document',
+        (app.storage.get<boolean>('showFloatingWidget') ?? true) &&
+        !!projectId &&
+        app.app.fileType === 'document',
       // Tray chip: same document-only context, plus the user's "Widgets" toggle
       // (shown by default, hideable from the pane manage sheet).
       chipShouldRender: ({ app, projectId }) =>
