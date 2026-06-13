@@ -91,7 +91,17 @@ export const TimerHeaderButton: React.FC<AppHeaderActionProps> = ({ app }) => {
 
   const reposition = React.useCallback(() => {
     const rect = triggerRef.current?.getBoundingClientRect();
-    if (rect) setCoords({ top: rect.bottom + 8, left: rect.left + rect.width / 2 });
+    if (!rect) return;
+    // Center the popover under the trigger, but clamp it to the viewport so it
+    // doesn't spill off-screen now that the Timer sits at the window's right
+    // edge (the popover is `translateX(-50%)`, i.e. `left` is its center).
+    const margin = 8;
+    const halfWidth = (contentRef.current?.offsetWidth ?? 320) / 2;
+    const center = rect.left + rect.width / 2;
+    const min = margin + halfWidth;
+    const max = window.innerWidth - margin - halfWidth;
+    const left = max < min ? center : Math.min(Math.max(center, min), max);
+    setCoords({ top: rect.bottom + 8, left });
   }, []);
 
   React.useLayoutEffect(() => {
