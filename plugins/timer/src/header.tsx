@@ -160,7 +160,8 @@ export const TimerHeaderButton: React.FC<AppHeaderActionProps> = ({ app }) => {
         createPortal(
           <div
             ref={contentRef}
-            className={`pnsv-tm-pop${open ? '' : ' closing'}`}
+            // `.pnsv-tm-card` supplies the border + light/dark ring (see styles.css).
+            className={`pnsv-tm-pop pnsv-tm-card${open ? '' : ' closing'}`}
             style={{
               position: 'fixed',
               top: coords.top,
@@ -170,8 +171,6 @@ export const TimerHeaderButton: React.FC<AppHeaderActionProps> = ({ app }) => {
               borderRadius: 'calc(var(--radius) + 0.25rem)',
               background: 'hsl(var(--popover) / 0.7)',
               color: 'hsl(var(--popover-foreground))',
-              border: '1px solid hsl(var(--border))',
-              boxShadow: 'var(--shadow-lg)',
               backdropFilter: 'blur(4px)',
               WebkitBackdropFilter: 'blur(4px)',
               zIndex: 60,

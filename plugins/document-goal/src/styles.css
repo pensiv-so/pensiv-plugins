@@ -5,18 +5,40 @@
 .pnsv-goal-card {
   width: 16rem;
   border-radius: calc(var(--radius) + 0.25rem); /* matches app rounded-xl */
-  border: 1px solid hsl(var(--border));
+  /* Transparent border so the box-shadow ring below paints the hairline cleanly
+   * (a colored border here would double up with the ring's border-color layer). */
+  border: 1px solid transparent;
   background: hsl(var(--popover) / 0.95);
   color: hsl(var(--popover-foreground));
   padding: 0.5rem;
-  box-shadow: var(--shadow-lg);
+  /* Layered hairline ring (white inner ring + border-color ring) over the card's
+   * drop shadow — matches the app's tablet editor toolbar / bottom sheet. */
+  box-shadow:
+    0 0 0 1.25px #ffffff,
+    0 0 0 2px hsl(var(--border)),
+    var(--shadow-lg);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   font-family: inherit;
   transition: box-shadow 0.5s ease;
 }
 .pnsv-goal-card:hover {
-  box-shadow: var(--shadow-xl);
+  box-shadow:
+    0 0 0 1.25px #ffffff,
+    0 0 0 2px hsl(var(--border)),
+    var(--shadow-xl);
+}
+.dark .pnsv-goal-card {
+  box-shadow:
+    0 0 0 1px #ffffff15,
+    0 0 0 1.5px hsl(var(--border)),
+    var(--shadow-lg);
+}
+.dark .pnsv-goal-card:hover {
+  box-shadow:
+    0 0 0 1px #ffffff15,
+    0 0 0 1.5px hsl(var(--border)),
+    var(--shadow-xl);
 }
 
 .pnsv-cog {

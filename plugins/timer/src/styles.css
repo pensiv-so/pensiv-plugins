@@ -93,6 +93,24 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Floating widget + controls popover card chrome. Layered hairline ring (white
+ * inner ring + border-color ring) over a drop shadow — matches the app's tablet
+ * editor toolbar / bottom sheet. Kept as a class (not inline) so the dark-mode
+ * ring can switch on the host's `.dark` ancestor. */
+.pnsv-tm-card {
+  border: 1px solid transparent;
+  box-shadow:
+    0 0 0 1.25px #ffffff,
+    0 0 0 2px hsl(var(--border)),
+    var(--shadow-lg);
+}
+.dark .pnsv-tm-card {
+  box-shadow:
+    0 0 0 1px #ffffff15,
+    0 0 0 1.5px hsl(var(--border)),
+    var(--shadow-lg);
+}
+
 /* Popover open/close animation — mirrors the native Radix popover bounce
  * (`popover-bounce-in` / `popover-bounce-out`). The popover is centered under the
  * trigger (clamped to the viewport), so the keyframes only scale + slide
