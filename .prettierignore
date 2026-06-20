@@ -2,5 +2,5 @@ dist
 node_modules
 package-lock.json
 *.pnsv-plugin
-# mirror-generated from the Pensiv app — formatted at its source of truth
+# mirror-generated from the pensiv app — formatted at its source of truth
 packages/plugin-sdk/src

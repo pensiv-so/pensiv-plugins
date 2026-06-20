@@ -1,6 +1,6 @@
 # Sample Plugin
 
-The canonical Pensiv plugin — the clone-and-edit starting point.
+The canonical pensiv plugin — the clone-and-edit starting point.
 
 ## Use it
 
@@ -11,7 +11,7 @@ npm run build -w @pensiv-plugins/sample-plugin
 ```
 
 This produces `dist/main.js` (+ `dist/styles.css` if you add CSS), which the
-Pensiv app packages into a `.pnsv-plugin` and installs.
+pensiv app packages into a `.pnsv-plugin` and installs.
 
 ## What it shows
 

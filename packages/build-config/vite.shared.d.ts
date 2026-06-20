@@ -11,7 +11,7 @@ export interface DefinePluginConfigOptions {
 }
 
 /**
- * Shared vite library build for a Pensiv plugin. Produces the bundle shape the
+ * Shared vite library build for a pensiv plugin. Produces the bundle shape the
  * app's runtime loader expects: a single ES module (`main.js`) plus an optional
  * `styles.css`, with `react`, `react-dom`, and `@pensiv/plugin-sdk` externalized.
  */

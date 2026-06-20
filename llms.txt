@@ -1,9 +1,9 @@
-# Pensiv Plugins
+# pensiv Plugins
 
-> Public monorepo for the Pensiv plugin ecosystem. A Pensiv plugin is a small
+> Public monorepo for the pensiv plugin ecosystem. A pensiv plugin is a small
 > TypeScript package authored against the typed
 > `@pensiv/plugin-sdk` (a `Plugin` base class + a permission-gated Host API),
-> built to an ES module the Pensiv writing app installs. First-party plugins live
+> built to an ES module the pensiv writing app installs. First-party plugins live
 > here too and install through the same pipeline — nothing is baked into the app.
 
 ## Start here
@@ -38,5 +38,5 @@
 
 - Code plugins target desktop/web. Mobile (iOS) cannot run downloaded code
   (Apple §2.5.2); declarative-only support comes later.
-- The SDK is mirror-generated from the Pensiv app; the published .d.ts is the
+- The SDK is mirror-generated from the pensiv app; the published .d.ts is the
   source of truth for authors.

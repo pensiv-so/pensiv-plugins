@@ -1,7 +1,7 @@
 {
   "name": "@pensiv/build-config",
   "version": "1.0.0",
-  "description": "Shared vite library build for Pensiv plugins (externalizes react + @pensiv/plugin-sdk).",
+  "description": "Shared vite library build for pensiv plugins (externalizes react + @pensiv/plugin-sdk).",
   "license": "MIT",
   "type": "module",
   "main": "./vite.shared.js",
@@ -12,7 +12,10 @@
       "import": "./vite.shared.js"
     }
   },
-  "files": ["vite.shared.js", "vite.shared.d.ts"],
+  "files": [
+    "vite.shared.js",
+    "vite.shared.d.ts"
+  ],
   "peerDependencies": {
     "vite": "^5.0.0 || ^6.0.0"
   },

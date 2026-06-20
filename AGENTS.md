@@ -1,7 +1,7 @@
-# Authoring a Pensiv plugin (agent reference)
+# Authoring a pensiv plugin (agent reference)
 
 This file is written for a coding agent (Claude Code / Cursor). It is the
-manufactured context that lets you author a Pensiv plugin reliably. The contract
+manufactured context that lets you author a pensiv plugin reliably. The contract
 follows a familiar typed `Plugin` API — if you've authored plugins against one
 before, your priors transfer.
 
@@ -10,7 +10,7 @@ before, your priors transfer.
 A plugin is a folder with a `manifest.json` and a `src/main.ts` that
 `export default`s a class extending `Plugin` from `@pensiv/plugin-sdk`. It builds
 (via vite + `@pensiv/build-config`) to a single ES module `main.js` (+ optional
-`styles.css`) that the Pensiv app installs.
+`styles.css`) that the pensiv app installs.
 
 ```ts
 import { Plugin } from '@pensiv/plugin-sdk';
@@ -28,13 +28,13 @@ export default class MyPlugin extends Plugin {
 
 ```jsonc
 {
-  "id": "com.example.my-plugin",   // reverse-DNS, unique, required
+  "id": "com.example.my-plugin", // reverse-DNS, unique, required
   "name": "My Plugin",
-  "version": "1.0.0",               // semver
-  "sdk": "^1.0.0",                  // Host API range you built against
+  "version": "1.0.0", // semver
+  "sdk": "^1.0.0", // Host API range you built against
   "source": "marketplace",
-  "permissions": ["editor.read"],   // see Permissions below; [] for none
-  "platforms": ["desktop", "web"],  // code plugins are desktop/web (Apple §2.5.2)
+  "permissions": ["editor.read"], // see Permissions below; [] for none
+  "platforms": ["desktop", "web"], // code plugins are desktop/web (Apple §2.5.2)
   "contributes": { "commands": [{ "id": "do-it", "name": "Do it" }] }
 }
 ```
@@ -50,16 +50,16 @@ export default class MyPlugin extends Plugin {
 
 ## What you can register (on `this`)
 
-| Method | Contributes |
-| --- | --- |
-| `addCommand({ id, name, run })` | palette / shortcut action (`name` is `LocalizedText`) |
-| `registerWidget({ id, surface, frame?, component, chip?, sheet?, … })` | a multi-surface widget — see below |
-| `registerEditorExtension(ext)` | a TipTap extension |
-| `addSettingTab({ title?, schema })` | a settings form (declarative `SettingsSchema`) |
-| `registerHeaderAction(...)` | a file-header button (`onClick` / `isActive`) |
-| `registerAppHeaderAction({ id, label, icon, onClick? \| render? })` | a project app-header button; pass `render` for a **live custom button + popover** (e.g. Timer) |
-| `registerPaneView(...)` / `registerPane(...)` | side-pane / full-tab views |
-| `registerSidebarItem(...)` | a sidebar entry/section |
+| Method                                                                 | Contributes                                                                                    |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `addCommand({ id, name, run })`                                        | palette / shortcut action (`name` is `LocalizedText`)                                          |
+| `registerWidget({ id, surface, frame?, component, chip?, sheet?, … })` | a multi-surface widget — see below                                                             |
+| `registerEditorExtension(ext)`                                         | a TipTap extension                                                                             |
+| `addSettingTab({ title?, schema })`                                    | a settings form (declarative `SettingsSchema`)                                                 |
+| `registerHeaderAction(...)`                                            | a file-header button (`onClick` / `isActive`)                                                  |
+| `registerAppHeaderAction({ id, label, icon, onClick? \| render? })`    | a project app-header button; pass `render` for a **live custom button + popover** (e.g. Timer) |
+| `registerPaneView(...)` / `registerPane(...)`                          | side-pane / full-tab views                                                                     |
+| `registerSidebarItem(...)`                                             | a sidebar entry/section                                                                        |
 
 Every `registerX` returns a disposer and is torn down automatically on disable.
 
@@ -71,16 +71,16 @@ chrome. The summary `{ id, surface, frame?, component }` is the floor, not the
 ceiling — the full shape (see [`widget.ts`](packages/plugin-sdk/src/widget.ts),
 the source of truth):
 
-| Field | What it does |
-| --- | --- |
-| `surface` | `'floating' \| 'pane' \| 'sheet' \| 'any'` — where it may mount |
-| `frame` | `'floating'` = host draws the draggable, corner-snapping chrome; your `component` returns **only inner content**. `'none'` (default) = host mounts it bare |
-| `component` | the desktop/tablet React body (`FC<WidgetProps>`, gets `{ app, projectId }`) |
-| `defaultCorner` / `storageKey` | initial corner + persisted corner/stack-order key, for `frame: 'floating'` |
-| `shouldRender(ctx)` | mount gate for `component`; re-evaluated as settings/project change. Return `false` and nothing mounts (e.g. a "show floating widget" toggle) |
-| `chip` | a **compact** body for the host's pill/tray surface (mobile). Inner content only — host owns the pill + tap-to-open, and opens `sheet` (or `component`) on tap |
-| `chipShouldRender(ctx)` / `chipAccent(ctx)` | independent visibility gate + accent-ring gate for the chip (falls back to `shouldRender`) |
-| `sheet` | a phone bottom-sheet body opened from the chip; falls back to `component` |
+| Field                                       | What it does                                                                                                                                                   |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `surface`                                   | `'floating' \| 'pane' \| 'sheet' \| 'any'` — where it may mount                                                                                                |
+| `frame`                                     | `'floating'` = host draws the draggable, corner-snapping chrome; your `component` returns **only inner content**. `'none'` (default) = host mounts it bare     |
+| `component`                                 | the desktop/tablet React body (`FC<WidgetProps>`, gets `{ app, projectId }`)                                                                                   |
+| `defaultCorner` / `storageKey`              | initial corner + persisted corner/stack-order key, for `frame: 'floating'`                                                                                     |
+| `shouldRender(ctx)`                         | mount gate for `component`; re-evaluated as settings/project change. Return `false` and nothing mounts (e.g. a "show floating widget" toggle)                  |
+| `chip`                                      | a **compact** body for the host's pill/tray surface (mobile). Inner content only — host owns the pill + tap-to-open, and opens `sheet` (or `component`) on tap |
+| `chipShouldRender(ctx)` / `chipAccent(ctx)` | independent visibility gate + accent-ring gate for the chip (falls back to `shouldRender`)                                                                     |
+| `sheet`                                     | a phone bottom-sheet body opened from the chip; falls back to `component`                                                                                      |
 
 `component`, `chip`, and `sheet` should share **one piece of state** so all
 surfaces stay in lockstep — see the Timer reference below for how. Never import
@@ -139,7 +139,7 @@ recipes.
 ### 1. One shared store across every surface
 
 The Timer's app-header button, floating widget, mobile chip, and sheet must show
-the *same* countdown — start it in one and the others update instantly. Do **not**
+the _same_ countdown — start it in one and the others update instantly. Do **not**
 reach for React state/context (each surface mounts independently, so they'd
 diverge). Use a **module-level singleton store** that every surface imports, with a
 tiny external-store subscription hook. See [`store.ts`](plugins/timer/src/store.ts):
@@ -149,9 +149,18 @@ tiny external-store subscription hook. See [`store.ts`](plugins/timer/src/store.
 class TimerStore {
   remainingSeconds = 0;
   private listeners = new Set<() => void>();
-  subscribe(fn: () => void) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
-  private notify() { this.listeners.forEach((fn) => fn()); }
-  setRemainingSeconds(s: number) { this.remainingSeconds = s; this.persist(); this.notify(); }
+  subscribe(fn: () => void) {
+    this.listeners.add(fn);
+    return () => this.listeners.delete(fn);
+  }
+  private notify() {
+    this.listeners.forEach((fn) => fn());
+  }
+  setRemainingSeconds(s: number) {
+    this.remainingSeconds = s;
+    this.persist();
+    this.notify();
+  }
   // …timers, persistence…
 }
 export const timerStore = new TimerStore();
@@ -164,7 +173,7 @@ export function useTimerStore(): TimerStore {
 }
 ```
 
-Because the surfaces are bundled into one plugin, they import the *same* module
+Because the surfaces are bundled into one plugin, they import the _same_ module
 instance — that's what keeps them in lockstep. (`useSyncExternalStore` works too;
 the `useReducer` force-update is the minimal form.)
 
@@ -176,12 +185,12 @@ Two different homes, on purpose:
   `app.storage` so it's namespaced, synced across devices (`scope: 'synced'` with
   `[storage.synced]`), and editable from your settings schema. Read it back as
   `app.storage.get(key) ?? field.default`.
-- **Ephemeral run-state** (what's counting *right now*, seconds remaining) →
-  the store, which persists *itself* to a plain `localStorage` key so a refresh
+- **Ephemeral run-state** (what's counting _right now_, seconds remaining) →
+  the store, which persists _itself_ to a plain `localStorage` key so a refresh
   resumes mid-countdown. This is on-device, high-frequency, not a setting — keep it
   out of `app.storage`.
 
-Components push durable settings *into* the store on change (e.g. `useEffect` that
+Components push durable settings _into_ the store on change (e.g. `useEffect` that
 calls `store.setMode(app.storage.get('mode'))`), so the store stays the single
 source of truth the surfaces render from. See [`widget.tsx`](plugins/timer/src/widget.tsx).
 
@@ -193,14 +202,14 @@ One registration, one shared store, three host-framed surfaces:
 this.registerWidget({
   id: 'timer',
   surface: 'floating',
-  frame: 'floating',                 // host draws the draggable card chrome
+  frame: 'floating', // host draws the draggable card chrome
   defaultCorner: 'bottom-right',
   storageKey: 'pensiv:plugin:timer:corner',
   shouldRender: ({ app }) => app.storage.get<boolean>('showFloatingWidget') ?? false,
   chipShouldRender: ({ app }) => app.storage.get<boolean>('showChip') !== false,
-  component: TimerFloatingWidget,    // desktop/tablet card body
-  chip: TimerChip,                   // mobile tray pill body
-  sheet: TimerSheet                  // mobile bottom-sheet body
+  component: TimerFloatingWidget, // desktop/tablet card body
+  chip: TimerChip, // mobile tray pill body
+  sheet: TimerSheet // mobile bottom-sheet body
 });
 ```
 
@@ -210,7 +219,7 @@ views of the same state. Gate the floating card and the chip independently
 
 ### 4. Localize your own rendered strings
 
-Schema labels take `LocalizedText` and the host resolves them, but strings *your*
+Schema labels take `LocalizedText` and the host resolves them, but strings _your_
 components render you resolve yourself. The Timer's
 [`i18n.ts`](plugins/timer/src/i18n.ts) is the whole recipe — a tiny literal helper
 plus a resolver over `app.app.locale`:
@@ -248,7 +257,7 @@ set up by hand.
 
 ## Rules that keep you compatible
 
-1. Import only from `@pensiv/plugin-sdk`. Never reach into Pensiv internals.
+1. Import only from `@pensiv/plugin-sdk`. Never reach into pensiv internals.
 2. `react`, `react-dom`, `@pensiv/plugin-sdk`, `@tiptap/core` are provided by the
    host — keep them external (the shared build config does this).
 3. Keep manifest + settings JSON-serializable.

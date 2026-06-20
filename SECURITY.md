@@ -1,6 +1,6 @@
 # Security Policy
 
-Pensiv plugins are **executable code** that runs inside the Pensiv app under a
+pensiv plugins are **executable code** that runs inside the pensiv app under a
 declared-permission model. We take the integrity of this repo — the SDK, the
 build pipeline, the scaffold, and the example corpus — seriously, because it is
 the supply chain for what other people install.
@@ -38,7 +38,7 @@ Out of scope:
 
 - vulnerabilities in third-party dependencies (report those upstream; we track
   them via Dependabot)
-- the closed-source Pensiv app host itself (report via the app's own channel)
+- the closed-source pensiv app host itself (report via the app's own channel)
 
 ## Supported versions
 
