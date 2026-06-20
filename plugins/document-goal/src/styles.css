@@ -11,11 +11,12 @@
   background: hsl(var(--popover) / 0.95);
   color: hsl(var(--popover-foreground));
   padding: 0.5rem;
-  /* Layered hairline ring (white inner ring + border-color ring) over the card's
-   * drop shadow — matches the app's tablet editor toolbar / bottom sheet. */
+  /* Apple-style edge: a single thin neutral hairline + a directional top
+   * highlight (light from above) over the card's drop shadow, not a flat thick
+   * border — mirrors the app's `--floating-ring`. */
   box-shadow:
-    0 0 0 1.25px #ffffff,
-    0 0 0 2px hsl(var(--border)),
+    0 0 0 0.5px hsl(240 6% 84%),
+    inset 0 1px 0 0 #ffffff,
     var(--shadow-lg);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -24,20 +25,20 @@
 }
 .pnsv-goal-card:hover {
   box-shadow:
-    0 0 0 1.25px #ffffff,
-    0 0 0 2px hsl(var(--border)),
+    0 0 0 0.5px hsl(240 6% 84%),
+    inset 0 1px 0 0 #ffffff,
     var(--shadow-xl);
 }
 .dark .pnsv-goal-card {
   box-shadow:
-    0 0 0 1px #ffffff15,
-    0 0 0 1.5px hsl(var(--border)),
+    inset 0 0 0 0.5px #ffffff14,
+    inset 0 1px 0 0 #ffffff2b,
     var(--shadow-lg);
 }
 .dark .pnsv-goal-card:hover {
   box-shadow:
-    0 0 0 1px #ffffff15,
-    0 0 0 1.5px hsl(var(--border)),
+    inset 0 0 0 0.5px #ffffff14,
+    inset 0 1px 0 0 #ffffff2b,
     var(--shadow-xl);
 }
 
