@@ -4,7 +4,7 @@
   "name": "Panes Demo",
   "version": "1.0.0",
   "description": "Example of a document side-pane view and a full split-view tab pane.",
-  "author": { "name": "Pensiv", "url": "https://pensiv.so" },
+  "author": { "name": "pensiv", "url": "https://pensiv.so" },
   "icon": "Boxes",
   "sdk": "^1.0.0",
   "source": "marketplace",

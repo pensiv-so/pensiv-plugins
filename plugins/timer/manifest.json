@@ -8,7 +8,7 @@
     "ko": "프리셋이 있는 플로팅 집필 카운트다운 타이머.",
     "ja": "プリセット付きのフローティング執筆カウントダウンタイマー。"
   },
-  "author": { "name": "Pensiv", "url": "https://pensiv.so" },
+  "author": { "name": "pensiv", "url": "https://pensiv.so" },
   "icon": "Clock",
   "sdk": "^1.0.0",
   "source": "marketplace",

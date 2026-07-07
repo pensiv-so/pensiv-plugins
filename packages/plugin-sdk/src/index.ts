@@ -1,5 +1,5 @@
 /**
- * `@pensiv/plugin-sdk` — the public, fully-typed contract a Pensiv plugin is
+ * `@pensiv/plugin-sdk` — the public, fully-typed contract a pensiv plugin is
  * authored against. One import surface: the {@link Plugin} base class, the typed
  * {@link HostApi}, the widget/contribution shapes, and the serializable data
  * model re-exported from `./types`.

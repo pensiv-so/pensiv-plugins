@@ -15,7 +15,7 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/*.pnsv-plugin',
       'packages/plugin-sdk/dist/**',
-      // @pensiv/plugin-sdk/src is mirror-generated from the Pensiv app — it is
+      // @pensiv/plugin-sdk/src is mirror-generated from the pensiv app — it is
       // linted at its source of truth, not here (see README "SDK source of truth").
       'packages/plugin-sdk/src/**'
     ]

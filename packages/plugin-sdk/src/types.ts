@@ -1,7 +1,7 @@
 /**
  * Plugin data model (v1) — the serializable contract.
  *
- * MIRROR: generated from the Pensiv app's `src/shared/app/types/plugin.ts`.
+ * MIRROR: generated from the pensiv app's `src/shared/app/types/plugin.ts`.
  * Do not hand-edit beyond the mirror — change the contract in the app repo
  * (where the host adapter implementing it lives) and re-mirror.
  *

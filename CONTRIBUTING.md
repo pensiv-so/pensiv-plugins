@@ -1,6 +1,6 @@
 # Contributing to pensiv-plugins
 
-Thanks for helping build the Pensiv plugin ecosystem. This repo is a public
+Thanks for helping build the pensiv plugin ecosystem. This repo is a public
 authoring kit: the SDK plugins are written against, the shared build config, the
 scaffold CLI, and a corpus of first-party plugins that double as worked examples.
 Because the plugins **are** the documentation, we keep the whole tree typed,
@@ -21,13 +21,13 @@ That links every workspace under `packages/*` and `plugins/*`.
 
 ## The checks (run before you open a PR)
 
-| Command | What it does |
-| --- | --- |
+| Command             | What it does                                                               |
+| ------------------- | -------------------------------------------------------------------------- |
 | `npm run typecheck` | builds `@pensiv/plugin-sdk`, then type-checks the SDK **and every plugin** |
-| `npm run lint` | ESLint across the repo |
-| `npm test` | Vitest unit tests |
-| `npm run build` | builds the SDK and bundles every plugin with vite |
-| `npm run format` | formats with Prettier (optional, not enforced in CI) |
+| `npm run lint`      | ESLint across the repo                                                     |
+| `npm test`          | Vitest unit tests                                                          |
+| `npm run build`     | builds the SDK and bundles every plugin with vite                          |
+| `npm run format`    | formats with Prettier (optional, not enforced in CI)                       |
 
 CI runs `typecheck`, `lint`, `build`, and `test` on Node 20 and 22. A PR must be
 green on all four.
@@ -45,7 +45,7 @@ See [AGENTS.md](AGENTS.md) and [llms.txt](llms.txt) for the full authoring contr
 ### Rules that keep a plugin compatible
 
 - Import only from `@pensiv/plugin-sdk` (and `@pensiv/plugin-ui` for host UI).
-  Never reach into Pensiv internals.
+  Never reach into pensiv internals.
 - Keep `react`, `react-dom`, `@pensiv/plugin-sdk`, and `@tiptap/core` external —
   the shared build config already does this.
 - Keep `manifest.json` and settings schemas JSON-serializable.
@@ -53,7 +53,7 @@ See [AGENTS.md](AGENTS.md) and [llms.txt](llms.txt) for the full authoring contr
 
 ## Changing a published package
 
-`@pensiv/plugin-sdk` is **mirror-generated from the Pensiv app** — do not
+`@pensiv/plugin-sdk` is **mirror-generated from the pensiv app** — do not
 hand-edit `packages/plugin-sdk/src`. Change the contract in the app repo (where
 the host adapter lives) and re-mirror.
 

@@ -1,13 +1,15 @@
 {
   "name": "create-pensiv-plugin",
   "version": "0.0.0",
-  "description": "Scaffold a new Pensiv plugin from the canonical sample (npm init pensiv-plugin).",
+  "description": "Scaffold a new pensiv plugin from the canonical sample (npm init pensiv-plugin).",
   "license": "MIT",
   "type": "module",
   "bin": {
     "create-pensiv-plugin": "./bin/index.js"
   },
-  "files": ["bin"],
+  "files": [
+    "bin"
+  ],
   "publishConfig": {
     "access": "public"
   }

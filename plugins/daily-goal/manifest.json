@@ -8,7 +8,7 @@
     "ko": "플로팅 진행률 위젯으로 일일 집필 목표를 추적합니다.",
     "ja": "フローティングの進捗ウィジェットで毎日の執筆目標を追跡します。"
   },
-  "author": { "name": "Pensiv", "url": "https://pensiv.so" },
+  "author": { "name": "pensiv", "url": "https://pensiv.so" },
   "icon": "Target",
   "sdk": "^1.0.0",
   "source": "marketplace",

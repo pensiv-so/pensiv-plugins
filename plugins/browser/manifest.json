@@ -8,7 +8,7 @@
     "ko": "북마크와 홈페이지 설정이 있는 내장 웹 브라우저 페인.",
     "ja": "ブックマークと設定可能なホームページを備えた内蔵ウェブブラウザペイン。"
   },
-  "author": { "name": "Pensiv", "url": "https://pensiv.so" },
+  "author": { "name": "pensiv", "url": "https://pensiv.so" },
   "icon": "Globe",
   "sdk": "^1.0.0",
   "source": "marketplace",

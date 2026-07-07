@@ -8,7 +8,7 @@
     "ko": "활성 문서의 단어 수를 실시간으로 보여주는 플로팅 위젯.",
     "ja": "アクティブな文書の文字数をリアルタイムで表示するフローティングウィジェット。"
   },
-  "author": { "name": "Pensiv", "url": "https://pensiv.so" },
+  "author": { "name": "pensiv", "url": "https://pensiv.so" },
   "icon": "Target",
   "sdk": "^1.0.0",
   "source": "marketplace",

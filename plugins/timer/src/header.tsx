@@ -92,15 +92,17 @@ export const TimerHeaderButton: React.FC<AppHeaderActionProps> = ({ app }) => {
   const reposition = React.useCallback(() => {
     const rect = triggerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    // Center the popover under the trigger, but clamp it to the viewport so it
-    // doesn't spill off-screen now that the Timer sits at the window's right
-    // edge (the popover is `translateX(-50%)`, i.e. `left` is its center).
+    // Center the popover under the trigger (dropdown-menu behaviour), then clamp
+    // to the viewport so it only shifts when it would otherwise run off-screen.
+    // Width is taken from the mounted portal when available; before first mount we
+    // fall back to the popover's intrinsic width (20rem) resolved against the root
+    // font size, so first-open centering is correct without a measure flash.
     const margin = 8;
-    const halfWidth = (contentRef.current?.offsetWidth ?? 320) / 2;
+    const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    const width = contentRef.current?.offsetWidth || 20 * rootPx;
     const center = rect.left + rect.width / 2;
-    const min = margin + halfWidth;
-    const max = window.innerWidth - margin - halfWidth;
-    const left = max < min ? center : Math.min(Math.max(center, min), max);
+    const maxLeft = window.innerWidth - margin - width;
+    const left = Math.min(Math.max(margin, center - width / 2), Math.max(margin, maxLeft));
     setCoords({ top: rect.bottom + 8, left });
   }, []);
 
@@ -158,19 +160,17 @@ export const TimerHeaderButton: React.FC<AppHeaderActionProps> = ({ app }) => {
         createPortal(
           <div
             ref={contentRef}
-            className={`pnsv-tm-pop${open ? '' : ' closing'}`}
+            // `.pnsv-tm-card` supplies the border + light/dark ring (see styles.css).
+            className={`pnsv-tm-pop pnsv-tm-card${open ? '' : ' closing'}`}
             style={{
               position: 'fixed',
               top: coords.top,
               left: coords.left,
-              transform: 'translateX(-50%)',
               width: '20rem',
               padding: '0.5rem',
-              borderRadius: '1rem',
-              background: 'hsl(var(--popover) / 0.5)',
+              borderRadius: 'calc(var(--radius) + 0.25rem)',
+              background: 'hsl(var(--popover) / 0.7)',
               color: 'hsl(var(--popover-foreground))',
-              border: '1px solid hsl(var(--border))',
-              boxShadow: 'var(--shadow-xl)',
               backdropFilter: 'blur(4px)',
               WebkitBackdropFilter: 'blur(4px)',
               zIndex: 60,

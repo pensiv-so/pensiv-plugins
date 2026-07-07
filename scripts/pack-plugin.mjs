@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Package a built plugin into a single `.pnsv-plugin` file the Pensiv app installs.
+ * Package a built plugin into a single `.pnsv-plugin` file the pensiv app installs.
  *
  *   node scripts/pack-plugin.mjs plugins/<name>
  *

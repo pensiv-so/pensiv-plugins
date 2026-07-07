@@ -2,7 +2,7 @@
   "name": "@pensiv-plugins/sample-plugin",
   "version": "1.0.0",
   "private": true,
-  "description": "Canonical Pensiv plugin starter.",
+  "description": "Canonical pensiv plugin starter.",
   "license": "MIT",
   "type": "module",
   "scripts": {

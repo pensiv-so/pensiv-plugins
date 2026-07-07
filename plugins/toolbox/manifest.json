@@ -4,7 +4,7 @@
   "name": "Toolbox",
   "version": "1.0.0",
   "description": "Non-visual example: a command, an app-header button, and a sidebar item that toast the live focus context.",
-  "author": { "name": "Pensiv", "url": "https://pensiv.so" },
+  "author": { "name": "pensiv", "url": "https://pensiv.so" },
   "icon": "Box",
   "sdk": "^1.0.0",
   "source": "marketplace",

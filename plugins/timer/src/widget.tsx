@@ -66,14 +66,15 @@ export const TimerChip: React.FC<WidgetProps> = ({ app }) => {
  */
 export const TimerFloatingWidget: React.FC<WidgetProps> = ({ app }) => (
   <div
+    // Card chrome (border + ring) lives in `.pnsv-tm-card` so the dark-mode ring
+    // can key off the host's `.dark` ancestor; layout/colors stay inline.
+    className="pnsv-tm-card"
     style={{
       width: '20rem',
       padding: '0.5rem',
       borderRadius: 'calc(var(--radius) + 0.25rem)', // matches app rounded-xl
-      border: '1px solid hsl(var(--border))',
       background: 'hsl(var(--popover) / 0.95)',
       color: 'hsl(var(--popover-foreground))',
-      boxShadow: 'var(--shadow-lg)',
       backdropFilter: 'blur(8px)',
       WebkitBackdropFilter: 'blur(8px)',
       fontFamily: 'inherit'

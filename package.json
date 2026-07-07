@@ -2,7 +2,7 @@
   "name": "pensiv-plugins",
   "version": "0.0.0",
   "private": true,
-  "description": "Public monorepo for the Pensiv plugin SDK, authoring kit, and first-party plugins.",
+  "description": "Public monorepo for the pensiv plugin SDK, authoring kit, and first-party plugins.",
   "license": "MIT",
   "type": "module",
   "workspaces": [

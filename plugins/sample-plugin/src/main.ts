@@ -1,7 +1,7 @@
 import { Plugin, type SettingsSchema } from '@pensiv/plugin-sdk';
 
 /**
- * The canonical Pensiv plugin. It shows the three things almost every plugin
+ * The canonical pensiv plugin. It shows the three things almost every plugin
  * does — a command, a settings tab, and reading the editor through the typed
  * Host API (`this.app`). Clone this folder, rename it in `manifest.json`, and
  * start editing here.

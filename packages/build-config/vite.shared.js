@@ -1,5 +1,5 @@
 /**
- * Shared vite library build for a Pensiv plugin.
+ * Shared vite library build for a pensiv plugin.
  *
  * Produces the bundle shape the app's runtime loader expects: a single ES module
  * (`main.js`) whose `default` export is the plugin's `Plugin` subclass, plus an
