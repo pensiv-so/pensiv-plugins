@@ -39,6 +39,11 @@ const STR = {
  * filtered retroactively and counts in full. Enable/disable is governed by the
  * plugin's own on/off state (Plugins manage page), so there is no in-settings
  * enable toggle.
+ *
+ * Goal progress is GROSS: today's typed additions (plus pasted content when the
+ * "include pasted" option is on). Deletions are shown in the "removed today"
+ * row but never subtract from the total — netting them used to pin the total at
+ * 0 for the rest of the day once removals overtook (never-counted) pasted text.
  */
 const charCustom: FieldConditions = [
   { key: 'type', equals: 'characters' },
@@ -73,6 +78,17 @@ const settings: SettingsSchema = {
           default: 1000,
           min: 10,
           max: 1000000
+        },
+        {
+          key: 'includePasted',
+          type: 'toggle',
+          label: L('Include pasted content', '붙여넣기 포함', '貼り付けを含める'),
+          description: L(
+            'Count content pasted today toward the goal, not just typed writing.',
+            '직접 입력한 글자뿐 아니라 오늘 붙여넣은 내용도 목표에 합산합니다.',
+            '入力したテキストだけでなく、今日貼り付けた内容も目標に加算します。'
+          ),
+          default: false
         },
         {
           key: 'showTotal',
@@ -233,11 +249,27 @@ export function sessionTodaySafe(app: WidgetProps['app']): SessionTotals {
   }
 }
 
-/** Net progress for the configured goal type. */
-export function dailyNet(app: WidgetProps['app']): number {
-  const type = app.storage.get<string>('type') ?? 'words';
-  const totals = sessionTodaySafe(app);
-  return type === 'words' ? totals.net.words : totals.net.chars;
+/**
+ * Today's goal progress for the given totals: gross typed additions, plus
+ * pasted content when the "include pasted" option is on. Deletions never
+ * subtract — netting them once pinned the total at 0 for the rest of the day
+ * whenever removals overtook (never-counted) pasted text.
+ */
+export function goalProgress(
+  app: WidgetProps['app'],
+  totals: SessionTotals,
+  type: 'words' | 'characters'
+): number {
+  const pick = (p: { words: number; chars: number } | undefined) =>
+    p ? (type === 'words' ? p.words : p.chars) : 0;
+  const includePasted = app.storage.get<boolean>('includePasted') ?? false;
+  return pick(totals.added) + (includePasted ? pick(totals.pasted) : 0);
+}
+
+/** Progress for the configured goal type (chip accent / goal-met checks). */
+export function dailyProgress(app: WidgetProps['app']): number {
+  const type = (app.storage.get<string>('type') ?? 'words') as 'words' | 'characters';
+  return goalProgress(app, sessionTodaySafe(app), type);
 }
 
 /** A `label — value` line, baseline-aligned (native parity). */
@@ -276,7 +308,7 @@ function DailyGoalWidget({ app }: WidgetProps) {
   const totals = sessionTodaySafe(app);
 
   const pick = (p: { words: number; chars: number }) => (type === 'words' ? p.words : p.chars);
-  const current = pick(totals.net);
+  const current = goalProgress(app, totals, type);
   const pct = Math.min(100, target > 0 ? (current / target) * 100 : 0);
   const achieved = target > 0 && current >= target;
 
@@ -333,8 +365,8 @@ function DailyGoalWidget({ app }: WidgetProps) {
   );
 }
 
-/** Compact tray chip (mobile): two stacked lines — net value + unit — matching
- *  the native `PaneDailyGoalChip`. White + difference blend (host owns the pill). */
+/** Compact tray chip (mobile): two stacked lines — progress value + unit —
+ *  matching the native `PaneDailyGoalChip`. White + difference blend (host owns the pill). */
 function DailyGoalChip({ app }: WidgetProps) {
   const type = (app.storage.get<string>('type') ?? 'words') as 'words' | 'characters';
   // Derived in render from live settings + session, so switching the goal type
@@ -342,7 +374,7 @@ function DailyGoalChip({ app }: WidgetProps) {
   const [, bump] = React.useReducer((n: number) => n + 1, 0);
   React.useEffect(() => app.session.on('change', bump), [app]);
   const totals = sessionTodaySafe(app);
-  const current = type === 'words' ? totals.net.words : totals.net.chars;
+  const current = goalProgress(app, totals, type);
   const unitShort = type === 'words' ? tr(app, STR.words) : tr(app, STR.chars);
   const line: React.CSSProperties = {
     width: '100%',
@@ -387,7 +419,7 @@ export default class DailyGoalPlugin extends Plugin {
       // Accent ring when today's goal is met (native parity).
       chipAccent: ({ app }) => {
         const target = app.storage.get<number>('target') ?? 1000;
-        return target > 0 && dailyNet(app) >= target;
+        return target > 0 && dailyProgress(app) >= target;
       },
       component: DailyGoalWidget,
       chip: DailyGoalChip,
