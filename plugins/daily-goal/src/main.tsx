@@ -129,7 +129,7 @@ const settings: SettingsSchema = {
           label: L('Use editor counting settings', '에디터 글자 수 계산 설정 사용', 'エディターのカウント設定を使用'),
           description: L(
             'Count characters the same way as the editor word counter. Turn off to set a dedicated rule for this goal.',
-            '에디터 단어 수 계산기와 동일한 방식으로 글자를 셉니다. 끄면 이 목표에만 적용되는 규칙을 설정할 수 있습니다.',
+            '에디터와 같은 방식으로 글자를 셉니다. 끄면 이 목표만의 규칙을 정할 수 있습니다.',
             'エディターの文字カウンターと同じ方法で文字を数えます。オフにすると、この目標専用のルールを設定できます。'
           ),
           default: true,

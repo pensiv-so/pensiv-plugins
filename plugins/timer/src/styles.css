@@ -68,7 +68,7 @@
   cursor: pointer;
   /* Apple-style floating ring (thin hairline + top highlight) instead of a flat
    * border — mirrors the app's --floating-ring, which auto-switches in dark mode. */
-  box-shadow: var(--floating-ring), var(--shadow-sm);
+  box-shadow: var(--floating-ring), var(--shadow-md);
   -webkit-app-region: no-drag;
   transition:
     background-color 0.15s ease,

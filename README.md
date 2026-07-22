@@ -45,6 +45,38 @@ Start from [`plugins/sample-plugin`](plugins/sample-plugin). See
 
 Don't want to read the contract yourself? **[➜ Build a plugin with Claude](<https://claude.ai/new?q=Build%20a%20pensiv%20writing-app%20plugin%20for%20me.%0A%0Apensiv%20plugins%20are%20small%20TypeScript%20packages%20authored%20against%20the%20%40pensiv%2Fplugin-sdk%20(a%20Plugin%20base%20class%20%2B%20a%20permission-gated%20Host%20API)%2C%20built%20to%20an%20ES%20module%20the%20app%20installs.%0A%0ABefore%20writing%20any%20code%2C%20read%20the%20authoring%20contract%20and%20SDK%20reference%3A%0A-%20https%3A%2F%2Fraw.githubusercontent.com%2Fpensiv-so%2Fpensiv-plugins%2Fmain%2FAGENTS.md%0A-%20https%3A%2F%2Fraw.githubusercontent.com%2Fpensiv-so%2Fpensiv-plugins%2Fmain%2Fllms.txt%0AUse%20https%3A%2F%2Fgithub.com%2Fpensiv-so%2Fpensiv-plugins%2Ftree%2Fmain%2Fplugins%2Fsample-plugin%20as%20the%20starting%20shape%20(manifest.json%20%2B%20src%2Fmain.ts%20%2B%20vite%20config)%2C%20and%20the%20timer%20plugin%20as%20the%20reference%20for%20anything%20non-trivial.%0A%0AThen%20build%20a%20plugin%20that%20does%20this%3A%0A%0A%3C%3C%3C%20DESCRIBE%20YOUR%20FEATURE%20HERE%20%3E%3E%3E>)** — opens [claude.ai](https://claude.ai) with a prompt pre-loaded to pull this repo's authoring contract. Just replace `<<< DESCRIBE YOUR FEATURE HERE >>>` with what you want the plugin to do.
 
+## Publishing to the marketplace
+
+The pensiv marketplace lists plugins from **source**: you submit
+`manifest.json` + `src/**`, and the server builds it (esbuild, no `npm
+install`) so the listed bundle is guaranteed to match the stored source.
+Everything lists immediately with an **Unreviewed** badge — readers see your
+declared permissions, and the app shows a consent dialog before any code runs.
+
+Two ways to publish (same backend either way):
+
+- **Web** — [pensiv.so/community/publish/plugin](https://pensiv.so/community/publish/plugin):
+  pick your plugin folder or a `.zip` (make one with
+  `node scripts/bundle-source.mjs plugins/<name>`), validate, add a README /
+  tags / screenshots, publish.
+- **In-app** — pensiv → Settings → Plugins → *Publish a plugin*: pick the
+  folder, validate, publish. Add screenshots on your listing page after.
+
+Re-publishing the same manifest `id` appends a **new version** (the manifest
+`version` must strictly increase). Constraints the server enforces:
+
+- **Imports**: only your own relative files plus the host modules — `react`,
+  `react-dom`, `react/jsx-runtime`, `@pensiv/plugin-sdk`, `@pensiv/plugin-ui`,
+  `@tiptap/core`. No other npm packages (vendor anything else as source you own).
+- **Size**: ≤ 100 source files, ≤ 2 MB total, ≤ 512 KB per file. Entry defaults
+  to `src/main.ts(x)`.
+- **Permissions**: every entry must be a known permission; network access needs
+  an explicit `net:<host>` per host.
+- **Namespace**: `so.pensiv.*` is reserved for first-party plugins.
+
+The local `.pnsv-plugin` pack (`npm run pack-plugin`) remains the path for
+side-loading and testing — publishing does not use it.
+
 ## SDK source of truth
 
 `@pensiv/plugin-sdk` is **mirror-generated from the pensiv app** (where the host
