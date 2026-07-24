@@ -55,7 +55,22 @@ export const DangerousWritingOverlay: React.FC<WidgetProps> = ({ app }) => {
     }
   }, [running, fileId, store.config.startFileId]);
 
-  if (!active && !store.popoverOpen) return null;
+  // Keep the popover mounted through its close animation, so it bounces out like
+  // the native popover instead of vanishing (mirrors the Timer header).
+  const [popMounted, setPopMounted] = React.useState(false);
+  const [popClosing, setPopClosing] = React.useState(false);
+  React.useEffect(() => {
+    if (store.popoverOpen) {
+      setPopMounted(true);
+      setPopClosing(false);
+    } else if (popMounted) {
+      setPopClosing(true);
+      const t = setTimeout(() => setPopMounted(false), 220);
+      return () => clearTimeout(t);
+    }
+  }, [store.popoverOpen, popMounted]);
+
+  if (!active && !popMounted) return null;
 
   const cfg = store.config;
   const danger = store.dangerLevel;
@@ -98,12 +113,10 @@ export const DangerousWritingOverlay: React.FC<WidgetProps> = ({ app }) => {
               <div
                 className={`dw-overlay-pill${isDanger ? ' is-danger' : ''}${danger > 0.85 ? ' dw-shake' : ''}`}
               >
-                <span
-                  style={{ color: isDanger ? 'hsl(var(--destructive))' : 'hsl(var(--primary))' }}
-                >
-                  <FireIcon size="0.9rem" />
+                <span className="dw-pill-icon">
+                  <FireIcon size="0.875rem" />
                 </span>
-                <span>{liveLabel}</span>
+                <span className="dw-pill-time">{liveLabel}</span>
                 <span className="dw-pill-msg">{tr(app, dangerMsg)}</span>
               </div>
             </>
@@ -122,17 +135,11 @@ export const DangerousWritingOverlay: React.FC<WidgetProps> = ({ app }) => {
                       store.endedAt && store.startedAt ? store.endedAt - store.startedAt : 0
                   }}
                 >
-                  <button
-                    className="dw-btn dw-btn--sm dw-btn--outline"
-                    onClick={() => dwStore.reset()}
-                  >
+                  <button className="dw-btn" onClick={() => dwStore.reset()}>
                     {tr(app, STR.done)}
                   </button>
                   {store.status === 'failed' ? (
-                    <button
-                      className="dw-btn dw-btn--sm dw-btn--destructive"
-                      onClick={() => armDocument(app)}
-                    >
+                    <button className="dw-btn dw-btn--danger" onClick={() => armDocument(app)}>
                       {tr(app, STR.tryAgain)}
                     </button>
                   ) : null}
@@ -143,7 +150,7 @@ export const DangerousWritingOverlay: React.FC<WidgetProps> = ({ app }) => {
         </>
       ) : null}
 
-      {store.popoverOpen ? <DangerLauncherPopover app={app} /> : null}
+      {popMounted ? <DangerLauncherPopover app={app} closing={popClosing} /> : null}
     </div>
   );
 };

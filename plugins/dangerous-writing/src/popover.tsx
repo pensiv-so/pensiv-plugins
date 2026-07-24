@@ -4,6 +4,7 @@ import { dwStore, useDangerStore } from './store';
 import { armDocument } from './document';
 import { readConfig } from './settings';
 import { STR, tr } from './i18n';
+import { CogIcon, FireIcon } from './components';
 
 const TIME_PRESETS = [5, 10, 20]; // minutes
 const WORD_PRESETS = [250, 500, 1000];
@@ -22,11 +23,14 @@ export const recordFireAnchor = (el: HTMLElement | null): void => {
 /**
  * The launcher popover — opened by the document-header button (which toggles
  * `dwStore.popoverOpen`) and rendered by the always-mounted overlay widget, so it
- * works without an app-header render slot. Compact, icon-free, no backdrop blur;
- * the goal toggle + presets are the app's outline/ghost buttons (selected =
- * outline, rest = ghost).
+ * works without an app-header render slot. A blurred, hairline-ringed card
+ * matching the app's popover: the goal type + preset are segmented controls, and
+ * arming is the single destructive accent. `closing` plays the bounce-out.
  */
-export const DangerLauncherPopover: React.FC<{ app: HostApi }> = ({ app }) => {
+export const DangerLauncherPopover: React.FC<{ app: HostApi; closing?: boolean }> = ({
+  app,
+  closing
+}) => {
   const store = useDangerStore();
   const contentRef = React.useRef<HTMLDivElement>(null);
   const anchorRef = React.useRef<HTMLElement | null>(null);
@@ -99,51 +103,71 @@ export const DangerLauncherPopover: React.FC<{ app: HostApi }> = ({ app }) => {
     dwStore.setPopover(false);
   };
 
-  /** Selected → outline, otherwise ghost (the app's button variants). */
-  const seg = (on: boolean) => `dw-btn dw-btn--sm ${on ? 'dw-btn--outline' : 'dw-btn--ghost'}`;
-
   if (!coords) return null;
 
   return (
     <div
       ref={contentRef}
-      className="dw-pop"
+      className={`dw-pop${closing ? ' closing' : ''}`}
       role="dialog"
       aria-label={tr(app, STR.title)}
       style={{ top: coords.top, right: coords.right }}
     >
       <div className="dw-pop-head">
-        <span className="dw-pop-name">{tr(app, STR.title)}</span>
+        <span className="dw-pop-icon">
+          <FireIcon size="0.875rem" />
+        </span>
+        <span className="dw-pop-title">{tr(app, STR.title)}</span>
         <button
-          className="dw-pop-settings"
+          className="dw-cog"
+          title={tr(app, STR.settings)}
+          aria-label={tr(app, STR.settings)}
           onClick={() => {
             dwStore.setPopover(false);
             app.ui.openSettings();
           }}
         >
-          {tr(app, STR.settings)}
+          <CogIcon />
         </button>
       </div>
 
       {running ? (
-        <p className="dw-pop-note">{tr(app, STR.dontStop)}</p>
+        <>
+          <p className="dw-pop-note">{tr(app, STR.dontStop)}</p>
+          <button className="dw-btn dw-btn--block" onClick={stop}>
+            {tr(app, STR.stop)}
+          </button>
+        </>
       ) : (
         <>
-          <div className="dw-btnrow">
-            <button className={seg(goalType === 'time')} onClick={() => setGoalType('time')}>
+          <div className="dw-seg-row" role="tablist" aria-label={tr(app, STR.goalLabel)}>
+            <button
+              className="dw-seg"
+              role="tab"
+              aria-selected={goalType === 'time'}
+              data-on={goalType === 'time'}
+              onClick={() => setGoalType('time')}
+            >
               {tr(app, STR.goalTime)}
             </button>
-            <button className={seg(goalType === 'words')} onClick={() => setGoalType('words')}>
+            <button
+              className="dw-seg"
+              role="tab"
+              aria-selected={goalType === 'words'}
+              data-on={goalType === 'words'}
+              onClick={() => setGoalType('words')}
+            >
               {tr(app, STR.goalWords)}
             </button>
           </div>
 
-          <div className="dw-btnrow">
+          <div className="dw-seg-row">
             {goalType === 'time'
               ? TIME_PRESETS.map((m) => (
                   <button
                     key={m}
-                    className={seg(durationSec === m * 60)}
+                    className="dw-seg"
+                    data-on={durationSec === m * 60}
                     onClick={() => setTimePreset(m)}
                   >
                     {m} {tr(app, STR.minutes)}
@@ -152,7 +176,8 @@ export const DangerLauncherPopover: React.FC<{ app: HostApi }> = ({ app }) => {
               : WORD_PRESETS.map((n) => (
                   <button
                     key={n}
-                    className={seg(wordTarget === n)}
+                    className="dw-seg"
+                    data-on={wordTarget === n}
                     onClick={() => setWordPreset(n)}
                   >
                     {n.toLocaleString()}
@@ -160,33 +185,24 @@ export const DangerLauncherPopover: React.FC<{ app: HostApi }> = ({ app }) => {
                 ))}
           </div>
 
-          <div className="dw-pop-note">
-            {tr(app, STR.fuseLabel)} {live.fuseSec}s
-            {live.hardcore ? ` · ${tr(app, STR.hardcoreLabel)}` : ''}
-          </div>
-        </>
-      )}
-
-      {running ? (
-        <div className="dw-btnrow">
-          <button className="dw-btn dw-btn--sm dw-btn--outline" onClick={stop}>
-            {tr(app, STR.stop)}
-          </button>
-        </div>
-      ) : (
-        <div className="dw-btnrow">
           <button
-            className="dw-btn dw-btn--sm dw-btn--destructive"
+            className="dw-btn dw-btn--danger dw-btn--block"
             onClick={start}
             disabled={!docFocused}
           >
             {tr(app, STR.start)}
           </button>
-        </div>
+
+          {docFocused ? (
+            <div className="dw-pop-meta">
+              {tr(app, STR.fuseLabel)} {live.fuseSec}s
+              {live.hardcore ? ` · ${tr(app, STR.hardcoreLabel)}` : ''}
+            </div>
+          ) : (
+            <p className="dw-pop-note">{tr(app, STR.openDocToStart)}</p>
+          )}
+        </>
       )}
-      {!running && !docFocused ? (
-        <p className="dw-pop-note">{tr(app, STR.openDocToStart)}</p>
-      ) : null}
     </div>
   );
 };
