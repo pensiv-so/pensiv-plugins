@@ -35,6 +35,8 @@ export const STR = {
   goalTime: L('Time', '시간', '時間'),
   goalWords: L('Words', '단어', '単語'),
   words: L('words', '단어', '単語'),
+  /** Caption under the popover's big focal readout (time goal). */
+  focalTime: L('to survive', '버티기', '生き延びる'),
   wordsLeft: L('to go', '남음', '残り'),
   prompt: L('Prompt', '프롬프트', 'お題'),
   noPrompt: L('Blank slate — write anything.', '백지 — 무엇이든 쓰세요.', '白紙 — 何でも書こう。'),

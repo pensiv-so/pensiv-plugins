@@ -4,6 +4,7 @@ import { dwStore, useDangerStore } from './store';
 import { armDocument } from './document';
 import { readConfig } from './settings';
 import { STR, tr } from './i18n';
+import { formatClock } from './format';
 import { CogIcon, FireIcon } from './components';
 
 const TIME_PRESETS = [5, 10, 20]; // minutes
@@ -159,6 +160,17 @@ export const DangerLauncherPopover: React.FC<{ app: HostApi; closing?: boolean }
             >
               {tr(app, STR.goalWords)}
             </button>
+          </div>
+
+          <div className="dw-focal">
+            <div className="dw-focal-value">
+              {goalType === 'time'
+                ? formatClock(durationSec * 1000)
+                : wordTarget.toLocaleString()}
+            </div>
+            <div className="dw-focal-label">
+              {goalType === 'time' ? tr(app, STR.focalTime) : tr(app, STR.words)}
+            </div>
           </div>
 
           <div className="dw-seg-row">
