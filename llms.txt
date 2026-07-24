@@ -40,3 +40,16 @@
   (Apple §2.5.2); declarative-only support comes later.
 - The SDK is mirror-generated from the pensiv app; the published .d.ts is the
   source of truth for authors.
+
+## Publishing
+
+- Marketplace publishing is SOURCE-based: submit manifest.json + src/** at
+  https://pensiv.so/community/publish/plugin (or in-app: Settings → Plugins →
+  Publish a plugin). The server builds it; imports beyond the host modules
+  (react, react-dom, react/jsx-runtime, @pensiv/plugin-sdk, @pensiv/plugin-ui,
+  @tiptap/core) are rejected. Caps: 100 files / 2 MB / 512 KB per file.
+- Every fetch host needs a `net:<host>` permission; so.pensiv.* ids are
+  reserved. Manifest version must strictly increase per republish.
+- Listings start as "Unreviewed" — permissions are displayed, and the app asks
+  for consent before running plugin code. See AGENTS.md "Publishing to the
+  marketplace" for the full rules.

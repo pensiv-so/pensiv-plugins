@@ -266,3 +266,31 @@ set up by hand.
 Start from [`plugins/sample-plugin`](plugins/sample-plugin) for the minimal shape;
 study [`plugins/timer`](plugins/timer) as the reference for anything stateful or
 multi-surface (see the patterns above).
+
+## Publishing to the marketplace
+
+The marketplace lists plugins from **source** — `manifest.json` + `src/**` —
+which pensiv's server builds itself (esbuild over a virtual FS, no `npm
+install`). What you must know when authoring for publication:
+
+- **Imports are allowlisted.** Only relative files inside the plugin plus the
+  host modules `react`, `react-dom`, `react/jsx-runtime`, `@pensiv/plugin-sdk`,
+  `@pensiv/plugin-ui`, `@tiptap/core`. Any other bare import fails the build —
+  vendor such code as source files you own.
+- **Caps**: ≤ 100 source files, ≤ 2 MB total, ≤ 512 KB per file. Entry is
+  `src/main.ts(x)` unless specified.
+- **Permissions are validated strictly**: only the known set, and any `fetch`
+  target needs its own `net:<host>` (bare lowercase hostname — no scheme, port,
+  wildcard, IP, or localhost).
+- **Version must strictly increase** on every republish of the same manifest
+  `id` (same author + same id ⇒ new version of the existing listing).
+- **`so.pensiv.*` is reserved** for first-party plugins; publish under your own
+  reverse-DNS namespace.
+- Everything lists immediately as **Unreviewed**: the listing shows the declared
+  permissions and the app asks for consent before running any code. A root
+  `README.md` seeds the listing description, and `screenshots/*` seed the
+  gallery, when publishing via the web wizard.
+
+Publish at <https://pensiv.so/community/publish/plugin> (folder or
+`npm run bundle-source plugins/<name>` zip), or in-app via Settings → Plugins →
+*Publish a plugin*.

@@ -86,6 +86,23 @@ export interface PluginContributions {
   settings?: { schema: unknown };
 }
 
+/**
+ * A plugin's identity icon. Either a built-in `MonoIcon` name (the string form,
+ * e.g. `"Globe"`) or an author-bundled image as a `data:` URI
+ * (`{ type: 'image', src }`) — the plugin's own logo, shown in the install
+ * dialog and Plugins manage list.
+ *
+ * The image form is validated at install: `src` must be a `data:image/*` URI
+ * (png / jpeg / webp / gif / svg+xml) and stay under ~32KB so it rides the
+ * bundle + settings sync without bloat. Remote `http(s)` URLs are **not**
+ * accepted (an icon must resolve offline and must not leak a fetch); invalid or
+ * oversized icons drop to a default MonoIcon.
+ *
+ * Only this manifest-level identity icon accepts an image. Contribution icons
+ * (commands, panes, header/sidebar actions) stay MonoIcon **names**.
+ */
+export type PluginIcon = string | { type: 'image'; src: string };
+
 export interface PluginManifest {
   /** Reverse-DNS, required. First-party plugins use the `so.pensiv.*` namespace. */
   id: string;
@@ -95,8 +112,8 @@ export interface PluginManifest {
   version: string;
   description?: LocalizedText;
   author?: PluginAuthor;
-  /** MonoIcon name shown in the Plugins manage UI. */
-  icon?: string;
+  /** Identity icon: a built-in MonoIcon name or an author-bundled `data:` image. See {@link PluginIcon}. */
+  icon?: PluginIcon;
   /** Host API semver range the plugin was authored against, e.g. "^1.0.0". */
   sdk: string;
   source: PluginSource;

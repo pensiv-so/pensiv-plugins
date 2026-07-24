@@ -13,7 +13,7 @@ import {
   SheetStatRow
 } from '@pensiv/plugin-ui';
 import { confettiBurst } from './confetti';
-import { sessionTodaySafe } from './main';
+import { goalProgress, sessionTodaySafe } from './main';
 
 /**
  * Mobile **bottom-sheet body** for the daily goal (phone tray). Composed from the
@@ -65,7 +65,7 @@ export const DailyGoalSheet: React.FC<WidgetProps> = ({ app }) => {
   const totals = sessionTodaySafe(app);
 
   const pick = (p: { words: number; chars: number }) => (type === 'words' ? p.words : p.chars);
-  const current = pick(totals.net);
+  const current = goalProgress(app, totals, type);
   const achieved = target > 0 && current >= target;
 
   // Confetti once per day, persisted — mirrors the widget so phone & tablet

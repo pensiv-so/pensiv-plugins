@@ -13,6 +13,7 @@
     "build:sdk": "tsc -b",
     "build": "npm run build:sdk && npm run build --workspaces --if-present",
     "pack-plugin": "node scripts/pack-plugin.mjs",
+    "bundle-source": "node scripts/bundle-source.mjs",
     "typecheck": "npm run build:sdk && npm run typecheck --workspaces --if-present",
     "test": "vitest run",
     "lint": "eslint .",

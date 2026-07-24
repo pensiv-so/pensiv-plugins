@@ -109,6 +109,12 @@ export interface SessionTotals {
   removed: SessionProgress;
   /** `added − removed`, floored at 0 per field. */
   net: SessionProgress;
+  /**
+   * Pasted content, tracked separately from typed `added` (pastes aren't typed
+   * prose). Absent on hosts from before this feature; granular character rules
+   * (`countToday`) don't filter pasted text — it counts in full.
+   */
+  pasted?: SessionProgress;
 }
 
 export interface SessionApi {
