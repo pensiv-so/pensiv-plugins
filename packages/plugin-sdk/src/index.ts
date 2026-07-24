@@ -67,6 +67,7 @@ export type {
 // Re-export the serializable data model so authors get everything from one place.
 export type {
   PluginManifest,
+  PluginIcon,
   PluginAuthor,
   PluginPermission,
   PluginSource,
