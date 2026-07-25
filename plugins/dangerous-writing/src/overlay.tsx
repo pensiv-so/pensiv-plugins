@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { WidgetProps } from '@pensiv/plugin-sdk';
 import { dwStore, useDangerStore } from './store';
 import { armDocument } from './document';
-import { STR, tr, fmt } from './i18n';
+import { STR, tr } from './i18n';
 import { formatClock, warnIntensity, warnThreshold } from './format';
 import { ResultCard } from './components';
 import { DangerLauncherPopover, recordFireAnchor } from './popover';
