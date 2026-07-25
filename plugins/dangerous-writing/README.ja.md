@@ -6,11 +6,15 @@
 
 このプラグインは Squibler の [Dangerous Writing Prompt App](https://www.squibler.io/dangerous-writing-prompt-app) に着想を得て、ペンシブで実際のドキュメントを対象に動作するよう新たに作り直したものです。
 
+![ツールバーの 🔥 ポップオーバーで目標を選び、ドキュメントを武装](https://raw.githubusercontent.com/pensiv-so/pensiv-plugins/main/plugins/dangerous-writing/screenshots/01-launcher.png)
+
 ### 使い方
 1. ドキュメントを開き、ツールバーの 🔥 ボタンを押します。
 2. 目標を選びます — 決めた**時間**を耐え抜くか、**単語数**を達成するか。
 3. 書き始めます。長く止まらず、導火線を絶やさないでください。
 4. 目標達成 → 文章は安全です。止まってしまうと → ページが消去されます。
+
+![導火線が燃えるにつれて画面が赤く染まります — 止まらないで](https://raw.githubusercontent.com/pensiv-so/pensiv-plugins/main/plugins/dangerous-writing/screenshots/02-session.png)
 
 ### 機能
 - **2つの目標** — タイマーを耐え抜く、または目標単語数を達成
@@ -20,3 +24,5 @@
 
 ### ⚠️ 警告
 このプラグインは、タイピングを長く止めると**開いているドキュメントを完全に削除**します。取り消しはありません。唯一の原稿ではなく、練習用の下書きで使ってください。
+
+![止まってしまうと、ページは本当に消去されます](https://raw.githubusercontent.com/pensiv-so/pensiv-plugins/main/plugins/dangerous-writing/screenshots/03-wiped.png)

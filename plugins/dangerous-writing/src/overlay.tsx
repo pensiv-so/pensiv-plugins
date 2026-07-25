@@ -2,9 +2,9 @@ import * as React from 'react';
 import type { WidgetProps } from '@pensiv/plugin-sdk';
 import { dwStore, useDangerStore } from './store';
 import { armDocument } from './document';
-import { STR, tr } from './i18n';
+import { STR, tr, fmt } from './i18n';
 import { formatClock, warnIntensity, warnThreshold } from './format';
-import { FireIcon, ResultCard } from './components';
+import { ResultCard } from './components';
 import { DangerLauncherPopover, recordFireAnchor } from './popover';
 
 /**
@@ -14,7 +14,8 @@ import { DangerLauncherPopover, recordFireAnchor } from './popover';
  *     document-header button) — this is why a document-header action can show a
  *     popover at all;
  *   - the full-screen danger drama while a session runs: a red wash that grows as
- *     the fuse burns, a top progress bar + status pill, and a win / wiped banner.
+ *     the fuse burns, a top progress bar, a STRIP pill (flame · live count ·
+ *     status · Stop — the launcher's one-line sibling), and the result card.
  * It also feeds editor keystrokes to the fuse and bails out safely if the user
  * navigates to a different file mid-session.
  */
@@ -91,7 +92,7 @@ export const DangerousWritingOverlay: React.FC<WidgetProps> = ({ app }) => {
   const liveLabel =
     cfg.goalType === 'time'
       ? formatClock(store.remainingMs)
-      : `${store.progressWords} / ${cfg.wordTarget} ${tr(app, STR.words)}`;
+      : `${store.progressWords.toLocaleString()} / ${cfg.wordTarget.toLocaleString()}`;
   const dangerMsg = danger > 0.85 ? STR.aboutToLose : isDanger ? STR.dontStop : STR.keepTyping;
 
   return (
@@ -110,14 +111,15 @@ export const DangerousWritingOverlay: React.FC<WidgetProps> = ({ app }) => {
                 className={`dw-overlay-top${isDanger ? ' is-danger' : ''}`}
                 style={{ transform: `scaleX(${scaleX.toFixed(3)})` }}
               />
-              <div
-                className={`dw-overlay-pill${isDanger ? ' is-danger' : ''}${danger > 0.85 ? ' dw-shake' : ''}`}
-              >
-                <span className="dw-pill-icon">
-                  <FireIcon size="0.875rem" />
-                </span>
-                <span className="dw-pill-time">{liveLabel}</span>
-                <span className="dw-pill-msg">{tr(app, dangerMsg)}</span>
+              {/* `no-drag` is the host app's utility (global.css). No flame, no
+                  color shift — the full-screen red wash carries the danger; the
+                  strip stays a calm, readable readout + Stop. */}
+              <div className="dw-strip no-drag">
+                <span className="dw-strip-live">{liveLabel}</span>
+                <span className="dw-strip-msg">{tr(app, dangerMsg)}</span>
+                <button className="dw-strip-stop no-drag" onClick={() => dwStore.cancel()}>
+                  {tr(app, STR.stop)}
+                </button>
               </div>
             </>
           ) : null}
@@ -128,6 +130,7 @@ export const DangerousWritingOverlay: React.FC<WidgetProps> = ({ app }) => {
                 <ResultCard
                   app={app}
                   status={store.status === 'success' ? 'success' : 'failed'}
+                  fuseSec={cfg.fuseSec}
                   stats={{
                     goalType: cfg.goalType,
                     words: store.progressWords,
@@ -139,8 +142,8 @@ export const DangerousWritingOverlay: React.FC<WidgetProps> = ({ app }) => {
                     {tr(app, STR.done)}
                   </button>
                   {store.status === 'failed' ? (
-                    <button className="dw-btn dw-btn--danger" onClick={() => armDocument(app)}>
-                      {tr(app, STR.tryAgain)}
+                    <button className="dw-btn dw-btn--primary" onClick={() => armDocument(app)}>
+                      {tr(app, STR.writeAgain)}
                     </button>
                   ) : null}
                 </ResultCard>

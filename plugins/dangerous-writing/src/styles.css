@@ -1,25 +1,22 @@
 /*
- * Dangerous Writing styles — matched to the pensiv app (pensiv-app) design
- * system. We ship our own classes (the app's Tailwind build never scans this
- * repo) but consume the host's theme tokens so every surface tracks the native
- * theme, light or dark:
- *   --floating-ring  Apple-style hairline (thin ring + top highlight), the same
- *                    edge the app puts on floating surfaces; auto-switches in dark.
- *   --inset-well     recessed track shading, for the segmented controls.
- *   --radius / --shadow-* / --popover / --muted / --destructive …
+ * Dangerous Writing — the CONTRACT design system.
  *
- * Sizes are in rem so they track the app's root font-size (text-size / zoom),
- * exactly like the native rem-based Tailwind sizes.
+ * The launcher is one sentence with inline red tokens (goal / fuse) that open
+ * small value menus; one red button signs the contract. While running, the
+ * status pill is a one-line STRIP (flame · live count · message · Stop), and
+ * results speak the same voice ("312 words burned.").
  *
- * Surfaces: a launcher popover (from the document-header 🔥 button) + a
- * full-screen overlay whose result reads like the app's AlertDialog.
+ * All surfaces are opaque, like the native Radix popover (`bg-popover`, no
+ * backdrop blur) — they must stay readable over the overlay's red wash. Host
+ * theme tokens (`--popover`, `--muted`, `--destructive`, `--floating-ring`,
+ * `--shadow-*`, `--radius`) drive every color so light/dark just works. Sizes
+ * are rem so they track the app's root font-size.
  */
 
 /* ── Buttons ─────────────────────────────────────────────────────────────────
- * Ghost by default — a faithful port of the native `Button variant="ghost"
- * sizeVariant="sm"`, same as the Timer plugin's button. The only accent is the
- * single destructive action (arm / try again); everything else stays quiet and
- * lets the overlay carry the drama. */
+ * ghost (default) · outline (safe primary: Stop / Done) · danger (the single
+ * destructive accent: sign / write again — the app's gradient destructive
+ * button, plus a faint ember glow). */
 .dw-btn {
   display: inline-flex;
   align-items: center;
@@ -27,7 +24,7 @@
   gap: 0.375rem;
   white-space: nowrap;
   height: 2rem;
-  padding: 0 0.75rem;
+  padding: 0 0.8125rem;
   border: 1px solid transparent;
   border-radius: calc(var(--radius) + 0.1rem); /* app rounded-lg */
   font-family: inherit;
@@ -43,13 +40,13 @@
     background-color 0.15s ease,
     color 0.15s ease,
     filter 0.15s ease,
-    transform 0.1s ease;
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
 }
 .dw-btn:hover {
   background: hsl(var(--muted) / 0.8);
 }
 .dw-btn:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 .dw-btn:disabled {
   opacity: 0.4;
@@ -58,109 +55,58 @@
 .dw-btn--block {
   width: 100%;
 }
-/* The one accent: arming / retrying a run that can erase your document. A solid
- * destructive fill (no gaudy gradient), matching the app's `destructive` intent. */
-.dw-btn--danger {
+.dw-btn--tall {
+  height: 2.375rem;
+}
+.dw-btn--outline {
   font-weight: 500;
-  color: hsl(var(--destructive-foreground));
-  background: hsl(var(--destructive));
+  border-color: hsl(var(--border));
+  background: hsl(var(--card));
   box-shadow: var(--shadow-sm);
 }
-.dw-btn--danger:hover {
-  background: hsl(var(--destructive));
-  filter: brightness(0.94);
+.dw-btn--outline:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+/* A faithful port of the app's default `variant` (primary): primary fill with
+ * the subtle darker-bottom gradient, primary/95 border, shadow-sm; hover
+ * darkens the same gradient one step — exactly the native hover, no color
+ * shift. The danger voice lives in the sentence tokens, not the button. */
+.dw-btn--primary {
+  font-weight: 500;
+  color: hsl(var(--primary-foreground));
+  border-color: hsl(var(--primary) / 0.95);
+  background: linear-gradient(
+    180deg,
+    hsl(var(--primary)),
+    hsl(from hsl(var(--primary)) h s calc(l * 0.9))
+  );
+  box-shadow: var(--shadow-sm);
+}
+.dw-btn--primary:hover {
+  background: linear-gradient(
+    180deg,
+    hsl(from hsl(var(--primary)) h s calc(l * 0.9)),
+    hsl(from hsl(var(--primary)) h s calc(l * 0.85))
+  );
 }
 
-/* ── Segmented control ───────────────────────────────────────────────────────
- * The goal type and preset pickers. A recessed track (`--inset-well`) with the
- * selected item lifted onto a hairline-ringed chip — the app's segmented look,
- * built from the same tokens. */
-.dw-seg-row {
-  display: flex;
-  gap: 0.125rem;
-  padding: 0.1875rem;
-  border-radius: calc(var(--radius) + 0.15rem);
-  background: hsl(var(--muted) / 0.6);
-  box-shadow: var(--inset-well);
-}
-.dw-seg {
-  flex: 1;
-  min-width: 0;
-  height: 1.75rem;
-  padding: 0 0.5rem;
-  border: 1px solid transparent;
-  border-radius: calc(var(--radius) - 0.05rem);
-  font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 400;
-  line-height: 1;
-  color: hsl(var(--muted-foreground));
-  background: transparent;
-  cursor: pointer;
-  user-select: none;
-  -webkit-app-region: no-drag;
-  font-variant-numeric: tabular-nums;
-  transition:
-    color 0.15s ease,
-    background-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-.dw-seg:hover {
-  color: hsl(var(--foreground));
-}
-.dw-seg[data-on='true'] {
-  color: hsl(var(--foreground));
-  font-weight: 500;
-  background: hsl(var(--background));
-  box-shadow: var(--floating-ring);
-}
-
-/* ── Focal target readout ─────────────────────────────────────────────────────
- * The popover's center of gravity — the stake, shown large (the Timer plugin's
- * big-number DNA). Presets below tune it; the segmented type toggle above swaps
- * it between a survival clock and a word count. */
-.dw-focal {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.1875rem;
-  padding: 0.375rem 0 0.3125rem;
-}
-.dw-focal-value {
-  font-size: 1.75rem;
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: hsl(var(--foreground));
-  font-variant-numeric: tabular-nums;
-}
-.dw-focal-label {
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: hsl(var(--muted-foreground));
-}
-
-/* ── Launcher popover ─────────────────────────────────────────────────────────
- * Mirrors the native Radix popover: hairline-ringed card over a blurred
- * translucent surface, with the app's bounce in / out. */
+/* ── Launcher popover: the contract ──────────────────────────────────────────
+ * An opaque hairline-ringed card (native popover chrome), origin-aware bounce
+ * from the 🔥 trigger. No header, no controls — a sentence and a signature. */
 .dw-pop {
   position: fixed;
   z-index: 2147483600;
-  width: 15rem;
+  width: 17.25rem;
   max-width: calc(100vw - 1rem);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.5rem;
+  gap: 0.875rem;
+  padding: 1.125rem 1.125rem 1rem;
   border: 1px solid transparent;
   border-radius: calc(var(--radius) + 0.25rem); /* app rounded-xl */
-  background: hsl(var(--popover) / 0.72);
+  background: hsl(var(--popover));
   color: hsl(var(--popover-foreground));
-  box-shadow: var(--floating-ring), var(--shadow-lg);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  box-shadow: var(--floating-ring), var(--shadow-xl);
   pointer-events: auto;
   font-family: inherit;
   transform-origin: top right;
@@ -193,29 +139,16 @@
     transform: scale(0.85) translateY(-6px);
   }
 }
-.dw-pop-head {
-  display: flex;
-  align-items: center;
-  gap: 0.4375rem;
-  padding: 0.125rem 0.125rem 0;
-}
-.dw-pop-icon {
-  display: inline-flex;
-  color: hsl(var(--muted-foreground));
-}
-.dw-pop-title {
-  font-size: 0.8125rem;
-  font-weight: 550;
-  letter-spacing: -0.01em;
-}
-/* Settings cog — a compact ghost icon button (the app's header-action look). */
+/* Settings cog, floating in the card's top-right corner. */
 .dw-cog {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 1.5rem;
   height: 1.5rem;
-  margin-left: auto;
   border: none;
   border-radius: calc(var(--radius) - 0.05rem);
   color: hsl(var(--muted-foreground));
@@ -230,74 +163,162 @@
   background: hsl(var(--muted) / 0.8);
   color: hsl(var(--foreground));
 }
-.dw-pop-note {
-  margin: 0;
-  padding: 0 0.125rem;
-  font-size: 0.75rem;
-  line-height: 1.45;
-  color: hsl(var(--muted-foreground));
+
+/* The sentence. Tokens are part of the prose, so it reads before it operates. */
+.dw-contract {
+  font-size: 0.875rem; /* app text-sm */
+  line-height: 1.65;
+  font-weight: 450;
+  letter-spacing: -0.005em;
+  padding-right: 0.875rem; /* clear of the cog */
 }
-.dw-pop-meta {
+.dw-tokwrap {
+  position: relative;
+  display: inline-block;
+}
+.dw-tok {
+  border: none;
+  margin: 0;
   padding: 0 0.125rem 0.0625rem;
-  font-size: 0.6875rem;
-  color: hsl(var(--muted-foreground) / 0.85);
+  font: inherit;
+  font-weight: 600;
+  color: hsl(var(--primary));
+  background: transparent;
+  border-bottom: 1.5px dashed hsl(var(--primary) / 0.4);
+  border-radius: 0.25rem 0.25rem 0 0;
+  cursor: pointer;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.01em;
+  -webkit-app-region: no-drag;
+  transition: background-color 0.15s ease;
+}
+.dw-tok:hover,
+.dw-tok[data-open='true'] {
+  background: hsl(var(--primary) / 0.1);
+}
+/* The live countdown inside the running sentence. */
+.dw-live {
+  color: hsl(var(--primary));
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
 }
 
-/* ── Result dialog ────────────────────────────────────────────────────────────
- * The end-of-session card, styled as the app's AlertDialog: left-aligned
- * semibold title + muted body, a muted stats line, right-aligned actions. Same
- * hairline-ringed card chrome as the popover. No emoji, no color on the title. */
+/* Token value menu — a small native-style menu card under the token. */
+.dw-menu {
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  left: 0;
+  z-index: 20;
+  min-width: 8.5rem;
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem; /* app dropdown p-1 */
+  border-radius: calc(var(--radius) + 0.25rem); /* app rounded-xl */
+  background: hsl(var(--popover));
+  box-shadow: var(--floating-ring), var(--shadow-lg);
+  transform-origin: top left;
+  animation: dw-menu-in 0.14s cubic-bezier(0.23, 1, 0.32, 1);
+}
+@keyframes dw-menu-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+/* A port of the app's `DropdownMenuItem`: gap-2.5 px-2 py-1.5 rounded-lg
+ * text-sm, opaque hover:bg-muted, no-drag. Selected item + check use primary. */
+.dw-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.375rem 0.5rem;
+  border: none;
+  border-radius: calc(var(--radius) + 0.1rem); /* app rounded-lg */
+  font-family: inherit;
+  font-size: 0.875rem; /* app text-sm */
+  font-weight: 400;
+  color: hsl(var(--foreground));
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  -webkit-app-region: no-drag;
+  transition: background-color 0.12s ease;
+}
+.dw-menu-item:hover {
+  background: hsl(var(--muted));
+}
+.dw-menu-item[data-on='true'] {
+  background: hsl(var(--muted));
+  font-weight: 600;
+  color: hsl(var(--primary));
+}
+.dw-menu-item[data-on='true']::after {
+  content: '✓';
+  margin-left: auto;
+  padding-left: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: hsl(var(--primary));
+}
+.dw-menu-sep {
+  height: 1px;
+  margin: 0.25rem 0.5rem;
+  background: hsl(var(--border));
+}
+
+.dw-note {
+  margin: -0.25rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  text-align: center;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ── Result dialog: the number talks ─────────────────────────────────────────*/
 .dw-dialog {
-  width: 19rem;
+  width: 18.25rem;
   max-width: calc(100vw - 2rem);
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
-  padding: 1rem;
+  gap: 0.375rem;
+  padding: 1.125rem;
   border: 1px solid transparent;
-  border-radius: calc(var(--radius) + 0.35rem);
-  background: hsl(var(--popover) / 0.85);
+  border-radius: calc(var(--radius) + 0.25rem); /* app rounded-xl */
+  background: hsl(var(--popover));
   color: hsl(var(--foreground));
   box-shadow: var(--floating-ring), var(--shadow-xl);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   text-align: left;
-}
-.dw-dialog-head {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
 }
 .dw-dialog-title {
   margin: 0;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: hsl(var(--foreground));
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+.dw-hot {
+  color: hsl(var(--primary));
 }
 .dw-dialog-desc {
   margin: 0;
   font-size: 0.8125rem;
-  line-height: 1.5;
+  line-height: 1.55;
   color: hsl(var(--muted-foreground));
-}
-.dw-dialog-detail {
-  margin: 0;
-  font-size: 0.75rem;
-  color: hsl(var(--muted-foreground) / 0.85);
-  font-variant-numeric: tabular-nums;
 }
 .dw-dialog-foot {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
+  margin-top: 0.625rem;
 }
 
 /* ── Full-screen overlay ──────────────────────────────────────────────────────
- * The live danger drama. A red wash that grows as the fuse burns, a top progress
- * bar + status pill while running, and the result card on end. */
+ * The live danger drama: a red wash that grows as the fuse burns, a top goal
+ * progress bar, and the strip. */
 .dw-overlay {
   position: fixed;
   inset: 0;
@@ -331,45 +352,66 @@
 .dw-overlay-top.is-danger {
   background: hsl(var(--destructive));
 }
-.dw-overlay-pill {
+
+/* The strip — the launcher's one-line sibling: flame · live · message · Stop. */
+.dw-strip {
   position: absolute;
-  top: 0.875rem;
+  /* Below the app title bar's drag region. The strip is a separate fixed
+   * overlay layer, NOT a DOM child of the title bar, so `no-drag` cannot carve a
+   * hole in the drag region it overlaps — the OS keeps eating the click on Stop.
+   * The only reliable fix is to not overlap the title bar at all: the launcher
+   * popover sits below the header and has always been clickable, so the strip
+   * drops to the same band. (no-drag is still set below as belt-and-braces.) */
+  top: 3.5rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 0.75rem 0.375rem 0.625rem;
+  gap: 0.625rem;
+  padding: 0.3125rem 0.3125rem 0.3125rem 0.9375rem;
   border: 1px solid transparent;
   border-radius: 9999px;
-  background: hsl(var(--popover) / 0.85);
+  background: hsl(var(--popover));
   color: hsl(var(--popover-foreground));
   box-shadow: var(--floating-ring), var(--shadow-lg);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
   font-size: 0.8125rem;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
   pointer-events: auto;
+  white-space: nowrap;
+  -webkit-app-region: no-drag;
 }
-.dw-pill-icon {
-  display: inline-flex;
-  color: hsl(var(--primary));
-  transition: color 0.2s linear;
-}
-.dw-overlay-pill.is-danger .dw-pill-icon {
-  color: hsl(var(--destructive));
-}
-.dw-pill-time {
+.dw-strip-live {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
 }
-.dw-pill-msg {
+.dw-strip-msg {
   color: hsl(var(--muted-foreground));
   font-weight: 400;
 }
-.dw-overlay-pill.is-danger .dw-pill-msg {
-  color: hsl(var(--destructive));
+.dw-strip-stop {
+  height: 2.125rem;
+  padding: 0 1.125rem;
+  margin-left: 0.25rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 9999px;
+  font-family: inherit;
+  font-size: 0.78125rem;
+  font-weight: 550;
+  color: hsl(var(--foreground));
+  background: hsl(var(--card));
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition:
+    background-color 0.15s ease,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
 }
+.dw-strip-stop:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+.dw-strip-stop:active {
+  transform: scale(0.97);
+}
+
 .dw-banner-wrap {
   position: absolute;
   inset: 0;
@@ -383,27 +425,6 @@
 }
 
 /* ── Animations ──────────────────────────────────────────────────────────────*/
-@keyframes dw-shake {
-  0%,
-  100% {
-    transform: translate(-50%, 0);
-  }
-  20% {
-    transform: translate(calc(-50% - 4px), 2px);
-  }
-  40% {
-    transform: translate(calc(-50% + 4px), -2px);
-  }
-  60% {
-    transform: translate(calc(-50% - 3px), -2px);
-  }
-  80% {
-    transform: translate(calc(-50% + 3px), 2px);
-  }
-}
-.dw-overlay-pill.dw-shake {
-  animation: dw-shake 0.32s linear infinite;
-}
 @keyframes dw-flash {
   0% {
     opacity: 0.85;
@@ -424,7 +445,7 @@
 @media (prefers-reduced-motion: reduce) {
   .dw-pop,
   .dw-pop.closing,
-  .dw-overlay-pill.dw-shake,
+  .dw-menu,
   .dw-flash {
     animation: none;
   }
