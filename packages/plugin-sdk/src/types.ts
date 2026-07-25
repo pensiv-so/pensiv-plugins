@@ -114,6 +114,12 @@ export interface PluginManifest {
   author?: PluginAuthor;
   /** Identity icon: a built-in MonoIcon name or an author-bundled `data:` image. See {@link PluginIcon}. */
   icon?: PluginIcon;
+  /**
+   * Optional accent, a `#rrggbb` hex. Tints the marketplace icon tile's gradient
+   * (the black/porcelain base is kept) so listings aren't all identical. Omit
+   * for the default monochrome tile.
+   */
+  accent?: string;
   /** Host API semver range the plugin was authored against, e.g. "^1.0.0". */
   sdk: string;
   source: PluginSource;
