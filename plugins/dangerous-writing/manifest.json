@@ -1,22 +1,43 @@
 {
   "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
   "id": "so.pensiv.dangerous-writing",
-  "name": { "en": "Dangerous Writing", "ko": "위험한 글쓰기", "ja": "デンジャラス・ライティング" },
+  "name": {
+    "en": "Dangerous Writing",
+    "ko": "위험한 글쓰기",
+    "ja": "デンジャラス・ライティング"
+  },
   "version": "1.0.0",
   "description": {
     "en": "Keep writing or lose it all. Arm your open document from the toolbar — stop typing too long and its content is erased. A port of the Dangerous Writing Prompt App.",
     "ko": "계속 쓰지 않으면 모두 잃습니다. 툴바에서 열린 문서를 무장하세요 — 너무 오래 멈추면 내용이 지워집니다. 위험한 글쓰기 프롬프트 앱 이식.",
     "ja": "書き続けなければ全て失う。ツールバーから開いているドキュメントを武装 — 長く止まると内容が消えます。デンジャラス・ライティング・プロンプト・アプリの移植。"
   },
-  "author": { "name": "pensiv", "url": "https://pensiv.so" },
+  "author": {
+    "name": "pensiv",
+    "url": "https://pensiv.so"
+  },
   "icon": "Fire",
   "sdk": "^1.0.0",
   "source": "marketplace",
-  "permissions": ["editor.read", "editor.write"],
-  "platforms": ["desktop", "web"],
+  "permissions": [
+    "editor.read",
+    "editor.write"
+  ],
+  "platforms": [
+    "desktop",
+    "web"
+  ],
   "license": "MIT",
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/dangerous-writing",
   "contributes": {
-    "widgets": [{ "id": "overlay", "surface": "any" }],
-    "settings": { "schema": {} }
+    "widgets": [
+      {
+        "id": "overlay",
+        "surface": "any"
+      }
+    ],
+    "settings": {
+      "schema": {}
+    }
   }
 }
