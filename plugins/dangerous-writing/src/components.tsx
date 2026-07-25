@@ -1,10 +1,10 @@
 import * as React from 'react';
 import type { HostApi } from '@pensiv/plugin-sdk';
-import { STR, tr } from './i18n';
+import { STR, tr, fmt } from './i18n';
 import { formatElapsed } from './format';
 import type { SessionStats } from './store';
 
-/** The flame glyph for the pill / popover header — the app's `Fire` (Lucide 1.5). */
+/** The flame glyph for the live strip — the app's `Fire` (Lucide 1.5). */
 export const FireIcon: React.FC<{ size?: string }> = ({ size = '1rem' }) => (
   <svg
     width={size}
@@ -21,7 +21,7 @@ export const FireIcon: React.FC<{ size?: string }> = ({ size = '1rem' }) => (
   </svg>
 );
 
-/** Settings cog for the popover header — the app's `Cog` (Lucide 1.5). */
+/** Settings cog for the popover corner — the app's `Cog` (Lucide 1.5). */
 export const CogIcon: React.FC<{ size?: string }> = ({ size = '1rem' }) => (
   <svg
     width={size}
@@ -39,36 +39,49 @@ export const CogIcon: React.FC<{ size?: string }> = ({ size = '1rem' }) => (
   </svg>
 );
 
-/** The stats line shown on a finished session ("X words · Ys"). */
-const statsLine = (app: HostApi, stats: SessionStats | null): string => {
-  if (!stats) return '';
-  const words = `${stats.words.toLocaleString()} ${tr(app, STR.words)}`;
-  return `${words} · ${formatElapsed(stats.elapsedMs)}`;
-};
-
 export interface ResultCardProps {
   app: HostApi;
   status: 'success' | 'failed';
   stats: SessionStats | null;
+  /** Effective fuse of the finished session, for the failure explanation. */
+  fuseSec: number;
   /** Footer action buttons, composed by the caller. */
   children: React.ReactNode;
 }
 
 /**
- * The end-of-session result, styled as the app's `AlertDialog`: left-aligned
- * header (semibold title + muted description), a muted stats line, and a
- * right-aligned footer of action buttons. No emoji, no heavy weights, no color on
- * the title — it reads like every other alert in the app.
+ * The end-of-session result, in the contract's voice — the number talks:
+ * "312 words burned." / "487 words survived." A one-line explanation and
+ * right-aligned actions; the word count glows destructive on a burn.
  */
-export const ResultCard: React.FC<ResultCardProps> = ({ app, status, stats, children }) => {
+export const ResultCard: React.FC<ResultCardProps> = ({
+  app,
+  status,
+  stats,
+  fuseSec,
+  children
+}) => {
   const success = status === 'success';
+  const count = fmt(tr(app, STR.nWords), { n: (stats?.words ?? 0).toLocaleString() });
+  const title = tr(app, success ? STR.survivedTitle : STR.burnedTitle)
+    .split(/(\{count\})/g)
+    .map((part, i) =>
+      part === '{count}' ? (
+        <span className={success ? undefined : 'dw-hot'} key={i}>
+          {count}
+        </span>
+      ) : (
+        <React.Fragment key={i}>{part}</React.Fragment>
+      )
+    );
+  const body = success
+    ? fmt(tr(app, STR.survivedBody), { elapsed: formatElapsed(stats?.elapsedMs ?? 0) })
+    : fmt(tr(app, STR.burnedBody), { fuse: String(fuseSec) });
+
   return (
     <div className="dw-dialog" role="alertdialog" aria-live="assertive">
-      <div className="dw-dialog-head">
-        <h3 className="dw-dialog-title">{tr(app, success ? STR.survived : STR.wiped)}</h3>
-        <p className="dw-dialog-desc">{tr(app, success ? STR.survivedBody : STR.wipedBody)}</p>
-        {stats ? <p className="dw-dialog-detail">{statsLine(app, stats)}</p> : null}
-      </div>
+      <h3 className="dw-dialog-title">{title}</h3>
+      <p className="dw-dialog-desc">{body}</p>
       <div className="dw-dialog-foot">{children}</div>
     </div>
   );

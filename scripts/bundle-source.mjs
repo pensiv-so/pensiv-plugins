@@ -48,9 +48,12 @@ function visit(rel) {
       continue;
     }
     const ext = extname(entry.name).toLowerCase();
+    // README.md plus localized README.<locale>.md variants — the publish
+    // wizard combines them into the listing description per language.
+    const isReadme = /^README(\.[a-z]{2}(-[a-z0-9-]+)?)?\.md$/i.test(relPath);
     const packable =
       relPath === 'manifest.json' ||
-      relPath === 'README.md' ||
+      isReadme ||
       relPath === 'styles.css' ||
       (relPath.startsWith('src/') && ALLOWED_EXT.has(ext)) ||
       (relPath.startsWith('screenshots/') && SCREENSHOT_EXT.has(ext));
