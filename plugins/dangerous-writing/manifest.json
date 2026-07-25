@@ -17,6 +17,7 @@
     "url": "https://pensiv.so"
   },
   "icon": "Fire",
+  "accent": "#e5533d",
   "sdk": "^1.0.0",
   "source": "marketplace",
   "permissions": [
