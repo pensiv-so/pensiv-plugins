@@ -12,6 +12,13 @@
   lifecycle, what you can register, the Host API, permissions, settings schema.
 - [Sample plugin](plugins/sample-plugin/src/main.ts): the canonical
   clone-and-edit starter (minimal shape — one command + settings tab).
+- [Surface actions plugin](plugins/surface-actions): the reference for
+  registerSurfaceItem — every surface in the catalogue, the two scoping knobs
+  (static `fileTypes` vs dynamic `when`), and a deliberately-crashing row that
+  shows the host's throw guard disabling one item rather than the menu.
+- [Canvas checklist plugin](plugins/canvas-checklist): the reference for
+  registerCanvasNode — the host/plugin split, `setState` returning false at the
+  size cap, and honouring `readOnly` in history/export renders.
 - [Timer plugin](plugins/timer): the reference for non-trivial plugins. Read
   AGENTS.md "Reference plugin: Timer" for the patterns it encodes — one shared
   singleton store across surfaces, ephemeral run-state vs durable `app.storage`,
@@ -25,6 +32,11 @@
   session / storage / ui / platform / app.
 - [Contributions & settings schema](packages/plugin-sdk/src/contributions.ts):
   header/pane/sidebar contributions and the declarative SettingsSchema.
+- [Surface catalogue](packages/plugin-sdk/src/surfaces.ts): registerSurfaceItem
+  and the stable surface ids — file.menu, editor.menu, plotcard.menu,
+  plotpartcard.menu, canvas.selection, pane.toolbar, pane.statusbar.
+- [Canvas nodes](packages/plugin-sdk/src/canvas-node.ts): registerCanvasNode —
+  a plugin-owned node on the canvas, with a 16 KB state cap.
 - [Widget contribution](packages/plugin-sdk/src/widget.ts).
 - [Data model](packages/plugin-sdk/src/types.ts): manifest, permissions,
   installed-entry.
