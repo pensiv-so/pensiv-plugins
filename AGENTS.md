@@ -258,8 +258,15 @@ set up by hand.
 ## Rules that keep you compatible
 
 1. Import only from `@pensiv/plugin-sdk`. Never reach into pensiv internals.
-2. `react`, `react-dom`, `@pensiv/plugin-sdk`, `@tiptap/core` are provided by the
-   host — keep them external (the shared build config does this).
+2. `react`, `react-dom`, `@pensiv/plugin-sdk`, `@tiptap/core` and `@tiptap/pm/*`
+   are provided by the host — keep them external (the shared build config does
+   this). Never add ProseMirror (`@tiptap/pm`, `prosemirror-*`) to your own
+   dependencies: the host identifies ProseMirror objects with `instanceof`, so a
+   second copy is invisible until it breaks. A `DecorationSet` built by a bundled
+   copy fails `instanceof DecorationSet` in the host's `DecorationGroup.from`,
+   which flattens it as `undefined` — after that every editor redraw throws
+   "Cannot read properties of undefined (reading 'localsInner')" and the editor
+   is dead until reload.
 3. Keep manifest + settings JSON-serializable.
 4. Declare the minimum permissions.
 
@@ -275,8 +282,8 @@ install`). What you must know when authoring for publication:
 
 - **Imports are allowlisted.** Only relative files inside the plugin plus the
   host modules `react`, `react-dom`, `react/jsx-runtime`, `@pensiv/plugin-sdk`,
-  `@pensiv/plugin-ui`, `@tiptap/core`. Any other bare import fails the build —
-  vendor such code as source files you own.
+  `@pensiv/plugin-ui`, `@tiptap/core`, `@tiptap/pm/*`. Any other bare import
+  fails the build — vendor such code as source files you own.
 - **Caps**: ≤ 100 source files, ≤ 2 MB total, ≤ 512 KB per file. Entry is
   `src/main.ts(x)` unless specified.
 - **Permissions are validated strictly**: only the known set, and any `fetch`

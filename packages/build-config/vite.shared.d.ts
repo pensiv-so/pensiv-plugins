@@ -1,7 +1,14 @@
 import type { UserConfig } from 'vite';
 
-/** Modules the host provides at runtime; never bundled into a plugin. */
+/**
+ * Modules the host provides at runtime; never bundled into a plugin. Includes
+ * `@tiptap/pm/*`: a second ProseMirror copy breaks the host's `instanceof`
+ * checks and poisons the editor's decoration group.
+ */
 export declare const PLUGIN_EXTERNALS: readonly string[];
+
+/** Catch-all patterns keeping any other `@tiptap/pm/*` / `prosemirror-*` id external. */
+export declare const PLUGIN_EXTERNAL_PATTERNS: readonly RegExp[];
 
 export interface DefinePluginConfigOptions {
   /** Entry module. Defaults to `src/main.ts`. */

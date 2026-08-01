@@ -67,7 +67,9 @@ Re-publishing the same manifest `id` appends a **new version** (the manifest
 
 - **Imports**: only your own relative files plus the host modules — `react`,
   `react-dom`, `react/jsx-runtime`, `@pensiv/plugin-sdk`, `@pensiv/plugin-ui`,
-  `@tiptap/core`. No other npm packages (vendor anything else as source you own).
+  `@tiptap/core`, `@tiptap/pm/*`. No other npm packages (vendor anything else as
+  source you own). Never add ProseMirror as a dependency of your own: a second
+  copy breaks the host's `instanceof` checks and can kill the editor.
 - **Size**: ≤ 100 source files, ≤ 2 MB total, ≤ 512 KB per file. Entry defaults
   to `src/main.ts(x)`.
 - **Permissions**: every entry must be a known permission; network access needs
