@@ -1,0 +1,19 @@
+{
+  "name": "@pensiv-plugins/project-explorer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Project API example \u2014 tree, links, create/link.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@pensiv/plugin-sdk": "*"
+  },
+  "devDependencies": {
+    "@pensiv/build-config": "*",
+    "vite": "^6.0.0"
+  }
+}

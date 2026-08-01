@@ -1,0 +1,42 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.writing-time",
+  "name": "Writing Time",
+  "version": "1.0.0",
+  "description": "Reference example for the session lifecycle: live active-writing time as a widget, chip and sheet.",
+  "author": {
+    "name": "pensiv",
+    "url": "https://pensiv.so"
+  },
+  "icon": "Clock",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": [
+    "session"
+  ],
+  "platforms": [
+    "desktop",
+    "web"
+  ],
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/writing-time",
+  "license": "MIT",
+  "contributes": {
+    "commands": [
+      {
+        "id": "show-today",
+        "name": "Writing Time: Today's summary"
+      }
+    ],
+    "widgets": [
+      {
+        "id": "writing-time",
+        "surface": "floating",
+        "defaultCorner": "bottom-right",
+        "storageKey": "writing-time-widget"
+      }
+    ],
+    "settings": {
+      "schema": {}
+    }
+  }
+}

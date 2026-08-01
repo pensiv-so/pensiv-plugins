@@ -1,0 +1,41 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.sentence-highlighter",
+  "name": "Sentence Highlighter",
+  "version": "1.0.0",
+  "description": "Reference example for editor decorations and the slash menu: flag over-long sentences.",
+  "author": {
+    "name": "pensiv",
+    "url": "https://pensiv.so"
+  },
+  "icon": "Sparkles",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": [
+    "editor.read"
+  ],
+  "platforms": [
+    "desktop",
+    "web"
+  ],
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/sentence-highlighter",
+  "license": "MIT",
+  "contributes": {
+    "commands": [
+      {
+        "id": "toggle",
+        "name": "Sentence Highlighter: Toggle"
+      }
+    ],
+    "slash": [
+      {
+        "id": "highlight-long",
+        "title": "Highlight long sentences",
+        "icon": "Sparkles"
+      }
+    ],
+    "settings": {
+      "schema": {}
+    }
+  }
+}

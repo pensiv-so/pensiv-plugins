@@ -1,0 +1,39 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.project-explorer",
+  "name": "Project Explorer",
+  "version": "1.0.0",
+  "description": "Reference example for the project API: read the file tree, follow links, create and link files.",
+  "author": {
+    "name": "pensiv",
+    "url": "https://pensiv.so"
+  },
+  "icon": "Waypoints",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": [
+    "project.read",
+    "project.write"
+  ],
+  "platforms": [
+    "desktop",
+    "web"
+  ],
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/project-explorer",
+  "license": "MIT",
+  "contributes": {
+    "commands": [
+      {
+        "id": "new-sibling",
+        "name": "Explorer: New document beside this one"
+      },
+      {
+        "id": "link-selection",
+        "name": "Explorer: Link the two selected files"
+      }
+    ],
+    "settings": {
+      "schema": {}
+    }
+  }
+}

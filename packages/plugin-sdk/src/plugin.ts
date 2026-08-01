@@ -6,13 +6,22 @@ import type { WidgetContribution } from './widget';
 import type {
   AppHeaderActionContribution,
   ContributionDisposer,
+  EditorExtensionOptions,
+  EditorSurfaceId,
   HeaderActionContribution,
   LocalizedText,
   PaneContribution,
   PaneViewContribution,
   SettingsSchema,
-  SidebarItemContribution
+  SidebarItemContribution,
+  SlashItemContribution
 } from './contributions';
+
+/** A TipTap extension paired with the editors it loads into. @internal */
+export interface RegisteredEditorExtension {
+  extension: AnyExtension;
+  surfaces: EditorSurfaceId[];
+}
 
 /** A command a plugin contributes (palette / shortcut target). */
 export interface PluginCommand {
@@ -38,7 +47,7 @@ export interface SettingTab {
 }
 
 /**
- * Base class every plugin extends — a familiar plugin shape
+ * Base class every plugin extends — deliberately Obsidian-shaped
  * (`onload`/`onunload`, `addCommand`, `registerWidget`, `addSettingTab`, …) so an
  * AI's existing plugin-authoring priors transfer.
  *
@@ -68,10 +77,12 @@ export interface SettingTab {
 export abstract class Plugin {
   /** @internal Widgets registered in `onload`. */
   readonly _widgets: WidgetContribution[] = [];
-  /** @internal Editor extensions registered in `onload`. */
-  readonly _editorExtensions: AnyExtension[] = [];
+  /** @internal Editor extensions registered in `onload`, with their surfaces. */
+  readonly _editorExtensions: RegisteredEditorExtension[] = [];
   /** @internal Commands registered in `onload`. */
   readonly _commands: PluginCommand[] = [];
+  /** @internal Editor `/` menu rows registered in `onload`. */
+  readonly _slashItems: SlashItemContribution[] = [];
   /** @internal Setting tabs registered in `onload`. */
   readonly _settingTabs: SettingTab[] = [];
   /** @internal File-header actions registered in `onload`. */
@@ -122,14 +133,46 @@ export abstract class Plugin {
     return this.add(this._widgets, widget);
   }
 
-  /** Contribute a TipTap editor extension. */
-  registerEditorExtension(extension: AnyExtension): ContributionDisposer {
-    return this.add(this._editorExtensions, extension);
+  /**
+   * Contribute a TipTap editor extension.
+   *
+   * Loads into the **document editor only** unless `options.surfaces` says
+   * otherwise — an editor extension joins the schema and the transaction
+   * pipeline, so it is opt-in per editor rather than everywhere-by-default:
+   *
+   * ```ts
+   * this.registerEditorExtension(MyMark);                              // document
+   * this.registerEditorExtension(MyMark, { surfaces: ['document', 'sheet'] });
+   * ```
+   */
+  registerEditorExtension(
+    extension: AnyExtension,
+    options?: EditorExtensionOptions
+  ): ContributionDisposer {
+    return this.add(this._editorExtensions, {
+      extension,
+      surfaces: options?.surfaces ?? ['document']
+    });
   }
 
   /** Contribute a command. */
   addCommand(command: PluginCommand): ContributionDisposer {
     return this.add(this._commands, command);
+  }
+
+  /**
+   * Contribute a row to the editor's `/` menu. Document editor only unless
+   * `surfaces` widens it.
+   *
+   * ```ts
+   * this.registerSlashItem({
+   *   id: 'timestamp', title: 'Timestamp', icon: 'Clock',
+   *   run: (ctx) => ctx.app.editor.insert(new Date().toISOString())
+   * });
+   * ```
+   */
+  registerSlashItem(item: SlashItemContribution): ContributionDisposer {
+    return this.add(this._slashItems, item);
   }
 
   /** Contribute a settings tab. */
