@@ -47,7 +47,11 @@
   https://pensiv.so/community/publish/plugin (or in-app: Settings → Plugins →
   Publish a plugin). The server builds it; imports beyond the host modules
   (react, react-dom, react/jsx-runtime, @pensiv/plugin-sdk, @pensiv/plugin-ui,
-  @tiptap/core) are rejected. Caps: 100 files / 2 MB / 512 KB per file.
+  @tiptap/core, @tiptap/pm/*) are rejected. Caps: 100 files / 2 MB / 512 KB per file.
+- ProseMirror MUST come from the host (@tiptap/pm/*), never from your own
+  dependency. Two copies mean the host's `instanceof` checks fail: a plugin-made
+  DecorationSet poisons the editor's DecorationGroup and every redraw then throws
+  "Cannot read properties of undefined (reading 'localsInner')".
 - Every fetch host needs a `net:<host>` permission; so.pensiv.* ids are
   reserved. Manifest version must strictly increase per republish.
 - Listings start as "Unreviewed" — permissions are displayed, and the app asks

@@ -46,8 +46,10 @@ See [AGENTS.md](AGENTS.md) and [llms.txt](llms.txt) for the full authoring contr
 
 - Import only from `@pensiv/plugin-sdk` (and `@pensiv/plugin-ui` for host UI).
   Never reach into pensiv internals.
-- Keep `react`, `react-dom`, `@pensiv/plugin-sdk`, and `@tiptap/core` external —
-  the shared build config already does this.
+- Keep `react`, `react-dom`, `@pensiv/plugin-sdk`, `@tiptap/core` and
+  `@tiptap/pm/*` external — the shared build config already does this. Never
+  install ProseMirror yourself: a second copy fails the host's `instanceof`
+  checks and can take the whole editor down.
 - Keep `manifest.json` and settings schemas JSON-serializable.
 - Declare the **minimum** permissions your plugin needs.
 
