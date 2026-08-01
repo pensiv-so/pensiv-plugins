@@ -16,6 +16,8 @@ import type {
   SidebarItemContribution,
   SlashItemContribution
 } from './contributions';
+import type { SurfaceItemContribution } from './surfaces';
+import type { CanvasNodeContribution } from './canvas-node';
 
 /** A TipTap extension paired with the editors it loads into. @internal */
 export interface RegisteredEditorExtension {
@@ -95,6 +97,10 @@ export abstract class Plugin {
   readonly _panes: PaneContribution[] = [];
   /** @internal Sidebar items registered in `onload`. */
   readonly _sidebarItems: SidebarItemContribution[] = [];
+  /** @internal Generic surface items (context menus, pane slots) registered in `onload`. */
+  readonly _surfaceItems: SurfaceItemContribution[] = [];
+  /** @internal Canvas node types registered in `onload`. */
+  readonly _canvasNodes: CanvasNodeContribution[] = [];
 
   /** Teardown callbacks run (LIFO) when the plugin unloads/disables. */
   private _disposers: ContributionDisposer[] = [];
@@ -203,6 +209,51 @@ export abstract class Plugin {
   /** Contribute an item/section to the project sidebar. */
   registerSidebarItem(item: SidebarItemContribution): ContributionDisposer {
     return this.add(this._sidebarItems, item);
+  }
+
+  /**
+   * Contribute an item to any surface in the catalogue — context menus and pane
+   * slots — rather than through a method per surface.
+   *
+   * ```ts
+   * this.registerSurfaceItem({
+   *   surface: 'file.menu',
+   *   id: 'reveal',
+   *   label: 'Show links',
+   *   icon: 'Waypoints',
+   *   when: (ctx) => ctx.target?.type !== 'folder',
+   *   onClick: (ctx) => this.app.ui.toast(String(ctx.target?.title))
+   * });
+   * ```
+   *
+   * See {@link SurfaceItemContribution} for the catalogue and the scoping rules.
+   * Callbacks run inside the host's guard, so a throw disables this one item
+   * rather than the menu around it.
+   */
+  registerSurfaceItem(item: SurfaceItemContribution): ContributionDisposer {
+    return this.add(this._surfaceItems, item);
+  }
+
+  /**
+   * Contribute a canvas node type — the plugin's own object on a canvas, added
+   * from the canvas toolbar like any built-in node.
+   *
+   * ```ts
+   * this.registerCanvasNode({
+   *   id: 'kanban',
+   *   name: 'Kanban board',
+   *   icon: 'Columns3',
+   *   createDefaultState: () => ({ columns: [] }),
+   *   render: KanbanNode
+   * });
+   * ```
+   *
+   * The host owns position, size, selection, undo, persistence and export; the
+   * plugin owns the inner render and an opaque, size-capped `state`. See
+   * {@link CanvasNodeContribution}.
+   */
+  registerCanvasNode(node: CanvasNodeContribution): ContributionDisposer {
+    return this.add(this._canvasNodes, node);
   }
 
   /**

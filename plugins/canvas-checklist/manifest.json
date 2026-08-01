@@ -1,0 +1,19 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.canvas-checklist",
+  "name": "Canvas Checklist",
+  "version": "1.0.0",
+  "description": "Reference example for registerCanvasNode: a plugin-owned checklist card on the canvas.",
+  "author": {
+    "name": "pensiv",
+    "url": "https://pensiv.so"
+  },
+  "icon": "List",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": [],
+  "platforms": ["desktop", "web"],
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/canvas-checklist",
+  "license": "MIT",
+  "contributes": {}
+}

@@ -50,18 +50,82 @@ export default class MyPlugin extends Plugin {
 
 ## What you can register (on `this`)
 
-| Method                                                                 | Contributes                                                                                    |
-| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `addCommand({ id, name, run })`                                        | palette / shortcut action (`name` is `LocalizedText`)                                          |
-| `registerWidget({ id, surface, frame?, component, chip?, sheet?, … })` | a multi-surface widget — see below                                                             |
-| `registerEditorExtension(ext)`                                         | a TipTap extension                                                                             |
-| `addSettingTab({ title?, schema })`                                    | a settings form (declarative `SettingsSchema`)                                                 |
-| `registerHeaderAction(...)`                                            | a file-header button (`onClick` / `isActive`)                                                  |
-| `registerAppHeaderAction({ id, label, icon, onClick? \| render? })`    | a project app-header button; pass `render` for a **live custom button + popover** (e.g. Timer) |
-| `registerPaneView(...)` / `registerPane(...)`                          | side-pane / full-tab views                                                                     |
-| `registerSidebarItem(...)`                                             | a sidebar entry/section                                                                        |
+| Method                                                                               | Contributes                                                                                         |
+| ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| `addCommand({ id, name, run })`                                                      | palette / shortcut action (`name` is `LocalizedText`)                                               |
+| `registerWidget({ id, surface, frame?, component, chip?, sheet?, … })`               | a multi-surface widget — see below                                                                  |
+| `registerEditorExtension(ext)`                                                       | a TipTap extension                                                                                  |
+| `addSettingTab({ title?, schema })`                                                  | a settings form (declarative `SettingsSchema`)                                                      |
+| `registerHeaderAction(...)`                                                          | a file-header button (`onClick` / `isActive`)                                                       |
+| `registerAppHeaderAction({ id, label, icon, onClick? \| render? })`                  | a project app-header button; pass `render` for a **live custom button + popover** (e.g. Timer)      |
+| `registerPaneView(...)` / `registerPane(...)`                                        | side-pane / full-tab views                                                                          |
+| `registerSidebarItem(...)`                                                           | a sidebar entry/section                                                                             |
+| `registerSurfaceItem({ surface, id, label, icon?, when?, onClick?, render? })`       | an item in **any** catalogue surface — context menus, the canvas selection toolbar, the pane strips |
+| `registerCanvasNode({ id, name, icon?, defaultSize?, createDefaultState?, render })` | a plugin-owned node type on the canvas                                                              |
 
 Every `registerX` returns a disposer and is torn down automatically on disable.
+
+### Surface items are the generic escape hatch (`registerSurfaceItem`)
+
+Rather than one `registerX` per menu, name a surface from the catalogue
+([`surfaces.ts`](packages/plugin-sdk/src/surfaces.ts), the source of truth):
+
+| Surface id                            | Where it appears                                              | `target`                      |
+| ------------------------------------- | ------------------------------------------------------------- | ----------------------------- |
+| `file.menu`                           | right-click a file in the project tree **or** the folder grid | the file                      |
+| `editor.menu`                         | right-click inside the document / sheet editor                | the selection (`target.text`) |
+| `plotcard.menu` / `plotpartcard.menu` | the card's "…" menu                                           | the card                      |
+| `canvas.selection`                    | the canvas selection toolbar                                  | the selected node(s)          |
+| `pane.toolbar` / `pane.statusbar`     | strips above / below the pane's content                       | the pane's file               |
+
+Menu surfaces render your item as a row at the end of the menu, under a
+separator — a bottom-sheet row on phones, where those menus are sheets. The rest
+render inline: an icon button, or your own `render` component.
+
+Two independent knobs narrow where an item shows:
+
+- `fileTypes` / `viewModes` — **static, omit-to-allow.** Leaving them out means
+  every value, including file types pensiv adds later, so a published plugin
+  never disappears because the app grew.
+- `when(ctx)` — **dynamic.** Re-evaluated on every render, with the live
+  `target`. A `when` that throws hides its item (fail closed).
+
+`ctx.target` is a convenience the host had at hand — enough to decide visibility
+and label a row. For anything authoritative, read the entity:
+`ctx.app.project.get(ctx.target.id)`. `ctx.targets` carries the whole
+multi-selection where the surface has one.
+
+Callbacks run in-process on host render paths, so the host guards them: a throw
+is caught and reported, and an item that throws three times is disabled for the
+session — that one item, not the plugin and not the surface. Re-enabling the
+plugin re-arms it. See [`plugins/surface-actions`](plugins/surface-actions) for a
+worked example of every surface above, including a deliberately-crashing row.
+
+### Canvas nodes (`registerCanvasNode`)
+
+A plugin can put its own object on a canvas, added from the canvas toolbar next
+to the built-in note / file / image cards.
+
+The **host** owns position, size, selection, z-order, grouping, undo/redo,
+copy/paste, persistence, sync, export and cascade delete. The **plugin** owns the
+inner React component and an opaque `state` — nothing else. Don't draw a frame, a
+resizer, or connection handles.
+
+Plugins do **not** widen the app's node-type union. Every plugin node is one host
+`type: 'plugin'` node carrying `{ pluginId, viewId, state }`, so the dozens of
+places that compare node kinds keep working, and a node whose plugin is
+uninstalled degrades to a neutral placeholder with its data intact rather than
+disappearing.
+
+`setState(next)` writes through the canvas's normal debounced writer — same undo
+stack, same sync, no separate save. It is **capped at 16 KB serialized** and
+returns `false` when refused: canvas content is one JSON blob read and written
+whole, so per-node state is paid on every load, and on Android an oversized row
+is a hard crash. Keep anything larger in `app.storage` and put a key on the node.
+
+The view also receives `readOnly`, which is `true` in version-history previews
+and export layouts — render the value, hide the controls. See
+[`plugins/canvas-checklist`](plugins/canvas-checklist) for a worked example.
 
 ### Widgets are multi-surface (`registerWidget`)
 
@@ -300,4 +364,4 @@ install`). What you must know when authoring for publication:
 
 Publish at <https://pensiv.so/community/publish/plugin> (folder or
 `npm run bundle-source plugins/<name>` zip), or in-app via Settings → Plugins →
-*Publish a plugin*.
+_Publish a plugin_.

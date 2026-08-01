@@ -52,6 +52,19 @@ export type {
   SettingsSchema
 } from './contributions';
 export type {
+  PluginSurfaceId,
+  SurfaceTargetType,
+  SurfaceTarget,
+  SurfaceItemContext,
+  SurfaceItemProps,
+  SurfaceItemContribution
+} from './surfaces';
+export type {
+  CanvasNodeState,
+  CanvasNodeViewProps,
+  CanvasNodeContribution
+} from './canvas-node';
+export type {
   HostApi,
   EditorApi,
   CountOptions,
