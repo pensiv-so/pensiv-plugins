@@ -47,6 +47,8 @@ import type { SurfaceScope } from './contributions';
  * | `plotcard.menu` | a plot card's "…" menu | the plot card |
  * | `plotpartcard.menu` | a plot part card's "…" menu | the part card |
  * | `canvas.selection` | the canvas selection toolbar, when node(s) are selected | the selected node(s) |
+ * | `graph.toolbar` | the relationship graph's header | — |
+ * | `graph.node-menu` | right-click a node in the relationship graph (desktop) | the node |
  * | `pane.toolbar` | a strip above the pane's content | the pane's file |
  * | `pane.statusbar` | a strip below the pane's content | the pane's file |
  *
@@ -60,6 +62,8 @@ export type PluginSurfaceId =
   | 'plotcard.menu'
   | 'plotpartcard.menu'
   | 'canvas.selection'
+  | 'graph.toolbar'
+  | 'graph.node-menu'
   | 'pane.toolbar'
   | 'pane.statusbar';
 
@@ -69,9 +73,18 @@ export type PluginSurfaceId =
  * `canvasnode` is not a `ProjectEntityType` because canvas nodes are not
  * entities — they live inside one canvas's `content` blob (see D2 in the plan),
  * so their `id` is only meaningful together with the containing canvas `fileId`.
- * `selection` likewise identifies a text range, not a row in a table.
+ * `selection` likewise identifies a text range, not a row in a table, and
+ * `graphnode` a *virtual* graph node contributed by a source — it exists only in
+ * that view, so its id resolves to nothing through `app.project`.
+ *
+ * A `graph.node-menu` opened on a **real** entity reports that entity's own type
+ * and raw id, not `graphnode`; only virtual nodes use it.
  */
-export type SurfaceTargetType = ProjectEntityType | 'canvasnode' | 'selection';
+export type SurfaceTargetType =
+  | ProjectEntityType
+  | 'canvasnode'
+  | 'selection'
+  | 'graphnode';
 
 /** The thing a surface item was invoked on. */
 export interface SurfaceTarget {

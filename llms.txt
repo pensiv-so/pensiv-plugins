@@ -18,7 +18,15 @@
   shows the host's throw guard disabling one item rather than the menu.
 - [Canvas checklist plugin](plugins/canvas-checklist): the reference for
   registerCanvasNode — the host/plugin split, `setState` returning false at the
-  size cap, and honouring `readOnly` in history/export renders.
+  size cap, honouring `readOnly` in history/export renders, and how to make a
+  plugin node look native (task-list checkbox, goal-widget track, ghost buttons,
+  all from host tokens).
+- [Writing time plugin](plugins/writing-time): the reference for the session
+  lifecycle — `activeMs` + the write-start/write-stop/tick stream, one shared
+  hook behind a floating card, a tray chip and a `@pensiv/plugin-ui` sheet.
+- [Graph tags plugin](plugins/graph-tags): the reference for the relationship
+  graph — a #tag overlay as virtual nodes, a togglable filter, a graph toolbar
+  button and a node-menu row, plus a guarded paintNode.
 - [Timer plugin](plugins/timer): the reference for non-trivial plugins. Read
   AGENTS.md "Reference plugin: Timer" for the patterns it encodes — one shared
   singleton store across surfaces, ephemeral run-state vs durable `app.storage`,
@@ -37,6 +45,8 @@
   plotpartcard.menu, canvas.selection, pane.toolbar, pane.statusbar.
 - [Canvas nodes](packages/plugin-sdk/src/canvas-node.ts): registerCanvasNode —
   a plugin-owned node on the canvas, with a 16 KB state cap.
+- [Graph contributions](packages/plugin-sdk/src/graph.ts): registerGraphSource /
+  registerGraphFilter — virtual nodes, links, filters, and a guarded paintNode.
 - [Widget contribution](packages/plugin-sdk/src/widget.ts).
 - [Data model](packages/plugin-sdk/src/types.ts): manifest, permissions,
   installed-entry.

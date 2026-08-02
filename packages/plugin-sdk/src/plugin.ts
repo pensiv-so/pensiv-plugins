@@ -18,6 +18,7 @@ import type {
 } from './contributions';
 import type { SurfaceItemContribution } from './surfaces';
 import type { CanvasNodeContribution } from './canvas-node';
+import type { GraphSourceContribution, GraphFilterContribution } from './graph';
 
 /** A TipTap extension paired with the editors it loads into. @internal */
 export interface RegisteredEditorExtension {
@@ -101,6 +102,10 @@ export abstract class Plugin {
   readonly _surfaceItems: SurfaceItemContribution[] = [];
   /** @internal Canvas node types registered in `onload`. */
   readonly _canvasNodes: CanvasNodeContribution[] = [];
+  /** @internal Relationship-graph sources registered in `onload`. */
+  readonly _graphSources: GraphSourceContribution[] = [];
+  /** @internal Relationship-graph filters registered in `onload`. */
+  readonly _graphFilters: GraphFilterContribution[] = [];
 
   /** Teardown callbacks run (LIFO) when the plugin unloads/disables. */
   private _disposers: ContributionDisposer[] = [];
@@ -254,6 +259,37 @@ export abstract class Plugin {
    */
   registerCanvasNode(node: CanvasNodeContribution): ContributionDisposer {
     return this.add(this._canvasNodes, node);
+  }
+
+  /**
+   * Contribute nodes and links to the relationship graph — a tag overlay, a
+   * cluster view, references to something outside the project.
+   *
+   * ```ts
+   * this.registerGraphSource({
+   *   id: 'tags',
+   *   nodes: () => [{ id: 'magic', name: '#magic' }],
+   *   links: () => [{ source: 'magic', target: documentId }]
+   * });
+   * ```
+   *
+   * These nodes are **virtual**: never written to the project, never synced,
+   * inert on click. For a node that persists, create a real entity through
+   * `app.project` instead and the graph picks it up with no plugin code on the
+   * render path. See {@link GraphSourceContribution}.
+   */
+  registerGraphSource(source: GraphSourceContribution): ContributionDisposer {
+    return this.add(this._graphSources, source);
+  }
+
+  /**
+   * Contribute a togglable graph filter. It appears as a switch in the graph
+   * preferences popover, alongside the built-in ones, and starts **off** unless
+   * `defaultEnabled` says otherwise — installing a plugin must never silently
+   * hide part of the user's graph.
+   */
+  registerGraphFilter(filter: GraphFilterContribution): ContributionDisposer {
+    return this.add(this._graphFilters, filter);
   }
 
   /**

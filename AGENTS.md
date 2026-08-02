@@ -62,6 +62,8 @@ export default class MyPlugin extends Plugin {
 | `registerSidebarItem(...)`                                                           | a sidebar entry/section                                                                             |
 | `registerSurfaceItem({ surface, id, label, icon?, when?, onClick?, render? })`       | an item in **any** catalogue surface — context menus, the canvas selection toolbar, the pane strips |
 | `registerCanvasNode({ id, name, icon?, defaultSize?, createDefaultState?, render })` | a plugin-owned node type on the canvas                                                              |
+| `registerGraphSource({ id, nodes, links?, paintNode? })`                             | nodes/links overlaid on the relationship graph                                                      |
+| `registerGraphFilter({ id, label, test, defaultEnabled? })`                          | a togglable graph filter, shown in graph preferences                                                |
 
 Every `registerX` returns a disposer and is torn down automatically on disable.
 
@@ -126,6 +128,29 @@ is a hard crash. Keep anything larger in `app.storage` and put a key on the node
 The view also receives `readOnly`, which is `true` in version-history previews
 and export layouts — render the value, hide the controls. See
 [`plugins/canvas-checklist`](plugins/canvas-checklist) for a worked example.
+
+### The relationship graph (`registerGraphSource` / `registerGraphFilter`)
+
+The graph is a `react-force-graph-2d` canvas — no child components to slot into.
+So instead of exposing the view, pensiv exposes the seams that decide **what is
+in the graph** (`registerGraphSource`), **what stays visible**
+(`registerGraphFilter`), and **how your own nodes look** (`paintNode` on a
+source). Plus the `graph.toolbar` and `graph.node-menu` surfaces.
+
+A source's nodes are **virtual**: graph-only, never written, never synced, inert
+on click. The host namespaces their ids so they can't collide with an entity. For
+a node that persists, create a real entity through `app.project` instead — the
+graph picks it up with no plugin code on the render path.
+
+Link endpoints are either your own node ids or **raw entity ids**; the host
+resolves which and drops anything that matches neither.
+
+Everything here is hot: `nodes()`/`links()` per rebuild, `test()` per node,
+`paintNode()` **per node per frame**. `paintNode` runs inside a
+`save()`/`restore()` pair (a leaked transform would corrupt every later node) and
+inside the throw guard. Filters narrow rather than union, a hidden node takes its
+links with it, and they start **off** — installing a plugin must never silently
+hide part of someone's graph. See [`plugins/graph-tags`](plugins/graph-tags).
 
 ### Widgets are multi-surface (`registerWidget`)
 

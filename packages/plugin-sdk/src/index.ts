@@ -65,6 +65,14 @@ export type {
   CanvasNodeContribution
 } from './canvas-node';
 export type {
+  PluginGraphNode,
+  PluginGraphLink,
+  GraphSourceContext,
+  GraphFilterNode,
+  GraphSourceContribution,
+  GraphFilterContribution
+} from './graph';
+export type {
   HostApi,
   EditorApi,
   CountOptions,
