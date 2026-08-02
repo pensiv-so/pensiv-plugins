@@ -1,0 +1,295 @@
+/*
+ * Pomodoro Basic styles. Bundled to `dist/styles.css` and injected by the host
+ * loader while the plugin is enabled. We ship our own classes (the app's
+ * Tailwind build never scans this repo) but reference the host's design tokens
+ * (`--foreground`, `--muted`, `--radius`, `--floating-ring`, …) so every surface
+ * matches the native theme exactly, light or dark.
+ *
+ * Sizes are in rem so they track the app's root font-size (the user's text-size
+ * / zoom setting), exactly like the native rem-based Tailwind sizes. The phase
+ * colour never appears here — it is user-chosen and passed inline.
+ */
+
+/* ── Card body ───────────────────────────────────────────────────────────── */
+.pnsv-pm-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: inherit;
+}
+
+/* ── The dial ────────────────────────────────────────────────────────────────
+ * 60 tick marks from one repeating conic gradient masked to a ring — no 60
+ * elements, no SVG — and the elapsed arc is the same pattern intersected with a
+ * conic wedge at the live angle. Click starts/pauses; press-and-hold resets.
+ */
+.pnsv-pm-dial {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 999px;
+  -webkit-app-region: no-drag;
+  transition: transform 0.18s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+.pnsv-pm-dial:active {
+  transform: scale(0.985);
+}
+
+.pnsv-pm-dial:focus-visible {
+  outline: 2px solid hsl(var(--ring, var(--primary)));
+  outline-offset: 3px;
+}
+
+.pnsv-pm-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  transition: opacity 0.2s ease;
+}
+
+/* The tick marks are SVG lines (see `RingTicks`): a masked conic gradient drew
+ * them in one element, but its hard colour stops are not antialiased, so each
+ * tick came out with stepped sides. */
+.pnsv-pm-ticks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.pnsv-pm-face {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+
+.pnsv-pm-num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 300;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  color: hsl(var(--foreground));
+}
+
+/* ── Cycle dots ──────────────────────────────────────────────────────────── */
+.pnsv-pm-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pnsv-pm-dots i {
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 999px;
+  background: hsl(var(--muted-foreground) / 0.28);
+  transition: background-color 0.25s ease;
+}
+
+/* ── Phase badge ─────────────────────────────────────────────────────────────
+ * The app's MCP settings status pill: `rounded-md`, accent at 15%, same accent
+ * for the label. Background + colour come inline from the phase's colour.
+ */
+.pnsv-pm-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: calc(var(--radius) + 0.05rem);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+/* ── Ghost buttons — the native `Button variant="ghost" sizeVariant="sm"` ──── */
+.pnsv-pm-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+  padding-top: 0.125rem;
+}
+
+.pnsv-pm-spacer {
+  margin-left: auto;
+}
+
+.pnsv-pm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border: none;
+  border-radius: calc(var(--radius) + 0.1rem);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-app-region: no-drag;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.pnsv-pm-btn:hover {
+  background: hsl(var(--muted) / 0.8);
+  color: hsl(var(--foreground));
+}
+
+.pnsv-pm-btn:active {
+  transform: scale(0.98);
+}
+
+.pnsv-pm-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.pnsv-pm-btn.icon {
+  width: 2rem;
+  padding: 0;
+}
+
+/* ── App-header trigger ──────────────────────────────────────────────────────
+ * The header is an Electron drag region, so the button must opt out of dragging
+ * or the OS swallows the click and the popover never opens.
+ */
+.pnsv-pm-header {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  min-width: 2rem;
+  padding: 0 0.5rem;
+  gap: 0.4rem;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) + 0.1rem);
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  box-shadow: var(--floating-ring), var(--shadow-md);
+  -webkit-app-region: no-drag;
+  transition: background-color 0.15s ease;
+}
+
+.pnsv-pm-header:hover {
+  background: hsl(var(--muted) / 0.8);
+}
+
+.pnsv-pm-header.icon {
+  width: 2rem;
+  padding: 0;
+}
+
+/* Mini ring for the header button and the phone chip — the dial at 0.9rem, where
+ * individual ticks would turn to mush, so it degrades to a solid arc. Also SVG
+ * (see `MiniRing`), for the same antialiasing reason as the ticks. */
+.pnsv-pm-mini {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.pnsv-pm-mini .arc {
+  transition: stroke-dashoffset 0.4s linear;
+}
+
+/* ── Card chrome ─────────────────────────────────────────────────────────────
+ * One thin neutral hairline plus a directional top highlight (light from above)
+ * — the app's `--floating-ring`. Kept as a class so the dark-mode ring can
+ * switch on the host's `.dark` ancestor.
+ */
+.pnsv-pm-card {
+  border: 1px solid transparent;
+  box-shadow:
+    0 0 0 0.5px hsl(240 6% 84%),
+    inset 0 1px 0 0 #ffffff,
+    var(--shadow-lg);
+}
+
+.dark .pnsv-pm-card {
+  box-shadow:
+    inset 0 0 0 0.5px #ffffff14,
+    inset 0 1px 0 0 #ffffff2b,
+    var(--shadow-lg);
+}
+
+/* ── Popover open/close — mirrors the native Radix popover bounce ─────────── */
+@keyframes pnsv-pm-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(-8px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.01) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes pnsv-pm-pop-out {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  30% {
+    opacity: 0.9;
+    transform: scale(1.01) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8) translateY(8px);
+  }
+}
+
+.pnsv-pm-pop {
+  -webkit-app-region: no-drag;
+  transform-origin: top center;
+  animation: pnsv-pm-pop-in 0.35s cubic-bezier(0.47, 1.14, 0.41, 1);
+}
+
+.pnsv-pm-pop.closing {
+  animation: pnsv-pm-pop-out 0.25s cubic-bezier(0.47, 1.14, 0.41, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pnsv-pm-dial,
+  .pnsv-pm-ticks.lit,
+  .pnsv-pm-mini,
+  .pnsv-pm-pop,
+  .pnsv-pm-pop.closing {
+    transition: none;
+    animation: none;
+  }
+}

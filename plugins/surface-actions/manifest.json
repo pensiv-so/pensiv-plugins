@@ -1,0 +1,19 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.surface-actions",
+  "name": "Surface Actions",
+  "version": "1.0.0",
+  "description": "Reference example for registerSurfaceItem: one call that adds items to context menus, the canvas selection toolbar, and the pane strips.",
+  "author": {
+    "name": "pensiv",
+    "url": "https://pensiv.so"
+  },
+  "icon": "Boxes",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": ["project.read", "editor.read", "clipboard"],
+  "platforms": ["desktop", "web"],
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/surface-actions",
+  "license": "MIT",
+  "contributes": {}
+}

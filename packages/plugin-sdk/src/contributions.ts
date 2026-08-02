@@ -29,18 +29,42 @@ export interface ActionContext {
 export type HeaderFileTypeId = 'document' | 'sheet' | 'plotboard' | 'folder' | 'canvas' | 'task';
 
 /**
+ * How the host is currently displaying the file. Because any entity can parent
+ * any entity, one file has two presentations: `file` (its own editor/board) and
+ * `folder` (a listing of its children). Some surfaces only make sense in one —
+ * AI Review and Export are file-view-only, for instance.
+ */
+export type PluginViewMode = 'file' | 'folder';
+
+/**
+ * Where a contribution is allowed to appear. **Both filters are omit-to-allow:
+ * leaving a list out means "every value", including view modes and file types
+ * added to the app later.** List values only to *narrow*.
+ *
+ * This is deliberately the opposite of a default-deny list: a plugin author
+ * shouldn't have to re-publish because pensiv gained a new pane type.
+ */
+export interface SurfaceScope {
+  /** Restrict to these file types. Omit = every file type. */
+  fileTypes?: HeaderFileTypeId[];
+  /** Restrict to these view modes. Omit = every view mode. */
+  viewModes?: PluginViewMode[];
+}
+
+/**
  * A button contributed to a file header (e.g. the document toolbar). It rides
  * the existing customizable-header system — users can show/hide and reorder it
  * alongside the built-in header items.
+ *
+ * Scope with {@link SurfaceScope}: omit `fileTypes`/`viewModes` to appear in
+ * every header and both view modes.
  */
-export interface HeaderActionContribution {
+export interface HeaderActionContribution extends SurfaceScope {
   id: string;
   /** i18n key or literal; used as tooltip + label in the customize menu. */
   label: string;
   /** MonoIcon name. */
   icon: string;
-  /** Headers it appears in. Defaults to `['document']`. */
-  fileTypes?: HeaderFileTypeId[];
   /** Invoked on click. */
   onClick(ctx: ActionContext): void;
   /** Optional pressed/active highlight. */
@@ -66,9 +90,63 @@ export interface AppHeaderActionContribution {
   isActive?(ctx: ActionContext): boolean;
   /**
    * Custom live header component (e.g. a Timer button with a countdown + popover).
-   * When set, the host renders this instead of the default icon button.
+   * When set, the host renders this instead of the default icon button, so a
+   * plugin can own a rich, stateful header surface.
    */
   render?: FC<AppHeaderActionProps>;
+}
+
+/**
+ * Rich-text editors a plugin's TipTap extension may load into.
+ *
+ *   - `document` — the main document editor.
+ *   - `sheet`    — the sheet body editor.
+ *   - `task`     — the task detail editor.
+ *
+ * The compact editors embedded in cards (plot card, canvas note node, note card)
+ * are deliberately **not** addressable: they mount many at a time and share the
+ * task tier, so a heavyweight extension there is a performance and correctness
+ * hazard. They get their own surface ids only once there is a real use case.
+ */
+export type EditorSurfaceId = 'document' | 'sheet' | 'task';
+
+/** Options for {@link Plugin.registerEditorExtension}. */
+export interface EditorExtensionOptions {
+  /**
+   * Which editors the extension loads into. **Defaults to `['document']`** —
+   * unlike the omit-to-allow {@link SurfaceScope} used for buttons, an editor
+   * extension is opt-in per surface: it participates in the schema and the
+   * transaction pipeline, so silently loading one into the sheet or task editor
+   * could corrupt content rather than just misplace a button. Widen it
+   * deliberately, after testing against that editor's tier.
+   */
+  surfaces?: EditorSurfaceId[];
+}
+
+/**
+ * A row a plugin adds to the editor's `/` menu.
+ *
+ * The host removes the typed `/query` before calling {@link run}, so the plugin
+ * just does its thing — typically `ctx.app.editor.insert(...)`. No editor object
+ * crosses the boundary, so this stays sandbox-safe.
+ *
+ * Scoped with `surfaces` on the same **opt-in, default `['document']`** rule as
+ * {@link EditorExtensionOptions}: a slash item writes into the document, and an
+ * item that makes sense in a manuscript ("insert chapter break") usually does not
+ * in a character sheet. Widen deliberately.
+ */
+export interface SlashItemContribution {
+  id: string;
+  /** Row label, and what the `/` query matches against. */
+  title: string;
+  /** Secondary line in the row. */
+  description?: string;
+  /** MonoIcon name. */
+  icon?: string;
+  /** Editors it appears in. Omit = `['document']`. */
+  surfaces?: EditorSurfaceId[];
+  /** Invoked after the host has deleted the `/query` text. */
+  run(ctx: ActionContext): void;
 }
 
 /** Props a side-pane view receives from the host. */
@@ -81,11 +159,15 @@ export interface PaneViewProps {
 }
 
 /**
- * A view a plugin can open in the document side pane (like Notes / Comments).
- * Opened via a header/app-header action that calls `app.ui.openPaneView(id)`
- * (or the host's pane API) — see the implementation docs.
+ * A view a plugin can open in a file's side pane (like Notes / Comments). The
+ * host renders a toggle button for it in the file header — through the same
+ * customizable-header system as {@link HeaderActionContribution}, so users can
+ * show/hide and reorder it next to the built-in side-pane toggles.
+ *
+ * Scope with {@link SurfaceScope}: omit `fileTypes`/`viewModes` and the view is
+ * offered on every file type, in both view modes.
  */
-export interface PaneViewContribution {
+export interface PaneViewContribution extends SurfaceScope {
   id: string;
   /** i18n key or literal title shown in the pane header. */
   title: string;

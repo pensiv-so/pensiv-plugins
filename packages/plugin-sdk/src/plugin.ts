@@ -6,13 +6,25 @@ import type { WidgetContribution } from './widget';
 import type {
   AppHeaderActionContribution,
   ContributionDisposer,
+  EditorExtensionOptions,
+  EditorSurfaceId,
   HeaderActionContribution,
   LocalizedText,
   PaneContribution,
   PaneViewContribution,
   SettingsSchema,
-  SidebarItemContribution
+  SidebarItemContribution,
+  SlashItemContribution
 } from './contributions';
+import type { SurfaceItemContribution } from './surfaces';
+import type { CanvasNodeContribution } from './canvas-node';
+import type { GraphSourceContribution, GraphFilterContribution } from './graph';
+
+/** A TipTap extension paired with the editors it loads into. @internal */
+export interface RegisteredEditorExtension {
+  extension: AnyExtension;
+  surfaces: EditorSurfaceId[];
+}
 
 /** A command a plugin contributes (palette / shortcut target). */
 export interface PluginCommand {
@@ -38,7 +50,7 @@ export interface SettingTab {
 }
 
 /**
- * Base class every plugin extends — a familiar plugin shape
+ * Base class every plugin extends — deliberately Obsidian-shaped
  * (`onload`/`onunload`, `addCommand`, `registerWidget`, `addSettingTab`, …) so an
  * AI's existing plugin-authoring priors transfer.
  *
@@ -68,10 +80,12 @@ export interface SettingTab {
 export abstract class Plugin {
   /** @internal Widgets registered in `onload`. */
   readonly _widgets: WidgetContribution[] = [];
-  /** @internal Editor extensions registered in `onload`. */
-  readonly _editorExtensions: AnyExtension[] = [];
+  /** @internal Editor extensions registered in `onload`, with their surfaces. */
+  readonly _editorExtensions: RegisteredEditorExtension[] = [];
   /** @internal Commands registered in `onload`. */
   readonly _commands: PluginCommand[] = [];
+  /** @internal Editor `/` menu rows registered in `onload`. */
+  readonly _slashItems: SlashItemContribution[] = [];
   /** @internal Setting tabs registered in `onload`. */
   readonly _settingTabs: SettingTab[] = [];
   /** @internal File-header actions registered in `onload`. */
@@ -84,6 +98,14 @@ export abstract class Plugin {
   readonly _panes: PaneContribution[] = [];
   /** @internal Sidebar items registered in `onload`. */
   readonly _sidebarItems: SidebarItemContribution[] = [];
+  /** @internal Generic surface items (context menus, pane slots) registered in `onload`. */
+  readonly _surfaceItems: SurfaceItemContribution[] = [];
+  /** @internal Canvas node types registered in `onload`. */
+  readonly _canvasNodes: CanvasNodeContribution[] = [];
+  /** @internal Relationship-graph sources registered in `onload`. */
+  readonly _graphSources: GraphSourceContribution[] = [];
+  /** @internal Relationship-graph filters registered in `onload`. */
+  readonly _graphFilters: GraphFilterContribution[] = [];
 
   /** Teardown callbacks run (LIFO) when the plugin unloads/disables. */
   private _disposers: ContributionDisposer[] = [];
@@ -122,14 +144,46 @@ export abstract class Plugin {
     return this.add(this._widgets, widget);
   }
 
-  /** Contribute a TipTap editor extension. */
-  registerEditorExtension(extension: AnyExtension): ContributionDisposer {
-    return this.add(this._editorExtensions, extension);
+  /**
+   * Contribute a TipTap editor extension.
+   *
+   * Loads into the **document editor only** unless `options.surfaces` says
+   * otherwise — an editor extension joins the schema and the transaction
+   * pipeline, so it is opt-in per editor rather than everywhere-by-default:
+   *
+   * ```ts
+   * this.registerEditorExtension(MyMark);                              // document
+   * this.registerEditorExtension(MyMark, { surfaces: ['document', 'sheet'] });
+   * ```
+   */
+  registerEditorExtension(
+    extension: AnyExtension,
+    options?: EditorExtensionOptions
+  ): ContributionDisposer {
+    return this.add(this._editorExtensions, {
+      extension,
+      surfaces: options?.surfaces ?? ['document']
+    });
   }
 
   /** Contribute a command. */
   addCommand(command: PluginCommand): ContributionDisposer {
     return this.add(this._commands, command);
+  }
+
+  /**
+   * Contribute a row to the editor's `/` menu. Document editor only unless
+   * `surfaces` widens it.
+   *
+   * ```ts
+   * this.registerSlashItem({
+   *   id: 'timestamp', title: 'Timestamp', icon: 'Clock',
+   *   run: (ctx) => ctx.app.editor.insert(new Date().toISOString())
+   * });
+   * ```
+   */
+  registerSlashItem(item: SlashItemContribution): ContributionDisposer {
+    return this.add(this._slashItems, item);
   }
 
   /** Contribute a settings tab. */
@@ -160,6 +214,82 @@ export abstract class Plugin {
   /** Contribute an item/section to the project sidebar. */
   registerSidebarItem(item: SidebarItemContribution): ContributionDisposer {
     return this.add(this._sidebarItems, item);
+  }
+
+  /**
+   * Contribute an item to any surface in the catalogue — context menus and pane
+   * slots — rather than through a method per surface.
+   *
+   * ```ts
+   * this.registerSurfaceItem({
+   *   surface: 'file.menu',
+   *   id: 'reveal',
+   *   label: 'Show links',
+   *   icon: 'Waypoints',
+   *   when: (ctx) => ctx.target?.type !== 'folder',
+   *   onClick: (ctx) => this.app.ui.toast(String(ctx.target?.title))
+   * });
+   * ```
+   *
+   * See {@link SurfaceItemContribution} for the catalogue and the scoping rules.
+   * Callbacks run inside the host's guard, so a throw disables this one item
+   * rather than the menu around it.
+   */
+  registerSurfaceItem(item: SurfaceItemContribution): ContributionDisposer {
+    return this.add(this._surfaceItems, item);
+  }
+
+  /**
+   * Contribute a canvas node type — the plugin's own object on a canvas, added
+   * from the canvas toolbar like any built-in node.
+   *
+   * ```ts
+   * this.registerCanvasNode({
+   *   id: 'kanban',
+   *   name: 'Kanban board',
+   *   icon: 'Columns3',
+   *   createDefaultState: () => ({ columns: [] }),
+   *   render: KanbanNode
+   * });
+   * ```
+   *
+   * The host owns position, size, selection, undo, persistence and export; the
+   * plugin owns the inner render and an opaque, size-capped `state`. See
+   * {@link CanvasNodeContribution}.
+   */
+  registerCanvasNode(node: CanvasNodeContribution): ContributionDisposer {
+    return this.add(this._canvasNodes, node);
+  }
+
+  /**
+   * Contribute nodes and links to the relationship graph — a tag overlay, a
+   * cluster view, references to something outside the project.
+   *
+   * ```ts
+   * this.registerGraphSource({
+   *   id: 'tags',
+   *   nodes: () => [{ id: 'magic', name: '#magic' }],
+   *   links: () => [{ source: 'magic', target: documentId }]
+   * });
+   * ```
+   *
+   * These nodes are **virtual**: never written to the project, never synced,
+   * inert on click. For a node that persists, create a real entity through
+   * `app.project` instead and the graph picks it up with no plugin code on the
+   * render path. See {@link GraphSourceContribution}.
+   */
+  registerGraphSource(source: GraphSourceContribution): ContributionDisposer {
+    return this.add(this._graphSources, source);
+  }
+
+  /**
+   * Contribute a togglable graph filter. It appears as a switch in the graph
+   * preferences popover, alongside the built-in ones, and starts **off** unless
+   * `defaultEnabled` says otherwise — installing a plugin must never silently
+   * hide part of the user's graph.
+   */
+  registerGraphFilter(filter: GraphFilterContribution): ContributionDisposer {
+    return this.add(this._graphFilters, filter);
   }
 
   /**

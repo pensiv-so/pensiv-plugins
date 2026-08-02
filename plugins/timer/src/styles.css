@@ -73,15 +73,32 @@
   transition:
     background-color 0.15s ease,
     color 0.15s ease,
-    border-color 0.15s ease;
+    border-color 0.15s ease,
+    /* The active state swaps the ring too — cross-fade it with the fill instead
+     * of snapping a frame ahead of it. */ box-shadow 0.15s ease;
 }
 .pnsv-tm-header:hover {
   background: hsl(var(--muted) / 0.8);
 }
+/* Active fills the pill with the accent, and `--floating-ring` does not survive
+ * that: it is tuned for a neutral card, so in light mode its opaque light-gray
+ * hairline reads as a foreign halo around a saturated pill, and in dark mode it
+ * is a white alpha wash that vanishes into a near-white accent. Either way the
+ * edge disappears the moment the timer starts.
+ *
+ * So the active pill draws the same shape — hairline + directional top highlight
+ * — in the fill's *own* ink: `--primary` seals the outer edge (no foreign gray),
+ * and `--primary-foreground` is by construction the contrasting colour for this
+ * accent, so the highlight stays visible whatever accent or mode is live. */
 .pnsv-tm-header.active {
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
   border-color: hsl(var(--primary));
+  box-shadow:
+    0 0 0 0.5px hsl(var(--primary)),
+    inset 0 0 0 0.5px hsl(var(--primary-foreground) / 0.12),
+    inset 0 1px 0 0 hsl(var(--primary-foreground) / 0.28),
+    var(--shadow-md);
 }
 .pnsv-tm-header.active:hover {
   background: hsl(var(--primary) / 0.9);

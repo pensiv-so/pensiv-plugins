@@ -7,5 +7,7 @@ dist/
 .env.*
 # built plugin artifacts
 *.pnsv-plugin
+# marketplace source bundles (regenerate: npm run bundle-source)
+*-source.zip
 # local tooling
 .claude/

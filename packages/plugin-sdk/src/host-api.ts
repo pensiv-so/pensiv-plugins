@@ -86,16 +86,20 @@ export interface EditorApi {
   decorate(ranges: EditorRange[]): Unsub;
 }
 
-/**
- * Project-data API (file tree, episodes, characters, comments, …). Gated and
- * intentionally a stub in v1 — the full surface arrives in a later phase
- * (`app.project.query/subscribe/write`). Declared here so the contract is
- * visible and `this.app.project` is always present.
- */
-export interface ProjectApi {
-  /** `true` once the project-data API is available (false in v1). */
-  readonly available: boolean;
-}
+export type {
+  ProjectApi,
+  ProjectFile,
+  ProjectFileType,
+  ProjectEntityType,
+  ProjectPlotCard,
+  ProjectPlotPartCard,
+  ProjectRelationship,
+  ProjectQuery,
+  ProjectFilePatch,
+  ProjectFileDraft,
+  ProjectLinkDraft,
+  ProjectChangeKind
+} from './project-api';
 
 /** Words + characters, used for both targets and progress counts. */
 export interface SessionProgress {
@@ -209,6 +213,35 @@ export interface PlatformApi {
   readonly webviewConfig?: { partition: string; webpreferences: string };
 }
 
+/** One file selected in the focused pane. */
+export interface PaneSelectionItem {
+  id: string;
+  /** The content type — a file type, or a route-ish pane content like `tasks`. */
+  type: string;
+}
+
+/**
+ * The focused split-view pane. Distinct from {@link AppApi}, which answers "what
+ * is the user looking at"; this answers "in which pane, and what is selected
+ * there" — the context a pane-scoped surface (side pane, pane toolbar, context
+ * menu) needs to act on the right thing.
+ */
+export interface PaneApi {
+  /** Id of the focused pane, or `undefined` outside a project view. */
+  readonly id?: string;
+  /**
+   * Every file selected in the focused pane, in pane order. One entry in the
+   * ordinary case; more when the user multi-selects. The first entry is the
+   * pane's primary content and matches `app.app.fileId`.
+   */
+  readonly selection: PaneSelectionItem[];
+  /**
+   * Fires when the focused pane, its file, or its selection changes. Returns an
+   * unsubscribe.
+   */
+  on(event: 'change', cb: () => void): Unsub;
+}
+
 export interface AppApi {
   /** The project currently in view, if any. */
   readonly projectId?: string;
@@ -232,8 +265,8 @@ export interface AppApi {
   readonly locale: string;
   /**
    * The host surface the plugin is running on. Use it to render
-   * platform-appropriate UI — e.g. a widget that draws a desktop floating card
-   * vs. a mobile bottom-sheet layout.
+   * platform-appropriate UI (Obsidian-style `Platform.isMobile`) — e.g. a widget
+   * that draws a desktop floating card vs. a mobile bottom-sheet layout.
    */
   readonly platform: 'desktop' | 'mobile' | 'web';
 }
@@ -242,6 +275,8 @@ export interface AppApi {
  * The whole plugin-facing surface. Semver'd as a unit (see `HOST_API_VERSION`).
  * Sub-objects are always present; gated calls throw without the right grant.
  */
+import type { ProjectApi } from './project-api';
+
 export interface HostApi {
   /** Host API semver this object implements. Matches `manifest.sdk` range. */
   readonly version: string;
@@ -252,4 +287,6 @@ export interface HostApi {
   ui: UiApi;
   platform: PlatformApi;
   app: AppApi;
+  /** The focused split-view pane (id + file selection). */
+  pane: PaneApi;
 }
