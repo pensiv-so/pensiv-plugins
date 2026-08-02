@@ -2,7 +2,7 @@
   "name": "@pensiv-plugins/writing-time",
   "version": "1.0.0",
   "private": true,
-  "description": "Session lifecycle example \u2014 active writing time.",
+  "description": "Session lifecycle example — active writing time.",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -10,7 +10,8 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@pensiv/plugin-sdk": "*"
+    "@pensiv/plugin-sdk": "*",
+    "@pensiv/plugin-ui": "*"
   },
   "devDependencies": {
     "@pensiv/build-config": "*",

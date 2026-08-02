@@ -1,23 +1,27 @@
 {
   "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
   "id": "so.pensiv.writing-time",
-  "name": "Writing Time",
+  "name": {
+    "en": "Writing Time",
+    "ko": "집필 시간",
+    "ja": "執筆時間"
+  },
   "version": "1.0.0",
-  "description": "Reference example for the session lifecycle: live active-writing time as a widget, chip and sheet.",
+  "description": {
+    "en": "Live active-writing time as a floating widget, tray chip and sheet.",
+    "ko": "실제 집필 시간을 플로팅 위젯·트레이 칩·시트로 실시간 표시합니다.",
+    "ja": "実際の執筆時間をフローティングウィジェット・トレイチップ・シートでリアルタイム表示します。"
+  },
   "author": {
     "name": "pensiv",
     "url": "https://pensiv.so"
   },
   "icon": "Clock",
+  "accent": "#327ad8",
   "sdk": "^1.0.0",
   "source": "marketplace",
-  "permissions": [
-    "session"
-  ],
-  "platforms": [
-    "desktop",
-    "web"
-  ],
+  "permissions": ["session"],
+  "platforms": ["desktop", "web"],
   "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/writing-time",
   "license": "MIT",
   "contributes": {

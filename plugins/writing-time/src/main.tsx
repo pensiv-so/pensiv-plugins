@@ -1,5 +1,9 @@
 import * as React from 'react';
 import { Plugin, type WidgetProps } from '@pensiv/plugin-sdk';
+import './styles.css';
+import { formatDuration, STR, tr } from './i18n';
+import { DEFAULT_TARGET_MINUTES, goalPercent, targetMinutes, useActiveMs } from './session';
+import { WritingTimeSheet } from './sheet';
 
 /**
  * The reference example for the session lifecycle — `app.session.activeMs()`
@@ -16,76 +20,158 @@ import { Plugin, type WidgetProps } from '@pensiv/plugin-sdk';
  *     while the user is reading.
  *  3. **One shared hook, three surfaces.** The chip, the floating card and the
  *     phone sheet all read the same state, so they can never disagree.
+ *  4. **Look native or don't ship it.** The card reuses the app's floating-widget
+ *     chrome, ghost buttons and `label — value` rows (see
+ *     {@link file://./styles.css}); the phone sheet is composed from the host UI
+ *     kit rather than hand-styled. Nothing here invents its own visual language.
  */
 
-function formatDuration(ms: number): string {
-  const totalMinutes = Math.floor(ms / 60_000);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  if (hours === 0) return `${minutes}m`;
-  return `${hours}h ${minutes}m`;
-}
+const CogIcon: React.FC = () => (
+  <svg
+    viewBox="0 0 24 24"
+    width="1rem"
+    height="1rem"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden
+  >
+    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
 
-/** Live active-writing-time, re-read on every host tick. */
-function useActiveMs(app: WidgetProps['app']): { ms: number; writing: boolean } {
-  const [ms, setMs] = React.useState(() => app.session.activeMs());
-  const [writing, setWriting] = React.useState(false);
+/**
+ * A `label — value` line, baseline-aligned (native widget parity). With
+ * `percent`, the share trails the value in muted ink — the analytics legend's
+ * `value · 70%` shape.
+ */
+const Row: React.FC<{ label: string; value: string; percent?: number }> = ({
+  label,
+  value,
+  percent
+}) => (
+  <div className="pnsv-wt-row">
+    <span className="pnsv-wt-label">{label}</span>
+    <span className="pnsv-wt-value">
+      {value}
+      {percent === undefined ? null : <span className="pnsv-wt-pct">· {percent}%</span>}
+    </span>
+  </div>
+);
 
-  React.useEffect(() => {
-    const read = () => setMs(app.session.activeMs());
-    // `tick` fires roughly once a second, but only during a writing stretch —
-    // so this is a live counter that costs nothing while the user is idle.
-    const offTick = app.session.on('tick', read);
-    const offStart = app.session.on('write-start', () => {
-      setWriting(true);
-      read();
-    });
-    const offStop = app.session.on('write-stop', () => {
-      setWriting(false);
-      read();
-    });
-    return () => {
-      offTick();
-      offStart();
-      offStop();
-    };
-  }, [app]);
-
-  return { ms, writing };
-}
-
-/** Compact tray pill content (mobile). The host owns the pill chrome. */
-function TimeChip({ app }: WidgetProps) {
+/**
+ * Compact tray pill content (mobile). The host owns the pill chrome; white +
+ * difference blend so the value reads on any chip tint — same recipe as the
+ * native Timer and Daily Goal chips.
+ */
+export function TimeChip({ app }: WidgetProps) {
   const { ms, writing } = useActiveMs(app);
   return (
-    <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-      {writing ? '✍️ ' : ''}
-      {formatDuration(ms)}
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.25rem',
+        color: '#fff',
+        mixBlendMode: 'difference'
+      }}
+    >
+      <span
+        style={{
+          fontSize: '0.875rem',
+          fontWeight: 600,
+          fontVariantNumeric: 'tabular-nums',
+          opacity: writing ? 1 : 0.7
+        }}
+      >
+        {formatDuration(app, ms)}
+      </span>
     </span>
   );
 }
 
-/** Full card (desktop floating widget / mobile sheet body). */
-function TimeCard({ app }: WidgetProps) {
+/**
+ * Mount grow-in flag, mirroring the app's `useChartGrowIn`: render the bar
+ * collapsed on the first paint, flip on the next frame, and let the CSS
+ * transition do the rest — so it grows in like the analytics charts, and later
+ * value changes morph on the same curve. Instant under reduced motion.
+ */
+function useGrowIn(): boolean {
+  const reduced =
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const [grown, setGrown] = React.useState(reduced);
+
+  React.useEffect(() => {
+    if (reduced) return;
+    const raf = requestAnimationFrame(() => setGrown(true));
+    return () => cancelAnimationFrame(raf);
+  }, [reduced]);
+
+  return grown;
+}
+
+/** Floating card (desktop / tablet). The host owns drag + corner snap. */
+export function TimeCard({ app }: WidgetProps) {
   const { ms, writing } = useActiveMs(app);
-  const today = app.session.today();
+
+  const minutes = targetMinutes(app);
+  const pct = goalPercent(app, ms);
+  const grown = useGrowIn();
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.25rem',
-        fontSize: '0.8125rem',
-        color: 'hsl(var(--foreground))'
-      }}
-    >
-      <strong style={{ fontSize: '1.5rem', fontVariantNumeric: 'tabular-nums' }}>
-        {formatDuration(ms)}
-      </strong>
-      <span style={{ color: 'hsl(var(--muted-foreground))' }}>
-        {writing ? 'writing now' : 'idle'} · {today.net.words} words today
-      </span>
+    <div className="pnsv-wt-card" role="status" aria-live="polite">
+      <div className="pnsv-wt-stack">
+        <div className="pnsv-wt-head">
+          <span className="pnsv-wt-title">{tr(app, STR.title)}</span>
+          <button
+            type="button"
+            className="pnsv-wt-cog"
+            title={tr(app, STR.settings)}
+            aria-label={tr(app, STR.settings)}
+            onClick={() => app.ui.openSettings()}
+          >
+            <CogIcon />
+          </button>
+        </div>
+
+        <div className="pnsv-wt-body">
+          <span className="pnsv-wt-time">{formatDuration(app, ms)}</span>
+          <span className={`pnsv-wt-status${writing ? ' live' : ''}`}>
+            <span className="pnsv-wt-dot" />
+            {writing ? tr(app, STR.writingNow) : tr(app, STR.idle)}
+          </span>
+        </div>
+
+        {/* Word/character totals deliberately live in the Daily Goal widget, not
+            here: two cards in one corner repeating the same numbers is noise.
+            This card answers one question — how long have I been writing. */}
+        {minutes > 0 ? (
+          <div className="pnsv-wt-body">
+            <Row
+              label={tr(app, STR.dailyGoal)}
+              value={formatDuration(app, minutes * 60_000)}
+              percent={pct}
+            />
+          </div>
+        ) : null}
+
+        {minutes > 0 ? (
+          <div
+            className="pnsv-wt-track"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={pct}
+          >
+            <span className="pnsv-wt-fill" style={{ width: `${grown ? pct : 0}%` }} />
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -100,22 +186,34 @@ export default class WritingTimePlugin extends Plugin {
       storageKey: 'writing-time-widget',
       component: TimeCard,
       chip: TimeChip,
-      sheet: TimeCard,
-      // Floating card is opt-in; the tray chip is always offered.
-      shouldRender: ({ app }) => app.storage.get<boolean>('floating') ?? false,
+      // Phone bottom sheet: composed from the host UI kit so it matches every
+      // other plugin sheet, rather than dropping the floating card into a sheet.
+      sheet: WritingTimeSheet,
+      // Shown by default (like the native Daily Goal widget) and hideable from
+      // the setting below; phones get the tray chip instead.
+      shouldRender: ({ app }) => app.storage.get<boolean>('floating') ?? true,
       chipShouldRender: () => true
     });
 
     this.addSettingTab({
-      title: 'Writing Time',
+      title: tr(this.app, STR.title),
       schema: {
         fields: [
           {
+            key: 'targetMinutes',
+            type: 'number',
+            label: STR.target,
+            description: STR.targetDesc,
+            default: DEFAULT_TARGET_MINUTES,
+            min: 0,
+            max: 1440
+          },
+          {
             key: 'floating',
             type: 'toggle',
-            label: 'Show floating widget',
-            description: 'Pin a live timer card to a screen corner.',
-            default: false,
+            label: STR.showFloating,
+            description: STR.showFloatingDesc,
+            default: true,
             // Phones use the tray chip instead of a floating card.
             formFactors: ['desktop', 'tablet', 'web']
           }
@@ -127,8 +225,8 @@ export default class WritingTimePlugin extends Plugin {
     // on desktop, a real bottom sheet on mobile.
     this.addCommand({
       id: 'show-today',
-      name: "Writing Time: Today's summary",
-      run: () => this.app.ui.openSheet(<TimeCard app={this.app} />)
+      name: tr(this.app, STR.summaryCommand),
+      run: () => this.app.ui.openSheet(<WritingTimeSheet app={this.app} />)
     });
   }
 }

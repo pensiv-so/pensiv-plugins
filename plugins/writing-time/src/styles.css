@@ -1,0 +1,197 @@
+/*
+ * Writing Time styles. Bundled to `dist/styles.css` and injected by the host
+ * loader while the plugin is enabled. Own classes (the app's Tailwind build never
+ * scans this repo), host design tokens (`--popover`, `--chart-1`, `--radius`, …)
+ * — so the card is theme-correct without duplicating the theme.
+ *
+ * Sizing deliberately mirrors the Daily Goal widget (16rem wide, 0.875rem rows,
+ * 0.25rem track): the two cards stack in the same corner, so anything bigger
+ * reads as a different design language. Sizes are in rem so they track the app's
+ * root font-size (text-size / zoom), exactly like the native rem-based Tailwind
+ * sizes.
+ */
+
+/* Floating card. Apple-style edge: one thin neutral hairline + a directional top
+ * highlight over the drop shadow, mirroring the app's `--floating-ring` — the
+ * same chrome the native Timer and Daily Goal widgets carry. */
+.pnsv-wt-card {
+  width: 16rem;
+  padding: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) + 0.25rem); /* matches app rounded-xl */
+  background: hsl(var(--popover) / 0.95);
+  color: hsl(var(--popover-foreground));
+  font-family: inherit;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow:
+    0 0 0 0.5px hsl(240 6% 84%),
+    inset 0 1px 0 0 #ffffff,
+    var(--shadow-lg);
+  transition: box-shadow 0.5s ease;
+}
+.pnsv-wt-card:hover {
+  box-shadow:
+    0 0 0 0.5px hsl(240 6% 84%),
+    inset 0 1px 0 0 #ffffff,
+    var(--shadow-xl);
+}
+.dark .pnsv-wt-card {
+  box-shadow:
+    inset 0 0 0 0.5px #ffffff14,
+    inset 0 1px 0 0 #ffffff2b,
+    var(--shadow-lg);
+}
+.dark .pnsv-wt-card:hover {
+  box-shadow:
+    inset 0 0 0 0.5px #ffffff14,
+    inset 0 1px 0 0 #ffffff2b,
+    var(--shadow-xl);
+}
+
+.pnsv-wt-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pnsv-wt-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.pnsv-wt-title {
+  margin-left: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Ghost icon button — the native `Button variant="ghost"` hover recipe. */
+.pnsv-wt-cog {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-left: auto;
+  border: none;
+  border-radius: calc(var(--radius) - 0.1rem);
+  background: transparent;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.pnsv-wt-cog:hover {
+  background: hsl(var(--muted) / 0.8);
+}
+
+.pnsv-wt-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0 0.25rem;
+}
+
+/* Headline duration. Only a half-step above a row — a hero number made the card
+ * shout next to the goal widget it stacks with. */
+.pnsv-wt-time {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Status line: a live dot + label. Green while writing — the app's own
+ * `--label-green`, which has a light and a dark value, so it stays legible in
+ * both themes and never turns into a raw #0f0. */
+.pnsv-wt-status {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+.pnsv-wt-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  flex: 0 0 auto;
+  border-radius: 9999px;
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+.pnsv-wt-status.live {
+  color: hsl(var(--label-green));
+}
+.pnsv-wt-status.live .pnsv-wt-dot {
+  background: hsl(var(--label-green));
+  box-shadow: 0 0 0 0.1875rem hsl(var(--label-green) / 0.18);
+  animation: pnsv-wt-pulse 1.6s ease-in-out infinite;
+}
+@keyframes pnsv-wt-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pnsv-wt-status.live .pnsv-wt-dot {
+    animation: none;
+  }
+}
+
+/* `label — value` line, baseline aligned (native widget parity). */
+.pnsv-wt-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+.pnsv-wt-row .pnsv-wt-label {
+  color: hsl(var(--muted-foreground));
+}
+.pnsv-wt-row .pnsv-wt-value {
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+/* Percentage reads as the analytics legend does: value, then a muted share. */
+.pnsv-wt-pct {
+  margin-left: 0.25rem;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Goal progress track — the analytics bar recipe: a pill track, `--chart-1`
+ * (the accent verbatim) as the fill, and the shared chart grow-in easing so the
+ * bar animates from zero on mount and morphs on every later change. */
+.pnsv-wt-track {
+  position: relative;
+  height: 0.25rem;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: hsl(var(--muted));
+}
+.pnsv-wt-fill {
+  display: block;
+  height: 100%;
+  border-radius: 9999px;
+  background: hsl(var(--chart-1, var(--primary)));
+  /* CHART_GROW_MS / CHART_EASE from the app's useChartGrowIn. */
+  transition: width 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pnsv-wt-fill {
+    transition: none;
+  }
+}
