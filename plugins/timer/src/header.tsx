@@ -169,10 +169,12 @@ export const TimerHeaderButton: React.FC<AppHeaderActionProps> = ({ app }) => {
               width: '20rem',
               padding: '0.5rem',
               borderRadius: 'calc(var(--radius) + 0.25rem)',
-              background: 'hsl(var(--popover) / 0.7)',
+              // Opaque, and no backdrop blur: translucency is the *floating
+              // widget's* signature (it hovers over the document and has to admit
+              // it). A popover is anchored chrome, so it matches the app's own
+              // popovers — solid `--popover`, page fully hidden behind it.
+              background: 'hsl(var(--popover))',
               color: 'hsl(var(--popover-foreground))',
-              backdropFilter: 'blur(4px)',
-              WebkitBackdropFilter: 'blur(4px)',
               zIndex: 60,
               fontFamily: 'inherit'
             }}
