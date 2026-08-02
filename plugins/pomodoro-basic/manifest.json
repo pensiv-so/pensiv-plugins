@@ -1,0 +1,54 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.pomodoro-basic",
+  "name": {
+    "en": "Pomodoro Basic",
+    "ko": "뽀모도로 베이직",
+    "ja": "ポモドーロ ベーシック"
+  },
+  "version": "1.0.0",
+  "description": {
+    "en": "Focus and break cycles in one dial — header button, floating widget and phone sheet.",
+    "ko": "다이얼 하나로 굴리는 집중/휴식 사이클. 헤더 버튼, 플로팅 위젯, 휴대폰 시트.",
+    "ja": "ダイヤル 1 つで回す集中／休憩サイクル。ヘッダーボタン・フローティングウィジェット・スマホシート。"
+  },
+  "author": {
+    "name": "pensiv",
+    "url": "https://pensiv.so"
+  },
+  "icon": "Clock",
+  "accent": "#d2553f",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": ["notifications"],
+  "platforms": ["desktop", "web", "mobile"],
+  "license": "MIT",
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/pomodoro-basic",
+  "contributes": {
+    "widgets": [
+      {
+        "id": "pomodoro",
+        "surface": "floating",
+        "defaultCorner": "bottom-right",
+        "storageKey": "pensiv:plugin:pomodoro:corner"
+      }
+    ],
+    "commands": [
+      {
+        "id": "toggle",
+        "name": "Pomodoro: Start / pause"
+      },
+      {
+        "id": "skip",
+        "name": "Pomodoro: Skip phase"
+      },
+      {
+        "id": "reset-cycle",
+        "name": "Pomodoro: Reset cycle"
+      }
+    ],
+    "settings": {
+      "schema": {}
+    }
+  }
+}
