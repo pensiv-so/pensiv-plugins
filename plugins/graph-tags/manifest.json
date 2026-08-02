@@ -1,0 +1,19 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.graph-tags",
+  "name": "Graph Tags",
+  "version": "1.0.0",
+  "description": "Reference example for the relationship graph: overlay #tags as virtual nodes, filter by them, and add graph toolbar and node-menu actions.",
+  "author": {
+    "name": "pensiv",
+    "url": "https://pensiv.so"
+  },
+  "icon": "Waypoints",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": ["project.read"],
+  "platforms": ["desktop", "web"],
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/graph-tags",
+  "license": "MIT",
+  "contributes": {}
+}
