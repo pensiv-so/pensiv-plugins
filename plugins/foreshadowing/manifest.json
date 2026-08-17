@@ -1,0 +1,38 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.foreshadowing",
+  "name": {
+    "en": "Foreshadowing",
+    "ko": "복선",
+    "ja": "伏線"
+  },
+  "version": "1.0.0",
+  "description": {
+    "en": "Mark a sentence as foreshadowing, mark where it pays off, and see what you still owe the reader.",
+    "ko": "문장에 복선을 심고 회수 지점을 표시해, 아직 회수하지 않은 복선을 한눈에 봅니다.",
+    "ja": "文に伏線を置き、回収した箇所を印して、まだ回収していない伏線を一覧します。"
+  },
+  "author": {
+    "name": "pensiv",
+    "url": "https://pensiv.so"
+  },
+  "icon": "Bookmark",
+  "accent": "#7c5cff",
+  "sdk": "^1.1.0",
+  "source": "marketplace",
+  "permissions": ["editor.read", "editor.write", "project.read", "storage.synced"],
+  "platforms": ["desktop", "web"],
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/foreshadowing",
+  "license": "MIT",
+  "contributes": {
+    "commands": [
+      {
+        "id": "list",
+        "name": "Foreshadowing"
+      }
+    ],
+    "settings": {
+      "schema": {}
+    }
+  }
+}

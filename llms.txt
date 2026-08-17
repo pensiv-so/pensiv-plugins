@@ -37,12 +37,17 @@
 - [Plugin base class](packages/plugin-sdk/src/plugin.ts): onload/onunload,
   addCommand, registerWidget, registerEditorExtension, addSettingTab, …
 - [Host API](packages/plugin-sdk/src/host-api.ts): app.editor / project /
-  session / storage / ui / platform / app.
+  session / storage / ui / platform / app. Cross-file text lives on
+  app.project.content(id) → {doc, text} for documents and sheets; navigating to
+  it is app.ui.openFile(id, { range }).
 - [Contributions & settings schema](packages/plugin-sdk/src/contributions.ts):
   header/pane/sidebar contributions and the declarative SettingsSchema.
 - [Surface catalogue](packages/plugin-sdk/src/surfaces.ts): registerSurfaceItem
-  and the stable surface ids — file.menu, editor.menu, plotcard.menu,
-  plotpartcard.menu, canvas.selection, pane.toolbar, pane.statusbar.
+  and the stable surface ids — file.menu, editor.menu, editor.selection,
+  plotcard.menu, plotpartcard.menu, canvas.selection, pane.toolbar,
+  pane.statusbar, analytics.section. The editor surfaces carry target.range
+  ({from,to}), snapshotted when the surface opened; editor.selection (the
+  floating toolbar) is the one that exists on phones and tablets too.
 - [Canvas nodes](packages/plugin-sdk/src/canvas-node.ts): registerCanvasNode —
   a plugin-owned node on the canvas, with a 16 KB state cap.
 - [Graph contributions](packages/plugin-sdk/src/graph.ts): registerGraphSource /

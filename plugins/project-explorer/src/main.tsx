@@ -28,6 +28,8 @@ const wrap: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   gap: '0.75rem',
+  // Pane views render full-bleed — the host adds no padding, the view owns it.
+  padding: '0.75rem',
   fontSize: '0.8125rem',
   color: 'hsl(var(--foreground))'
 };

@@ -78,8 +78,18 @@ export interface EditorApi {
    * for real. `[editor.write]`
    */
   setContent(doc: unknown, options?: { resetHistory?: boolean }): void;
-  /** Run a named editor command (e.g. `toggleBold`). `[editor.write]` */
-  runCommand(name: string): void;
+  /**
+   * Run a named editor command (e.g. `toggleBold`), optionally with arguments.
+   *
+   * The arguments are how a plugin drives **its own** commands — the ones its
+   * `registerEditorExtension` added — with data the command needs but the
+   * selection can't carry, e.g. `runCommand('setMyAnchor', { id }, range)` from a
+   * menu item that must act on the span the user had highlighted rather than on
+   * wherever the caret ended up. Keep them JSON-serializable: the in-process host
+   * passes them through untouched, but a sandboxed one has to send them across a
+   * boundary. `[editor.write]`
+   */
+  runCommand(name: string, ...args: unknown[]): void;
   /** Subscribe to editor events. Returns an unsubscribe. */
   on(event: 'update' | 'selectionUpdate', cb: () => void): Unsub;
   /** Add read-only decorations over ranges; returns an unsubscribe. `[editor.read]` */
@@ -89,6 +99,7 @@ export interface EditorApi {
 export type {
   ProjectApi,
   ProjectFile,
+  ProjectFileContent,
   ProjectFileType,
   ProjectEntityType,
   ProjectPlotCard,
@@ -201,13 +212,62 @@ export interface StorageApi {
   on(key: string, callback: (value: unknown) => void): Unsub;
 }
 
+/** Options for {@link UiApi.openFile}. */
+export interface OpenFileOptions {
+  /**
+   * A span to reveal once the file's editor is ready — it is scrolled into view
+   * and briefly pulse-highlighted, the same feedback the app uses for its own
+   * jump-to-text navigation. Positions are ProseMirror absolute positions, as
+   * handed out by {@link SurfaceTarget.range} and `editor.getSelection()`.
+   *
+   * The request is held until that file's editor mounts, so it works whether the
+   * file was already open, in a background tab, or not open at all. A range that
+   * no longer exists (the text was deleted) is dropped without an error.
+   */
+  range?: EditorRange;
+  /** Open beside the current pane instead of in it. */
+  split?: boolean;
+}
+
+/** Options for {@link UiApi.openSheet}. */
+export interface OpenSheetOptions {
+  /**
+   * Header title for the host's sheet chrome (a dialog on desktop, a bottom
+   * sheet on mobile). Falls back to a generic host label when omitted.
+   */
+  title?: string;
+}
+
 export interface UiApi {
   /** Show a transient toast. */
   toast(message: string): void;
-  /** Open a host-rendered sheet with the given content node. */
-  openSheet(node: unknown): void;
+  /**
+   * Open a host-rendered sheet with the given content node. One at a time — a
+   * second call replaces the first. The host draws the chrome (title, close);
+   * the plugin supplies only the body.
+   */
+  openSheet(node: unknown, options?: OpenSheetOptions): void;
+  /**
+   * Close the sheet this plugin opened with {@link openSheet} — for pickers,
+   * where choosing a row is also the dismissal. No-op when nothing is open.
+   */
+  closeSheet(): void;
   /** Open a plugin-contributed full pane/tab (see `Plugin.registerPane`) in the split view. */
   openPane(pluginPaneId: string): void;
+  /**
+   * Open one of the project's files in the split view — the navigation half of
+   * `app.project`, so a plugin's list of results can behave like the app's own
+   * (click a row, land on the text).
+   *
+   * The file's type is resolved by the host, so an id is enough. Pass
+   * `options.range` to land on a specific span. No-op (with a console warning)
+   * when no project view is mounted or the id isn't a file in it. `[project.read]`
+   *
+   * ```ts
+   * app.ui.openFile(anchor.fileId, { range: anchor.range });
+   * ```
+   */
+  openFile(fileId: string, options?: OpenFileOptions): void;
   /** Open this plugin's own settings page (its `addSettingTab` form). */
   openSettings(): void;
 }

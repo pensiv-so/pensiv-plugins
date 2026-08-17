@@ -46,6 +46,19 @@ import type { HostApi } from './host-api';
  */
 
 /**
+ * A slot in the page's chart palette — **not** a colour.
+ *
+ * `1..6` map to the app's `--chart-1..6`, the same categorical ramp the host's
+ * own charts use, so a plugin can tell *different things* apart (written vs
+ * rested, one project vs another) without ever picking a hex that clashes with
+ * the user's accent, breaks in dark mode, or fails contrast. `1` is the accent
+ * verbatim and the default. `muted` is the neutral tone the host uses for
+ * "other" / "nothing here" — the right choice for the half of a split that
+ * isn't the point.
+ */
+export type AnalyticsColor = 1 | 2 | 3 | 4 | 5 | 6 | 'muted';
+
+/**
  * One headline figure, rendered like the page's own stat cards: muted label
  * above, figure below.
  */
@@ -69,6 +82,11 @@ export interface AnalyticsRow {
   label: string;
   /** Right-hand figure, **already formatted**. */
   value: string;
+  /**
+   * Palette slot for this row's magnitude bar. Defaults to `1` (the accent).
+   * Give the parts of a split different slots so they read as different things.
+   */
+  color?: AnalyticsColor;
   /**
    * Relative magnitude in `0..1`, drawn as a soft data-bar behind the row. Omit
    * for a plain list. Out-of-range values are clamped rather than rejected, so a
@@ -108,6 +126,8 @@ export type AnalyticsChart =
   | {
       kind: 'bars';
       points: AnalyticsPoint[];
+      /** Palette slot for the bars. Defaults to `1` (the accent). */
+      color?: AnalyticsColor;
       /** Caption under the chart (a unit, an axis note). */
       caption?: string;
     }

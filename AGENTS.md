@@ -58,7 +58,7 @@ export default class MyPlugin extends Plugin {
 | `addSettingTab({ title?, schema })`                                                  | a settings form (declarative `SettingsSchema`)                                                      |
 | `registerHeaderAction(...)`                                                          | a file-header button (`onClick` / `isActive`)                                                       |
 | `registerAppHeaderAction({ id, label, icon, onClick? \| render? })`                  | a project app-header button; pass `render` for a **live custom button + popover** (e.g. Timer)      |
-| `registerPaneView(...)` / `registerPane(...)`                                        | side-pane / full-tab views                                                                          |
+| `registerPaneView(...)` / `registerPane(...)`                                        | side-pane / full-tab views — rendered **full-bleed** (no host padding), so the view owns its insets |
 | `registerSidebarItem(...)`                                                           | a sidebar entry/section                                                                             |
 | `registerSurfaceItem({ surface, id, label, icon?, when?, onClick?, render? })`       | an item in **any** catalogue surface — context menus, the canvas selection toolbar, the pane strips |
 | `registerCanvasNode({ id, name, icon?, defaultSize?, createDefaultState?, render })` | a plugin-owned node type on the canvas                                                              |
@@ -72,13 +72,26 @@ Every `registerX` returns a disposer and is torn down automatically on disable.
 Rather than one `registerX` per menu, name a surface from the catalogue
 ([`surfaces.ts`](packages/plugin-sdk/src/surfaces.ts), the source of truth):
 
-| Surface id                            | Where it appears                                              | `target`                      |
-| ------------------------------------- | ------------------------------------------------------------- | ----------------------------- |
-| `file.menu`                           | right-click a file in the project tree **or** the folder grid | the file                      |
-| `editor.menu`                         | right-click inside the document / sheet editor                | the selection (`target.text`) |
-| `plotcard.menu` / `plotpartcard.menu` | the card's "…" menu                                           | the card                      |
-| `canvas.selection`                    | the canvas selection toolbar                                  | the selected node(s)          |
-| `pane.toolbar` / `pane.statusbar`     | strips above / below the pane's content                       | the pane's file               |
+| Surface id                            | Where it appears                                              | `target`                                       |
+| ------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------- |
+| `file.menu`                           | right-click a file in the project tree **or** the folder grid | the file                                       |
+| `editor.menu`                         | right-click inside the document / sheet editor (desktop)      | the selection (`target.text` + `target.range`) |
+| `editor.selection`                    | the floating toolbar over selected text (all platforms)       | the selection (`target.text` + `target.range`) |
+| `plotcard.menu` / `plotpartcard.menu` | the card's "…" menu                                           | the card                                       |
+| `canvas.selection`                    | the canvas selection toolbar                                  | the selected node(s)                           |
+| `pane.toolbar` / `pane.statusbar`     | strips above / below the pane's content                       | the pane's file                                |
+
+The two editor surfaces are the same target from two entry points — the toolbar
+is the fast path, the context menu the discoverable one — so an item that acts on
+selected text usually registers on both. Register `editor.selection` if you want
+to exist on phones and tablets: `editor.menu` hangs off a right-click, which
+touch has no equivalent of.
+
+`target.range` is the selection's `{ from, to }` in ProseMirror positions,
+**snapshotted when the surface opened**. Anchor to it rather than calling
+`app.editor.getSelection()` inside `onClick`: opening a menu takes focus and a
+toolbar tap can collapse the selection, so by click time the live selection may
+no longer be what the user highlighted.
 
 Menu surfaces render your item as a row at the end of the menu, under a
 separator — a bottom-sheet row on phones, where those menus are sheets. The rest
@@ -188,7 +201,21 @@ granted permission.
   `wordsToday()`, `on('change'|…, cb)`. `[session]`
 - `app.storage` — `get(key)` / `set(key, value, { scope })` (per-plugin
   namespace; `scope:'synced'` needs `[storage.synced]`), `on(key, cb)`.
-- `app.ui` — `toast(msg)`, `openSheet(node)`, `openPane(id)`, `openSettings()`.
+- `app.project` — the file tree, plot cards and relationships (see
+  [`project-api.ts`](packages/plugin-sdk/src/project-api.ts)), plus
+  `content(id)` `[project.read]`: the body of a **document or sheet** as
+  `{ doc, text }`. That is the only way to read text outside the file being
+  edited, so it is what a manuscript-wide index or coverage stat is built on.
+  `doc` is a copy, cloned on first access — reading just `text` costs nothing.
+- `app.ui` — `toast(msg)`, `openSheet(node, { title? })` + `closeSheet()`,
+  `openPane(id)`, `openSettings()`, `openFile(fileId, { range?, split? })`
+  `[project.read]`. `openSheet` renders your body in host chrome (dialog on
+  desktop, bottom sheet on mobile) with the optional `title` in its header;
+  `closeSheet` dismisses your own sheet — for pickers, where choosing a row is
+  also the dismissal. `openFile` is the navigation half of `app.project`: it
+  opens the file in the split view and, with a `range`, scrolls to that span
+  and pulse-highlights it once the editor has loaded — so a row in your pane
+  behaves like the app's own results.
 - `app.platform` — `clipboard`, `notify()` `[notifications]`, `playSound(name)`,
   `now()`, `timer(ms, cb)`, `fetch(url)` `[net:<host>]`, `openExternal(url)`.
 - `app.app` — read-only context: `projectId`, `fileId`, `fileType`
