@@ -124,6 +124,16 @@ export interface PluginManifest {
   sdk: string;
   source: PluginSource;
   permissions: PluginPermission[];
+  /**
+   * Human names for the hosts in `net:<host>` permissions, keyed by host — e.g.
+   * `{ 'x7f2.execute-api.ap-northeast-2.amazonaws.com': { en: 'PNU speller' } }`.
+   *
+   * Presentation only: the install dialog leads with this name and keeps the raw
+   * host in a dimmer line beneath it, so an opaque cloud hostname still says who
+   * receives the user's text. Entries for hosts the plugin did not declare are
+   * ignored, and each label is capped at 60 characters.
+   */
+  netLabels?: Record<string, LocalizedText>;
   contributes: PluginContributions;
   minAppVersion?: string;
   /** Surfaces supported. Code plugins are desktop/web only (Apple §2.5.2). */

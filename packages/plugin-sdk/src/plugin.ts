@@ -18,6 +18,7 @@ import type {
 } from './contributions';
 import type { SurfaceItemContribution } from './surfaces';
 import type { CanvasNodeContribution } from './canvas-node';
+import type { AnalyticsSectionContribution } from './analytics';
 import type { GraphSourceContribution, GraphFilterContribution } from './graph';
 
 /** A TipTap extension paired with the editors it loads into. @internal */
@@ -102,6 +103,8 @@ export abstract class Plugin {
   readonly _surfaceItems: SurfaceItemContribution[] = [];
   /** @internal Canvas node types registered in `onload`. */
   readonly _canvasNodes: CanvasNodeContribution[] = [];
+  /** @internal Analytics sections registered in `onload`. */
+  readonly _analyticsSections: AnalyticsSectionContribution[] = [];
   /** @internal Relationship-graph sources registered in `onload`. */
   readonly _graphSources: GraphSourceContribution[] = [];
   /** @internal Relationship-graph filters registered in `onload`. */
@@ -237,6 +240,33 @@ export abstract class Plugin {
    */
   registerSurfaceItem(item: SurfaceItemContribution): ContributionDisposer {
     return this.add(this._surfaceItems, item);
+  }
+
+  /**
+   * Contribute a section to Settings → Analytics.
+   *
+   * Unlike every other surface, this one is **declarative**: return the figures,
+   * chart and rows from `data()` and the host renders them with the analytics
+   * page's own cards, palette, hover and motion — identically on desktop and
+   * phone. See {@link AnalyticsSectionContribution} for why, and for who owns
+   * formatting.
+   *
+   * ```ts
+   * this.registerAnalyticsSection({
+   *   id: 'writing-time',
+   *   async data({ app, range }) {
+   *     const days = await app.session.history(range);
+   *     return { stats: [{ label: 'Total', value: fmt(sum(days)) }] };
+   *   }
+   * });
+   * ```
+   *
+   * `data()` runs inside the host's guard: a rejection renders an error line in
+   * the card instead of taking the page down, and a section that keeps throwing
+   * is disabled for the session.
+   */
+  registerAnalyticsSection(section: AnalyticsSectionContribution): ContributionDisposer {
+    return this.add(this._analyticsSections, section);
   }
 
   /**

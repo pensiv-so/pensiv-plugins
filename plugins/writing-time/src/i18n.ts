@@ -37,7 +37,27 @@ export const STR = {
     "Writing Time: Today's summary",
     '집필 시간: 오늘 요약',
     '執筆時間: 今日のまとめ'
-  )
+  ),
+  analyticsTitle: L('Writing time', '집필 시간', '執筆時間'),
+  analyticsTotal: L('Total', '합계', '合計'),
+  analyticsAverage: L('Per writing day', '집필한 날 평균', '執筆日あたり'),
+  analyticsBest: L('Best day', '최고 기록', '最高記録'),
+  analyticsLoading: L('Loading…', '불러오는 중...', '読み込み中...'),
+  analyticsEmpty: L('No writing time recorded yet.', '아직 기록된 집필 시간이 없습니다.', 'まだ記録された執筆時間はありません。'),
+  analyticsUnavailable: L(
+    "Writing history isn't available right now.",
+    '집필 기록을 불러올 수 없습니다.',
+    '執筆履歴を読み込めませんでした。'
+  ),
+  analyticsDaily: L('Daily record', '일별 기록', '日別の記録'),
+  rhythmTitle: L('Writing rhythm', '집필 리듬', '執筆リズム'),
+  rhythmShare: L('Days written', '집필한 날 비율', '執筆した日の割合'),
+  rhythmLongestRun: L('Longest run', '최장 연속', '最長連続'),
+  rhythmLongestGap: L('Longest break', '최장 공백', '最長ブランク'),
+  rhythmWrote: L('Wrote', '집필', '執筆'),
+  rhythmRested: L('Rested', '휴식', '休み'),
+  daysUnit: L('d', '일', '日'),
+  ofDays: L('of {{total}} days', '{{total}}일 중', '{{total}}日中')
 } as const;
 
 /**
@@ -46,10 +66,19 @@ export const STR = {
  * translated label bolted on.
  */
 export const formatDuration = (app: HostApi, ms: number): string => {
-  const totalMinutes = Math.floor(Math.max(0, ms) / 60_000);
+  const totalSeconds = Math.round(Math.max(0, ms) / 1000);
+  const totalMinutes = Math.floor(totalSeconds / 60);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   const base = (app.app.locale || 'en').split('-')[0];
+
+  // Under a minute, keep seconds. Flooring to minutes here printed "0분" for a
+  // 40-second average, which reads as "you wrote nothing" rather than "briefly".
+  if (totalSeconds < 60) {
+    if (base === 'ko') return `${totalSeconds}초`;
+    if (base === 'ja') return `${totalSeconds}秒`;
+    return `${totalSeconds}s`;
+  }
 
   // A whole number of hours drops the minutes entirely — a goal of 60 minutes
   // should read "1시간", not "1시간 0분".

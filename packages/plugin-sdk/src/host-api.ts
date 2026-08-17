@@ -144,11 +144,47 @@ export interface SessionApi {
    */
   countToday(options?: CountOptions): SessionTotals;
   /**
+   * Per-day writing history, oldest first and zero-filled — characters, words,
+   * active writing time and session count for each local calendar day in the
+   * window. `[session]`
+   *
+   * Async, unlike the rest of this API: history is served by the account's
+   * server-side session record (local storage keeps roughly a week), cached
+   * briefly per window. The window defaults to the trailing 30 days; pass
+   * `days` for a trailing window or `from`/`to` (`YYYY-MM-DD`, inclusive, local
+   * days) for an explicit one. Windows longer than 400 days are trimmed from the
+   * `from` end.
+   *
+   * The last day is overlaid with the same live numbers {@link today} returns, so
+   * a widget showing both can't disagree with itself. Rejects when offline or
+   * signed out — catch it and render a placeholder.
+   *
+   * ```ts
+   * const days = await app.session.history({ days: 7 });
+   * const minutes = days.reduce((sum, d) => sum + d.activeMs, 0) / 60000;
+   * ```
+   */
+  history(range?: { from?: string; to?: string; days?: number }): Promise<SessionHistoryDay[]>;
+  /**
    * Subscribe to writing-session events. `'change'` fires whenever today's totals
    * change (the common case for a progress widget); the others mark write
    * start/stop and a periodic tick. Returns an unsubscribe. `[session]`
    */
   on(event: 'change' | 'write-start' | 'write-stop' | 'tick', cb: () => void): Unsub;
+}
+
+/** One day of {@link SessionApi.history}. */
+export interface SessionHistoryDay {
+  /** Local calendar day, `YYYY-MM-DD`. */
+  date: string;
+  added: SessionProgress;
+  removed: SessionProgress;
+  /** `added − removed`, floored at 0 per field — the same rule the daily goal uses. */
+  net: SessionProgress;
+  /** Active writing time that day, in milliseconds. */
+  activeMs: number;
+  /** Writing sessions started that day. */
+  sessions: number;
 }
 
 export interface StorageApi {

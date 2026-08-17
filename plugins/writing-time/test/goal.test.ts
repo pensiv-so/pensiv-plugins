@@ -35,10 +35,18 @@ describe('formatDuration', () => {
     expect(formatDuration(host('ja'), 84 * 60_000)).toBe('1時間24分');
   });
 
-  it('falls back to English for an unknown locale and floors partial minutes', () => {
+  it('falls back to English for an unknown locale', () => {
     expect(formatDuration(host('de'), 90 * 60_000)).toBe('1h 30m');
-    expect(formatDuration(host('en'), 59_999)).toBe('0m');
-    expect(formatDuration(host('en'), -5)).toBe('0m');
+  });
+
+  // A 40-second average printed as "0분" reads as "you wrote nothing" rather
+  // than "briefly", which is what the analytics section was showing.
+  it('keeps seconds under a minute instead of flooring to zero', () => {
+    expect(formatDuration(host('en'), 40_000)).toBe('40s');
+    expect(formatDuration(host('ko'), 40_000)).toBe('40초');
+    expect(formatDuration(host('ja'), 40_000)).toBe('40秒');
+    expect(formatDuration(host('en'), 59_999)).toBe('1m');
+    expect(formatDuration(host('en'), -5)).toBe('0s');
   });
 });
 

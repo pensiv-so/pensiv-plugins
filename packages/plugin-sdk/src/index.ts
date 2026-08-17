@@ -12,7 +12,10 @@
  * below is the frozen v1 contract — see `HOST_API_VERSION`.
  */
 
-export const HOST_API_VERSION = '1.0.0';
+// 1.1.0 — new capabilities, not a fix: `app.session.history()` and the
+// `registerAnalyticsSection`. Minor, per semver, since both are additive —
+// existing `sdk: "^1.0.0"` plugins keep running untouched.
+export const HOST_API_VERSION = '1.1.0';
 
 /** Runtime helper so plugins resolve their own {@link LocalizedText} strings. */
 export { resolveLocalizedText } from './types';
@@ -60,6 +63,15 @@ export type {
   SurfaceItemContribution
 } from './surfaces';
 export type {
+  AnalyticsSectionContribution,
+  AnalyticsSectionContext,
+  AnalyticsSectionData,
+  AnalyticsStat,
+  AnalyticsRow,
+  AnalyticsPoint,
+  AnalyticsChart
+} from './analytics';
+export type {
   CanvasNodeState,
   CanvasNodeViewProps,
   CanvasNodeContribution
@@ -91,6 +103,7 @@ export type {
   SessionApi,
   SessionProgress,
   SessionTotals,
+  SessionHistoryDay,
   StorageApi,
   StorageOptions,
   UiApi,
