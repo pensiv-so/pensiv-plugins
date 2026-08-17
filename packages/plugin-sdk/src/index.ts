@@ -6,13 +6,20 @@
  *
  * **Source of truth.** This module *is* the contract, living beside the host
  * adapter that implements it. In-app code imports it via
- * `@pensiv/plugin-sdk`. For external authors it is published as the
+ * `@/shared/app/plugins/sdk`. For external authors it is published as the
  * `@pensiv/plugin-sdk` npm package, mirrored from here on release (so the
  * published `.d.ts` can never drift from the running implementation). The shape
  * below is the frozen v1 contract — see `HOST_API_VERSION`.
  */
 
-export const HOST_API_VERSION = '1.0.0';
+// 1.1.0 — new capabilities, not a fix: `app.session.history()`,
+// `registerAnalyticsSection`, and the text-anchoring set (`SurfaceTarget.range`,
+// the `editor.selection` surface, `app.project.content()`, `app.ui.openFile()`,
+// arguments on `editor.runCommand()`) — which together let a plugin anchor its
+// own data to a span of prose, list those anchors across the manuscript, and
+// navigate back to one. Minor, per semver, since all of it is additive —
+// existing `sdk: "^1.0.0"` plugins keep running untouched.
+export const HOST_API_VERSION = '1.1.0';
 
 /** Runtime helper so plugins resolve their own {@link LocalizedText} strings. */
 export { resolveLocalizedText } from './types';
@@ -60,6 +67,16 @@ export type {
   SurfaceItemContribution
 } from './surfaces';
 export type {
+  AnalyticsSectionContribution,
+  AnalyticsSectionContext,
+  AnalyticsSectionData,
+  AnalyticsStat,
+  AnalyticsRow,
+  AnalyticsPoint,
+  AnalyticsChart,
+  AnalyticsColor
+} from './analytics';
+export type {
   CanvasNodeState,
   CanvasNodeViewProps,
   CanvasNodeContribution
@@ -78,6 +95,7 @@ export type {
   CountOptions,
   ProjectApi,
   ProjectFile,
+  ProjectFileContent,
   ProjectFileType,
   ProjectEntityType,
   ProjectPlotCard,
@@ -91,9 +109,12 @@ export type {
   SessionApi,
   SessionProgress,
   SessionTotals,
+  SessionHistoryDay,
   StorageApi,
   StorageOptions,
   UiApi,
+  OpenFileOptions,
+  OpenSheetOptions,
   ClipboardApi,
   PlatformApi,
   AppApi,

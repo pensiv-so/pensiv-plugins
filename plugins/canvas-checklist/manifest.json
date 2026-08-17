@@ -6,7 +6,7 @@
     "ko": "캔버스 체크리스트",
     "ja": "キャンバスチェックリスト"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": {
     "en": "A checklist card you can drop on a canvas, styled like a native node.",
     "ko": "캔버스에 놓을 수 있는 체크리스트 카드. 기본 노드와 같은 디자인입니다.",

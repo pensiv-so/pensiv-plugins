@@ -8,6 +8,8 @@ Live active-writing time as a floating widget, tray chip and sheet.
 - Green "writing now" state while you write, dimmed while you pause
 - Optional daily time goal with a progress bar and percentage
 - A tray chip on phones and a summary sheet from the command palette
+- A **Writing time** section in Settings → Analytics: total, per-writing-day average,
+  best day and a per-day bar chart, following the page's own range selector
 - Korean, Japanese and English
 
 ## Usage

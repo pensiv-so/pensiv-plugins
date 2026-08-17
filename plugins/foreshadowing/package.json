@@ -1,0 +1,19 @@
+{
+  "name": "@pensiv-plugins/foreshadowing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Anchor foreshadowing beats to prose, track payoffs, chart the rate.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@pensiv/plugin-sdk": "*"
+  },
+  "devDependencies": {
+    "@pensiv/build-config": "*",
+    "vite": "^6.0.0"
+  }
+}

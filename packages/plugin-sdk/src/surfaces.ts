@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import type { HostApi } from './host-api';
+import type { EditorRange, HostApi } from './host-api';
 import type { ProjectEntityType } from './project-api';
 import type { SurfaceScope } from './contributions';
 
@@ -43,7 +43,8 @@ import type { SurfaceScope } from './contributions';
  * | id | Where it appears | `target` |
  * | --- | --- | --- |
  * | `file.menu` | right-click a file in the project tree **or** the folder grid | the file |
- * | `editor.menu` | right-click inside the document / sheet editor | the selection |
+ * | `editor.menu` | right-click inside the document / sheet editor (desktop) | the selection |
+ * | `editor.selection` | the floating toolbar over selected text (all platforms) | the selection |
  * | `plotcard.menu` | a plot card's "…" menu | the plot card |
  * | `plotpartcard.menu` | a plot part card's "…" menu | the part card |
  * | `canvas.selection` | the canvas selection toolbar, when node(s) are selected | the selected node(s) |
@@ -55,10 +56,22 @@ import type { SurfaceScope } from './contributions';
  * `file.menu` covers both the sidebar tree and the folder grid on purpose — they
  * share one menu component, and a plugin that means "act on this file" should not
  * have to know which listing the user right-clicked.
+ *
+ * `editor.selection` and `editor.menu` are the same target from two entry points:
+ * the floating toolbar is the fast path (one tap on the selection you just made),
+ * the context menu the discoverable one. Both carry {@link SurfaceTarget.range},
+ * so an item that anchors something to the selected span can register on either
+ * without branching. The toolbar is an icon strip, so items there want an `icon`.
+ *
+ * **Register `editor.selection` if you want to exist on phones and tablets.**
+ * `editor.menu` hangs off a right-click, which touch has no equivalent of, so it
+ * is desktop-only — the same way `graph.node-menu` is. The floating toolbar is
+ * the surface every platform shows over a selection.
  */
 export type PluginSurfaceId =
   | 'file.menu'
   | 'editor.menu'
+  | 'editor.selection'
   | 'plotcard.menu'
   | 'plotpartcard.menu'
   | 'canvas.selection'
@@ -96,8 +109,23 @@ export interface SurfaceTarget {
   type: SurfaceTargetType;
   /** Display title, when the host has one (file name, card title). */
   title?: string;
-  /** The selected text, on `editor.menu`. Empty string when nothing is selected. */
+  /**
+   * The selected text, on the editor surfaces (`editor.menu` /
+   * `editor.selection`). Empty string when nothing is selected.
+   */
   text?: string;
+  /**
+   * Where the selection sits in the document, in ProseMirror absolute positions —
+   * the same coordinate space as `editor.decorate` and `ui.openFile`. Present on
+   * the editor surfaces whenever the selection is non-empty.
+   *
+   * The host **snapshots this when the surface opens**, not when the item is
+   * clicked: a context menu takes focus, and a toolbar button click can collapse
+   * the selection, so reading `app.editor.getSelection()` inside `onClick` can
+   * see a range that no longer matches what the user had highlighted. Anchor to
+   * `target.range` instead.
+   */
+  range?: EditorRange;
   /**
    * Host sub-kind, when the type alone is too coarse: the canvas node kind
    * (`note` / `image` / …) or the sheet category. Compare defensively — the host

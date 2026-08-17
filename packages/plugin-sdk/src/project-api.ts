@@ -112,6 +112,26 @@ export interface ProjectRelationship {
   updatedAt: string;
 }
 
+/**
+ * The rich-text body of one file, as returned by {@link ProjectApi.content}.
+ *
+ * Only the two text-bearing file types have one: `document` and `sheet`. A
+ * folder, plotboard or canvas holds its children / nodes rather than prose, so
+ * `content` returns `undefined` for them — check the type, don't assume.
+ */
+export interface ProjectFileContent {
+  id: string;
+  type: 'document' | 'sheet';
+  /**
+   * ProseMirror document JSON — the same opaque shape `editor.getDoc()` returns
+   * for the *active* file, so one walker handles both. Frozen: treat as
+   * read-only, and write through the editor (or a TipTap extension) instead.
+   */
+  doc: unknown;
+  /** Plain text of the body, for scanning / counting without walking `doc`. */
+  text: string;
+}
+
 /** Filter for {@link ProjectApi.query}. Every field is optional and ANDed. */
 export interface ProjectQuery {
   /** Restrict to one or more file types. Omit = all five. */
@@ -187,6 +207,27 @@ export interface ProjectApi {
   children(parentId: string | null, options?: { includeTrashed?: boolean }): ProjectFile[];
   /** Files matching a filter, rank-ordered. `[project.read]` */
   query(filter?: ProjectQuery): ProjectFile[];
+  /**
+   * The body of a `document` / `sheet` — the only way to see text outside the
+   * file the user is currently editing, which is what a manuscript-wide feature
+   * (an index, a coverage stat, a cross-file scan) needs. `undefined` for file
+   * types that hold no prose, and for an id the loaded project doesn't contain.
+   * `[project.read]`
+   *
+   * Synchronous, like every other read here: opening a project loads its files
+   * into memory, so this is a lookup rather than I/O, and it sees exactly what
+   * the app's own cross-file features (e.g. the folder word counter) see. That
+   * also means it is scoped to the **loaded** project — it will not reach into a
+   * project the user has not opened.
+   *
+   * ```ts
+   * for (const file of app.project.query({ type: 'document' })) {
+   *   const body = app.project.content(file.id);
+   *   if (body) scan(body.doc);
+   * }
+   * ```
+   */
+  content(id: string): ProjectFileContent | undefined;
   /** Cards on a plotboard, rank-ordered. `[project.read]` */
   plotCards(boardId: string): ProjectPlotCard[];
   /** Part cards belonging to a plot card, rank-ordered. `[project.read]` */

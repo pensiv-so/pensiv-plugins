@@ -4,6 +4,7 @@ import './styles.css';
 import { formatDuration, STR, tr } from './i18n';
 import { DEFAULT_TARGET_MINUTES, goalPercent, targetMinutes, useActiveMs } from './session';
 import { WritingTimeSheet } from './sheet';
+import { writingRhythmSection, writingTimeSection } from './analytics';
 
 /**
  * The reference example for the session lifecycle — `app.session.activeMs()`
@@ -219,6 +220,27 @@ export default class WritingTimePlugin extends Plugin {
           }
         ]
       }
+    });
+
+    // A section on Settings → Analytics. Declarative on purpose: this hands back
+    // figures and a per-day series, and the host renders them with the page's own
+    // cards, palette and hover — so it matches the page and keeps matching.
+    this.registerAnalyticsSection({
+      id: 'writing-time',
+      title: tr(this.app, STR.analyticsDaily),
+      width: 'half',
+      order: 0,
+      data: writingTimeSection
+    });
+
+    // The same window as a ratio — how much of the period was writing and how
+    // much was rest. Paired at half width so the two read as one thought.
+    this.registerAnalyticsSection({
+      id: 'writing-rhythm',
+      title: tr(this.app, STR.rhythmTitle),
+      width: 'half',
+      order: 1,
+      data: writingRhythmSection
     });
 
     // `openSheet` hands the host a body and lets it pick the surface — a dialog

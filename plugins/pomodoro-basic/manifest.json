@@ -6,7 +6,7 @@
     "ko": "뽀모도로 베이직",
     "ja": "ポモドーロ ベーシック"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": {
     "en": "Focus and break cycles in one dial — header button, floating widget and phone sheet.",
     "ko": "다이얼 하나로 굴리는 집중/휴식 사이클. 헤더 버튼, 플로팅 위젯, 휴대폰 시트.",
