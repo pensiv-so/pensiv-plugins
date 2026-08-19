@@ -64,8 +64,12 @@ export default class ForeshadowingPlugin extends Plugin {
     const t = createT(this.app);
 
     // ── the anchor layer ────────────────────────────────────────────────────
-    // Document editor only (the default): a beat belongs to the manuscript.
-    this.registerEditorExtension(ForeshadowMark);
+    // Both prose surfaces, not just `document` (the default). The rest of the
+    // plugin already treats sheets as manuscript: `includeSheets` scans them, the
+    // side pane is registered for them, and the selection items show up in their
+    // toolbar. Leaving the mark out of the sheet schema made that last one a lie —
+    // the command simply wasn't there, so planting in a sheet did nothing.
+    this.registerEditorExtension(ForeshadowMark, { surfaces: ['document', 'sheet'] });
 
     // ── planting: the one thing that starts from the prose ──────────────────
     const plant = (ctx: SurfaceItemContext) => {
@@ -76,13 +80,15 @@ export default class ForeshadowingPlugin extends Plugin {
       }
       const id = newId();
       const attrs: ForeshadowAttrs = { fid: id, gid: id, kind: 'setup', label: '' };
-      this.app.editor.runCommand('setForeshadowAnchor', attrs, range);
-      this.app.ui.toast(t('planted'));
+      // Only claim success when the mark actually landed: `runCommand` returns
+      // false where this plugin's extension isn't in the active editor's schema.
+      const planted = this.app.editor.runCommand('setForeshadowAnchor', attrs, range);
+      this.app.ui.toast(t(planted ? 'planted' : 'cannotAnchorHere'));
     };
 
     /** Anchor a payoff mark for `thread` over `range` in the active editor. */
     const payOff = (thread: Thread, range: EditorRange) => {
-      this.app.editor.runCommand(
+      const paid = this.app.editor.runCommand(
         'setForeshadowAnchor',
         {
           fid: newId(),
@@ -92,7 +98,7 @@ export default class ForeshadowingPlugin extends Plugin {
         } satisfies ForeshadowAttrs,
         range
       );
-      this.app.ui.toast(t('paidOff'));
+      this.app.ui.toast(t(paid ? 'paidOff' : 'cannotAnchorHere'));
     };
 
     /**

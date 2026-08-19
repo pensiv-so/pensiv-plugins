@@ -6,7 +6,7 @@
     "ko": "집필 시간",
     "ja": "執筆時間"
   },
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": {
     "en": "Live active-writing time as a floating widget, tray chip and sheet.",
     "ko": "실제 집필 시간을 플로팅 위젯·트레이 칩·시트로 실시간 표시합니다.",
