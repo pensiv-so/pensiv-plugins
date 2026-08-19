@@ -88,8 +88,15 @@ export interface EditorApi {
    * wherever the caret ended up. Keep them JSON-serializable: the in-process host
    * passes them through untouched, but a sandboxed one has to send them across a
    * boundary. `[editor.write]`
+   *
+   * Returns whether the command ran. `false` means it did **not**: there is no
+   * active editor, or that editor's schema has no such command — which is the
+   * normal case for a command the plugin registered itself, on a surface the
+   * plugin's extension is not loaded into. Check it before telling the user the
+   * action succeeded; a fire-and-forget call there reports a change that never
+   * happened.
    */
-  runCommand(name: string, ...args: unknown[]): void;
+  runCommand(name: string, ...args: unknown[]): boolean;
   /** Subscribe to editor events. Returns an unsubscribe. */
   on(event: 'update' | 'selectionUpdate', cb: () => void): Unsub;
   /** Add read-only decorations over ranges; returns an unsubscribe. `[editor.read]` */

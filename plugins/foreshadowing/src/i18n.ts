@@ -24,6 +24,16 @@ const STRINGS = {
     ko: '표시할 텍스트를 먼저 선택하세요.',
     ja: '先にテキストを選択してください。'
   },
+  /**
+   * The anchor could not be placed: this view's editor doesn't carry the plugin's
+   * mark (e.g. the folder's continuous view). Silence here would read as "it
+   * worked" — the mark is a thin underline, so the toast is the only feedback.
+   */
+  cannotAnchorHere: {
+    en: "This view can't hold foreshadowing marks. Open the document on its own tab.",
+    ko: '이 화면에서는 복선을 심을 수 없습니다. 문서를 탭으로 열어 주세요.',
+    ja: 'この画面では伏線を置けません。ドキュメントをタブで開いてください。'
+  },
   open: { en: 'Open', ko: '미회수', ja: '未回収' },
   resolved: { en: 'Paid off', ko: '회수', ja: '回収済み' },
   all: { en: 'All', ko: '전체', ja: 'すべて' },
