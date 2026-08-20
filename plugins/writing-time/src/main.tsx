@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Plugin, type WidgetProps } from '@pensiv/plugin-sdk';
 import './styles.css';
-import { formatDuration, STR, tr } from './i18n';
+import { formatDuration, L, STR, tr } from './i18n';
 import { DEFAULT_TARGET_MINUTES, goalPercent, targetMinutes, useActiveMs } from './session';
 import { WritingTimeSheet } from './sheet';
 import { writingRhythmSection, writingTimeSection } from './analytics';
@@ -208,6 +208,39 @@ export default class WritingTimePlugin extends Plugin {
             default: DEFAULT_TARGET_MINUTES,
             min: 0,
             max: 1440
+          },
+          {
+            key: 'dayStartHour',
+            type: 'select',
+            label: STR.dayStart,
+            description: STR.dayStartDesc,
+            default: '0',
+            options: [
+              { value: '0', label: L('00:00', '00:00', '00:00') },
+              { value: '1', label: L('01:00', '01:00', '01:00') },
+              { value: '2', label: L('02:00', '02:00', '02:00') },
+              { value: '3', label: L('03:00', '03:00', '03:00') },
+              { value: '4', label: L('04:00', '04:00', '04:00') },
+              { value: '5', label: L('05:00', '05:00', '05:00') },
+              { value: '6', label: L('06:00', '06:00', '06:00') },
+              { value: '7', label: L('07:00', '07:00', '07:00') },
+              { value: '8', label: L('08:00', '08:00', '08:00') },
+              { value: '9', label: L('09:00', '09:00', '09:00') },
+              { value: '10', label: L('10:00', '10:00', '10:00') },
+              { value: '11', label: L('11:00', '11:00', '11:00') },
+              { value: '12', label: L('12:00', '12:00', '12:00') },
+              { value: '13', label: L('13:00', '13:00', '13:00') },
+              { value: '14', label: L('14:00', '14:00', '14:00') },
+              { value: '15', label: L('15:00', '15:00', '15:00') },
+              { value: '16', label: L('16:00', '16:00', '16:00') },
+              { value: '17', label: L('17:00', '17:00', '17:00') },
+              { value: '18', label: L('18:00', '18:00', '18:00') },
+              { value: '19', label: L('19:00', '19:00', '19:00') },
+              { value: '20', label: L('20:00', '20:00', '20:00') },
+              { value: '21', label: L('21:00', '21:00', '21:00') },
+              { value: '22', label: L('22:00', '22:00', '22:00') },
+              { value: '23', label: L('23:00', '23:00', '23:00') },
+            ]
           },
           {
             key: 'floating',

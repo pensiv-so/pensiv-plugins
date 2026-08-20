@@ -5,6 +5,9 @@ Mark a sentence as foreshadowing, mark where it pays off, and see what you still
 ## Features
 
 - Select a sentence → **Plant foreshadowing** from the floating toolbar (or the right-click menu)
+- Write down **how you mean to pay it off**: planting asks for a note while the plan is
+  still in your head, and it stays on the row — and on the sentence, as a tooltip — until
+  it lands
 - Select the sentence where it lands → **Pay off foreshadowing** opens a picker of the
   open beats; choose one and the payoff is anchored
 - Every beat in one list — open first, paid-off struck through — in the
@@ -20,6 +23,13 @@ Mark a sentence as foreshadowing, mark where it pays off, and see what you still
 Open a document, select the sentence that plants the seed, and press the bookmark button
 in the toolbar that appears over the selection. The sentence gets a dotted
 underline and shows up in the **Foreshadowing** list.
+
+A note opens with it — "how do you mean to pay this off?" — because the plan is only
+reliably in your head at that moment. Write it, or press Escape and carry on; you can add
+or change it later from the note button on any row. Notes show under the beat in the list,
+in the payoff picker (which is how you tell two similar beats apart), and as a tooltip on
+the sentence itself. Turn the prompt off in Settings → Preferences if you plant faster
+than you plan.
 
 Next to the prose, the side pane toggle in the document header shows the list —
 manuscript-wide by default, with a **This file** tab for narrowing. The plugin's
@@ -62,7 +72,19 @@ doesn't extend the beat), `excludes: ''` (beats may overlap), `keepOnSplit: true
 (Enter inside a beat doesn't destroy it).
 
 Only two things stay in `app.storage` — the manual tick and the preferences — and
-[`store.ts`](src/store.ts) argues why each one can't be a mark.
+[`store.ts`](src/store.ts) argues why each one can't be a mark. The note went the other
+way for the same reason the anchor did: it belongs to the sentence, so it should survive a
+cut-and-pasted paragraph and die with a deleted one. (`app.storage` is _user_ settings, not
+project data, which is a second trap — a `gid → text` map there is one project switch away
+from being pruned against the wrong project.)
+
+### Writing to a file that isn't on screen
+
+`app.editor` is **the editor the user is looking at**, so a mark in another file cannot be
+patched where it stands — `runCommand` returns `false`. Editing a note from the list
+therefore opens the beat's file and writes once the host has it, retrying until the command
+lands and reporting failure if it never does ([`note.tsx`](src/note.tsx)). Pay that cost
+explicitly; a fire-and-forget `runCommand` would silently drop what the user typed.
 
 ### Use `target.range`, not `getSelection()`
 
@@ -114,6 +136,7 @@ was already open or not.
 | [`mark.ts`](src/mark.ts)       | the TipTap mark + its commands (the anchor layer)                     |
 | [`anchors.ts`](src/anchors.ts) | pure walkers: ProseMirror JSON → beats → threads → stats              |
 | [`scan.ts`](src/scan.ts)       | project-wide scan over `app.project.content()`                        |
+| [`note.tsx`](src/note.tsx)     | the note sheet + the write path into a possibly-inactive file         |
 | [`store.ts`](src/store.ts)     | the manual tick and preferences in `app.storage`                      |
 | [`list.tsx`](src/list.tsx)     | one list component: project tab, side pane, settings page             |
 | [`main.tsx`](src/main.tsx)     | registration: extension, surfaces, pane, command, analytics, settings |

@@ -34,6 +34,33 @@ const STRINGS = {
     ko: '이 화면에서는 복선을 심을 수 없습니다. 문서를 탭으로 열어 주세요.',
     ja: 'この画面では伏線を置けません。ドキュメントをタブで開いてください。'
   },
+  /* ── the note on a beat ──────────────────────────────────────────────── */
+  noteTitle: { en: 'Note', ko: '메모', ja: 'メモ' },
+  addNote: { en: 'Add a note', ko: '메모 추가', ja: 'メモを追加' },
+  editNote: { en: 'Edit note', ko: '메모 수정', ja: 'メモを編集' },
+  notePlaceholder: {
+    en: 'How do you mean to pay this off?',
+    ko: '이 복선을 어떤 전개로 회수할 계획인가요?',
+    ja: 'この伏線をどんな展開で回収する予定ですか？'
+  },
+  noteSaved: { en: 'Note saved', ko: '메모를 저장했습니다', ja: 'メモを保存しました' },
+  /**
+   * The write needs the beat's own editor, and the host may not hand it over —
+   * the file is in the trash, the pane refused to open it, the document is
+   * still loading after several seconds. Silence would read as saved.
+   */
+  noteFailed: {
+    en: "Couldn't save the note. Open that document and try again.",
+    ko: '메모를 저장하지 못했습니다. 해당 문서를 열고 다시 시도해 주세요.',
+    ja: 'メモを保存できませんでした。そのドキュメントを開いて再試行してください。'
+  },
+  noteRemoteHint: {
+    en: 'The note is kept in the text, so saving opens that document.',
+    ko: '메모는 본문에 저장되므로, 저장하면 해당 문서가 열립니다.',
+    ja: 'メモは本文に保存されるため、保存するとそのドキュメントが開きます。'
+  },
+  save: { en: 'Save', ko: '저장', ja: '保存' },
+  cancel: { en: 'Cancel', ko: '취소', ja: 'キャンセル' },
   open: { en: 'Open', ko: '미회수', ja: '未回収' },
   resolved: { en: 'Paid off', ko: '회수', ja: '回収済み' },
   all: { en: 'All', ko: '전체', ja: 'すべて' },
@@ -44,7 +71,11 @@ const STRINGS = {
     ko: '아직 복선이 없습니다. 문장을 선택하고 툴바 버튼을 누르세요.',
     ja: 'まだ伏線がありません。文を選択してツールバーのボタンを押してください。'
   },
-  emptyTitle: { en: 'No foreshadowing yet', ko: '아직 복선이 없습니다', ja: 'まだ伏線がありません' },
+  emptyTitle: {
+    en: 'No foreshadowing yet',
+    ko: '아직 복선이 없습니다',
+    ja: 'まだ伏線がありません'
+  },
   emptyHint: {
     en: 'Select a sentence and press the bookmark in the toolbar.',
     ko: '문장을 선택하고 툴바에서 북마크 버튼을 눌러 보세요.',
@@ -74,6 +105,16 @@ const STRINGS = {
     en: 'Paid-off beats stay in the list, struck through.',
     ko: '회수한 복선을 목록에서 취소선으로 표시합니다.',
     ja: '回収済みの伏線をリストに取り消し線付きで残します。'
+  },
+  settingsNoteOnPlant: {
+    en: 'Ask for a note when planting',
+    ko: '복선을 심을 때 메모 묻기',
+    ja: '伏線を置いたらメモを尋ねる'
+  },
+  settingsNoteOnPlantHint: {
+    en: 'Opens the note straight after you plant a beat, while the plan is still in your head.',
+    ko: '복선을 심은 직후 메모 창을 열어, 회수 계획을 잊기 전에 적어둘 수 있게 합니다.',
+    ja: '伏線を置いた直後にメモ欄を開き、回収の計画を忘れないうちに書き留められます。'
   },
   settingsHighlight: {
     en: 'Highlight open beats in the text',

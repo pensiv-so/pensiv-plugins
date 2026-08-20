@@ -13,9 +13,29 @@ const ZERO: SessionTotals = {
   net: { words: 0, chars: 0 }
 };
 
+/**
+ * The hour this plugin's writing day starts, 0-23 (0 = midnight).
+ *
+ * Stored by a `select`, so it arrives as a string; a number is tolerated in case
+ * the value was written by something else. This is the plugin's own boundary —
+ * moving it does not change what any other plugin reads.
+ */
+export function dayStartHour(app: WidgetProps['app']): number {
+  const raw = app.storage.get<string | number>('dayStartHour');
+  const hour = typeof raw === 'string' ? Number.parseInt(raw, 10) : raw;
+  if (typeof hour !== 'number' || !Number.isFinite(hour)) return 0;
+  return Math.min(23, Math.max(0, Math.trunc(hour)));
+}
+
 /** Today's totals, guarded against an unavailable session — render-safe. */
 export function todaySafe(app: WidgetProps['app']): SessionTotals {
   try {
+    const hour = dayStartHour(app);
+    // `today()` is always midnight; the boundary only travels on `countToday`.
+    // An older host without it falls back to midnight rather than breaking.
+    if (hour !== 0 && typeof app.session.countToday === 'function') {
+      return app.session.countToday({ dayStartHour: hour });
+    }
     return app.session.today();
   } catch {
     return ZERO;
@@ -24,11 +44,21 @@ export function todaySafe(app: WidgetProps['app']): SessionTotals {
 
 /** Live active-writing-time, re-read on every host tick. */
 export function useActiveMs(app: WidgetProps['app']): { ms: number; writing: boolean } {
-  const [ms, setMs] = React.useState(() => app.session.activeMs());
+  // Read through a helper so the initial state and every tick apply the same
+  // boundary — reading one on midnight and the other on the plugin's hour would
+  // make the widget jump on its first tick.
+  const readMs = () => {
+    try {
+      return app.session.activeMs({ dayStartHour: dayStartHour(app) });
+    } catch {
+      return 0;
+    }
+  };
+  const [ms, setMs] = React.useState(readMs);
   const [writing, setWriting] = React.useState(false);
 
   React.useEffect(() => {
-    const read = () => setMs(app.session.activeMs());
+    const read = () => setMs(readMs());
     // `tick` fires roughly once a second, but only during a writing stretch —
     // so this is a live counter that costs nothing while the user is idle.
     const offTick = app.session.on('tick', read);

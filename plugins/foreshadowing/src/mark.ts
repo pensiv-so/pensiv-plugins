@@ -17,9 +17,9 @@
  *  - deleting the sentence deletes the beat, which is the correct behaviour and
  *    is otherwise a dangling-reference bug.
  *
- * The mark carries the whole (small) record — id, group, kind, label — rather
- * than an id pointing at a side table, because a side table would have to be
- * kept in sync with edits the plugin never sees.
+ * The mark carries the whole (small) record — id, group, kind, label, note —
+ * rather than an id pointing at a side table, because a side table would have to
+ * be kept in sync with edits the plugin never sees.
  *
  * Modelled on the host's own inline-comment mark: `inclusive: false` so typing at
  * an edge doesn't silently extend the beat, `excludes: ''` so two beats may share
@@ -45,7 +45,20 @@ export interface ForeshadowAttrs {
   kind: ForeshadowKind;
   /** Short user-facing name. Empty means "use the quoted text". */
   label: string;
+  /**
+   * The writer's plan for the beat — "how I mean to pay this off". Lives on the
+   * *setup* mark; payoffs carry an empty one rather than a copy, so editing the
+   * plan can't leave a stale duplicate twenty chapters away.
+   *
+   * Capped at {@link NOTE_MAX_LENGTH} on the way in: mark attributes are copied
+   * into every text node the mark spans, so a beat split over four text nodes
+   * pays for the note four times.
+   */
+  note: string;
 }
+
+/** Longest note we write into a mark. See {@link ForeshadowAttrs.note}. */
+export const NOTE_MAX_LENGTH = 500;
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -102,7 +115,8 @@ export const ForeshadowMark = Mark.create({
       fid: attr('fid', 'data-foreshadow-id'),
       gid: attr('gid', 'data-foreshadow-group'),
       kind: attr('kind', 'data-foreshadow-kind'),
-      label: attr('label', 'data-foreshadow-label')
+      label: attr('label', 'data-foreshadow-label'),
+      note: attr('note', 'data-foreshadow-note')
     };
   },
 
@@ -110,8 +124,16 @@ export const ForeshadowMark = Mark.create({
     return [{ tag: 'span[data-foreshadow-id]' }];
   },
 
-  renderHTML({ HTMLAttributes }) {
-    return ['span', mergeAttributes(HTMLAttributes, { class: 'pensiv-foreshadow' }), 0];
+  // The note is also the span's `title`, so the plan is readable by hovering the
+  // sentence in the manuscript — the list is where you go to work through the
+  // debt, but mid-paragraph the writer only wants to be reminded.
+  renderHTML({ HTMLAttributes, mark }) {
+    const note = String(mark.attrs.note ?? '').trim();
+    return [
+      'span',
+      mergeAttributes(HTMLAttributes, { class: 'pensiv-foreshadow' }, note ? { title: note } : {}),
+      0
+    ];
   },
 
   addCommands() {

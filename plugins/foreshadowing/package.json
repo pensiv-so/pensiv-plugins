@@ -1,6 +1,6 @@
 {
   "name": "@pensiv-plugins/foreshadowing",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "private": true,
   "description": "Anchor foreshadowing beats to prose, track payoffs, chart the rate.",
   "license": "MIT",

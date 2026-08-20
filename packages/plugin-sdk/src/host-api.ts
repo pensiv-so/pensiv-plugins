@@ -139,11 +139,37 @@ export interface SessionTotals {
   pasted?: SessionProgress;
 }
 
+/**
+ * Where a plugin's writing "day" starts.
+ *
+ * A writer who works past midnight otherwise sees one sitting split in two. This
+ * is a **per-call** option rather than a host-wide setting on purpose: one
+ * plugin moving its boundary must not change the numbers another plugin reads.
+ * Keep the value in your own `app.storage` and pass it on every read.
+ */
+export interface DayWindowOptions {
+  /**
+   * Local hour the day begins, 0-23. Default 0 (midnight). Before this hour,
+   * "today" is still the day that opened yesterday. Out-of-range or non-numeric
+   * values fall back to midnight.
+   *
+   * Hosts from before this option ignore it and always answer on midnight.
+   */
+  dayStartHour?: number;
+}
+
 export interface SessionApi {
   /** Net words written today (added − removed), across the account. `[session]` */
   wordsToday(): number;
-  /** Active writing time today, in milliseconds. `[session]` */
-  activeMs(): number;
+  /**
+   * Active writing time today, in milliseconds. `[session]`
+   *
+   * Pass `dayStartHour` to measure a day beginning at another hour. Credit is
+   * banked per local hour, so any boundary is answered exactly — including one
+   * changed midway through a session, which neither discards nor re-attributes
+   * time already banked.
+   */
+  activeMs(options?: DayWindowOptions): number;
   /**
    * Today's added / removed / net words & characters, aggregated across all of the
    * user's devices (server baseline + local + in-flight edits). Read synchronously
@@ -159,8 +185,13 @@ export interface SessionApi {
    * before this feature (or by older clients/devices) can't be filtered
    * retroactively and count in full. With no `options`, equals {@link today}.
    * Read synchronously from the same warm cache. `[session]`
+   *
+   * `dayStartHour` moves this plugin's day boundary. The host keeps one warm
+   * window per hour any plugin has asked for, so the first read after changing
+   * it answers on midnight and `on('change')` fires with the real window a
+   * moment later. {@link today} and {@link wordsToday} are always midnight.
    */
-  countToday(options?: CountOptions): SessionTotals;
+  countToday(options?: CountOptions & DayWindowOptions): SessionTotals;
   /**
    * Per-day writing history, oldest first and zero-filled — characters, words,
    * active writing time and session count for each local calendar day in the
@@ -185,8 +216,16 @@ export interface SessionApi {
   history(range?: { from?: string; to?: string; days?: number }): Promise<SessionHistoryDay[]>;
   /**
    * Subscribe to writing-session events. `'change'` fires whenever today's totals
-   * change (the common case for a progress widget); the others mark write
-   * start/stop and a periodic tick. Returns an unsubscribe. `[session]`
+   * change (the common case for a progress widget). Returns an unsubscribe.
+   * `[session]`
+   *
+   * `'write-start'` / `'write-stop'` bracket the stretches where
+   * {@link activeMs} is actually moving, so they are what a "writing now"
+   * indicator should follow: the counter stops crediting a few seconds into a
+   * pause, and the events stop with it rather than at some later idle boundary.
+   * Typing again re-enters the state. `'tick'` fires about once a second while
+   * the counter moves, and not at all in between — a live number can redraw on
+   * it without polling.
    */
   on(event: 'change' | 'write-start' | 'write-stop' | 'tick', cb: () => void): Unsub;
 }

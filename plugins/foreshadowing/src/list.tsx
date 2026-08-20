@@ -28,8 +28,9 @@
  */
 import * as React from 'react';
 import type { HostApi } from '@pensiv/plugin-sdk';
-import { summarize, threadLabel, type Thread } from './anchors';
+import { summarize, threadLabel, threadNote, type Thread } from './anchors';
 import { scanProject, threadsInFile } from './scan';
+import { openNoteSheet } from './note';
 import {
   markThreadDeleted,
   pruneDeleted,
@@ -138,55 +139,91 @@ const Row: React.FC<{
   thread: Thread;
   detail: string;
   strike: boolean;
+  noteLabel: string;
   deleteLabel: string;
   onToggle: (next: boolean) => void;
+  onNote: () => void;
   onDelete: () => void;
   onOpen: () => void;
-}> = ({ thread, detail, strike, deleteLabel, onToggle, onDelete, onOpen }) => (
-  <div
-    className="pnsv-fs-row"
-    role="button"
-    tabIndex={0}
-    onClick={onOpen}
-    onKeyDown={(event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        onOpen();
-      }
-    }}
-  >
-    <Check checked={thread.resolved} label={threadLabel(thread)} onChange={onToggle} />
-    <span className="pnsv-fs-body" data-done={thread.resolved ? 'true' : undefined}>
-      <span className="pnsv-fs-title" data-strike={strike && thread.resolved ? 'true' : undefined}>
-        {threadLabel(thread)}
-      </span>
-      {detail ? <span className="pnsv-fs-detail">{detail}</span> : null}
-    </span>
-    {/* Hover-revealed, like the task row's own actions; always visible on touch. */}
-    <button
-      type="button"
-      className="pnsv-fs-action"
-      title={deleteLabel}
-      aria-label={deleteLabel}
-      onClick={(event) => {
-        event.stopPropagation();
-        onDelete();
+}> = ({ thread, detail, strike, noteLabel, deleteLabel, onToggle, onNote, onDelete, onOpen }) => {
+  const note = threadNote(thread);
+  return (
+    <div
+      className="pnsv-fs-row"
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onOpen();
+        }
       }}
     >
-      {/* lucide trash-2 */}
-      <svg viewBox="0 0 24 24" aria-hidden focusable="false">
-        <path
-          d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m5 5v6m4-6v6"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </button>
-  </div>
-);
+      <Check checked={thread.resolved} label={threadLabel(thread)} onChange={onToggle} />
+      <span className="pnsv-fs-body" data-done={thread.resolved ? 'true' : undefined}>
+        <span className="pnsv-fs-line">
+          <span
+            className="pnsv-fs-title"
+            data-strike={strike && thread.resolved ? 'true' : undefined}
+          >
+            {threadLabel(thread)}
+          </span>
+          {detail ? <span className="pnsv-fs-detail">{detail}</span> : null}
+        </span>
+        {/* The reason the row exists twenty chapters later: the plan, in full
+            enough to act on, clamped so one long note can't own the pane. */}
+        {note ? <span className="pnsv-fs-note">{note}</span> : null}
+      </span>
+      {/* Hover-revealed, like the task row's own actions; always visible on touch. */}
+      <button
+        type="button"
+        className="pnsv-fs-action"
+        title={noteLabel}
+        aria-label={noteLabel}
+        onClick={(event) => {
+          event.stopPropagation();
+          onNote();
+        }}
+      >
+        {/* lucide message-square-text */}
+        <svg viewBox="0 0 24 24" aria-hidden focusable="false">
+          <path
+            d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zM13 8H7m10 4H7"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      <button
+        type="button"
+        className="pnsv-fs-action"
+        data-tone="destructive"
+        title={deleteLabel}
+        aria-label={deleteLabel}
+        onClick={(event) => {
+          event.stopPropagation();
+          onDelete();
+        }}
+      >
+        {/* lucide trash-2 */}
+        <svg viewBox="0 0 24 24" aria-hidden focusable="false">
+          <path
+            d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m5 5v6m4-6v6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+    </div>
+  );
+};
 
 export const ForeshadowList: React.FC<ForeshadowListProps> = ({
   app,
@@ -226,6 +263,25 @@ export const ForeshadowList: React.FC<ForeshadowListProps> = ({
     app.ui.toast(t('deleted'));
   };
 
+  /**
+   * The note is a mark in the beat's own file, and only the active editor is
+   * writable — so a note on a beat elsewhere navigates on save (the hint in the
+   * sheet says so, and `saveNote` does the opening).
+   */
+  const editNote = (thread: Thread) => {
+    const setup = thread.setup;
+    const remote = setup.fileId !== app.app.fileId;
+    openNoteSheet(
+      app,
+      { fid: setup.fid, fileId: setup.fileId, range: { from: setup.from, to: setup.to } },
+      {
+        quote: setup.quote,
+        note: setup.note,
+        remoteTitle: remote ? (titles.get(setup.fileId) ?? '') : undefined
+      }
+    );
+  };
+
   const renderRow = (thread: Thread) => (
     <Row
       key={thread.gid}
@@ -238,6 +294,7 @@ export const ForeshadowList: React.FC<ForeshadowListProps> = ({
         .filter(Boolean)
         .join(' · ')}
       strike={strike}
+      noteLabel={threadNote(thread) ? t('editNote') : t('addNote')}
       deleteLabel={t('deleteBeat')}
       // Both directions, without touching the prose: a beat with payoff marks
       // toggles via the reopened override, one without via the manual tick.
@@ -246,6 +303,7 @@ export const ForeshadowList: React.FC<ForeshadowListProps> = ({
           ? setReopenedByHand(app, thread.gid, !next)
           : setDoneByHand(app, thread.gid, next)
       }
+      onNote={() => editNote(thread)}
       onDelete={() => deleteThread(thread)}
       onOpen={() =>
         app.ui.openFile(thread.setup.fileId, {
@@ -395,9 +453,18 @@ export const PayoffPicker: React.FC<{
             onClick={() => onPick(thread)}
           >
             <span className="pnsv-fs-body">
-              <span className="pnsv-fs-title">{threadLabel(thread)}</span>
-              {titles.get(thread.setup.fileId) ? (
-                <span className="pnsv-fs-detail">{titles.get(thread.setup.fileId)}</span>
+              <span className="pnsv-fs-line">
+                <span className="pnsv-fs-title">{threadLabel(thread)}</span>
+                {titles.get(thread.setup.fileId) ? (
+                  <span className="pnsv-fs-detail">{titles.get(thread.setup.fileId)}</span>
+                ) : null}
+              </span>
+              {/* Two beats can quote near-identical sentences; the note is what
+                  tells them apart at the moment of choosing. */}
+              {threadNote(thread) ? (
+                <span className="pnsv-fs-note" data-lines="1">
+                  {threadNote(thread)}
+                </span>
               ) : null}
             </span>
           </button>
