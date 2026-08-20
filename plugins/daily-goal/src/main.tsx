@@ -80,6 +80,43 @@ const settings: SettingsSchema = {
           max: 1000000
         },
         {
+          key: 'dayStartHour',
+          type: 'select',
+          label: L('Day starts at', '하루 시작 시각', '一日の開始時刻'),
+          description: L(
+            'Writing before this hour still counts toward the previous day. The analytics charts and writing streak always use midnight.',
+            '이 시각 이전에 쓴 글은 전날 몫으로 합산됩니다. 애널리틱스 차트와 연속 기록은 항상 자정을 기준으로 합니다.',
+            'この時刻より前に書いた分は前日に加算されます。アナリティクスのチャートと連続記録は常に午前0時が基準です。'
+          ),
+          default: '0',
+          options: [
+            { value: '0', label: L('00:00', '00:00', '00:00') },
+            { value: '1', label: L('01:00', '01:00', '01:00') },
+            { value: '2', label: L('02:00', '02:00', '02:00') },
+            { value: '3', label: L('03:00', '03:00', '03:00') },
+            { value: '4', label: L('04:00', '04:00', '04:00') },
+            { value: '5', label: L('05:00', '05:00', '05:00') },
+            { value: '6', label: L('06:00', '06:00', '06:00') },
+            { value: '7', label: L('07:00', '07:00', '07:00') },
+            { value: '8', label: L('08:00', '08:00', '08:00') },
+            { value: '9', label: L('09:00', '09:00', '09:00') },
+            { value: '10', label: L('10:00', '10:00', '10:00') },
+            { value: '11', label: L('11:00', '11:00', '11:00') },
+            { value: '12', label: L('12:00', '12:00', '12:00') },
+            { value: '13', label: L('13:00', '13:00', '13:00') },
+            { value: '14', label: L('14:00', '14:00', '14:00') },
+            { value: '15', label: L('15:00', '15:00', '15:00') },
+            { value: '16', label: L('16:00', '16:00', '16:00') },
+            { value: '17', label: L('17:00', '17:00', '17:00') },
+            { value: '18', label: L('18:00', '18:00', '18:00') },
+            { value: '19', label: L('19:00', '19:00', '19:00') },
+            { value: '20', label: L('20:00', '20:00', '20:00') },
+            { value: '21', label: L('21:00', '21:00', '21:00') },
+            { value: '22', label: L('22:00', '22:00', '22:00') },
+            { value: '23', label: L('23:00', '23:00', '23:00') },
+          ]
+        },
+        {
           key: 'includePasted',
           type: 'toggle',
           label: L('Include pasted content', '붙여넣기 포함', '貼り付けを含める'),
@@ -237,11 +274,26 @@ function ruleOptions(app: WidgetProps['app']): CountOptions | undefined {
  * back to `session.today()` (all categories), so the widget still works on an
  * older app build.
  */
+export function dayStartHour(app: WidgetProps['app']): number {
+  // Stored by a `select`, so it arrives as a string; tolerate a number too in
+  // case the value was written by something else.
+  const raw = app.storage.get<string | number>('dayStartHour');
+  const hour = typeof raw === 'string' ? Number.parseInt(raw, 10) : raw;
+  if (typeof hour !== 'number' || !Number.isFinite(hour)) return 0;
+  return Math.min(23, Math.max(0, Math.trunc(hour)));
+}
+
 export function sessionTodaySafe(app: WidgetProps['app']): SessionTotals {
   try {
     const opts = ruleOptions(app);
-    if (opts && typeof app.session.countToday === 'function') {
-      return app.session.countToday(opts);
+    const hour = dayStartHour(app);
+    // `countToday` carries both the character rules and the day boundary, so it
+    // is the path whenever either is in play — a word goal with a shifted day
+    // needs it just as much as a character goal. An older host without it
+    // answers `today()` on midnight: the widget still works, it just can't move
+    // the boundary.
+    if ((opts || hour !== 0) && typeof app.session.countToday === 'function') {
+      return app.session.countToday({ ...opts, dayStartHour: hour });
     }
     return app.session.today();
   } catch {

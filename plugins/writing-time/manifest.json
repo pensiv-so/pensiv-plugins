@@ -6,7 +6,7 @@
     "ko": "집필 시간",
     "ja": "執筆時間"
   },
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": {
     "en": "Live active-writing time as a floating widget, tray chip and sheet.",
     "ko": "실제 집필 시간을 플로팅 위젯·트레이 칩·시트로 실시간 표시합니다.",
@@ -20,8 +20,13 @@
   "accent": "#327ad8",
   "sdk": "^1.0.0",
   "source": "marketplace",
-  "permissions": ["session"],
-  "platforms": ["desktop", "web"],
+  "permissions": [
+    "session"
+  ],
+  "platforms": [
+    "desktop",
+    "web"
+  ],
   "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/writing-time",
   "license": "MIT",
   "contributes": {

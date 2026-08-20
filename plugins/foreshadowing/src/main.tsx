@@ -22,6 +22,13 @@
  * page carries the same list for when no document is open. No standalone
  * project tab — Eric cut it: two homes that both look native beat a third that
  * doesn't earn its page.
+ *
+ * ## The note is asked for at planting time
+ *
+ * A beat is planted with the payoff already in mind and settled fifty pages
+ * later, when it isn't. So planting opens the note (`note.tsx`) straight away —
+ * the one moment the plan is known — and the list carries it from then on. Off
+ * with the `noteOnPlant` preference for writers who plant faster than they plan.
  */
 import * as React from 'react';
 import {
@@ -36,6 +43,7 @@ import { ForeshadowMark, type ForeshadowAttrs } from './mark';
 import { summarize, type Thread } from './anchors';
 import { scanProject } from './scan';
 import { ForeshadowList, PayoffPicker } from './list';
+import { openNoteSheet } from './note';
 import { readSettings, SETTINGS_DEFAULTS } from './store';
 import { createT, text } from './i18n';
 
@@ -79,11 +87,22 @@ export default class ForeshadowingPlugin extends Plugin {
         return;
       }
       const id = newId();
-      const attrs: ForeshadowAttrs = { fid: id, gid: id, kind: 'setup', label: '' };
+      const attrs: ForeshadowAttrs = { fid: id, gid: id, kind: 'setup', label: '', note: '' };
       // Only claim success when the mark actually landed: `runCommand` returns
       // false where this plugin's extension isn't in the active editor's schema.
       const planted = this.app.editor.runCommand('setForeshadowAnchor', attrs, range);
-      this.app.ui.toast(t(planted ? 'planted' : 'cannotAnchorHere'));
+      if (!planted) {
+        this.app.ui.toast(t('cannotAnchorHere'));
+        return;
+      }
+      if (!readSettings(this.app).noteOnPlant) {
+        this.app.ui.toast(t('planted'));
+        return;
+      }
+      // The sheet *is* the confirmation here — a toast behind an open dialog
+      // saying the thing the dialog already implies is noise. No `fileId`: the
+      // beat was just planted in the file on screen, so the write is local.
+      openNoteSheet(this.app, { fid: id }, { quote: ctx.target?.text ?? '', note: '' });
     };
 
     /** Anchor a payoff mark for `thread` over `range` in the active editor. */
@@ -94,7 +113,10 @@ export default class ForeshadowingPlugin extends Plugin {
           fid: newId(),
           gid: thread.gid,
           kind: 'payoff',
-          label: thread.setup.label
+          label: thread.setup.label,
+          // The plan belongs to the setup, and a copy here would go stale the
+          // first time the writer rewrites it.
+          note: ''
         } satisfies ForeshadowAttrs,
         range
       );
@@ -188,6 +210,13 @@ export default class ForeshadowingPlugin extends Plugin {
       title: t('preferences'),
       schema: {
         fields: [
+          {
+            key: 'noteOnPlant',
+            type: 'toggle',
+            label: text.settingsNoteOnPlant,
+            description: text.settingsNoteOnPlantHint,
+            default: SETTINGS_DEFAULTS.noteOnPlant
+          },
           {
             key: 'highlightOpen',
             type: 'toggle',

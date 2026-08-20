@@ -25,19 +25,25 @@ export interface ForeshadowSettings {
   includeSheets: boolean;
   strikeResolved: boolean;
   highlightOpen: boolean;
+  noteOnPlant: boolean;
 }
 
 export const SETTINGS_DEFAULTS: ForeshadowSettings = {
   includeSheets: true,
   strikeResolved: true,
-  highlightOpen: true
+  highlightOpen: true,
+  // On by default: the moment of planting is the only moment the writer
+  // reliably still knows how the beat is meant to land, and the sheet is one
+  // Escape away for anyone who plants faster than they plan.
+  noteOnPlant: true
 };
 
 export function readSettings(app: HostApi): ForeshadowSettings {
   return {
     includeSheets: app.storage.get<boolean>('includeSheets') ?? SETTINGS_DEFAULTS.includeSheets,
     strikeResolved: app.storage.get<boolean>('strikeResolved') ?? SETTINGS_DEFAULTS.strikeResolved,
-    highlightOpen: app.storage.get<boolean>('highlightOpen') ?? SETTINGS_DEFAULTS.highlightOpen
+    highlightOpen: app.storage.get<boolean>('highlightOpen') ?? SETTINGS_DEFAULTS.highlightOpen,
+    noteOnPlant: app.storage.get<boolean>('noteOnPlant') ?? SETTINGS_DEFAULTS.noteOnPlant
   };
 }
 

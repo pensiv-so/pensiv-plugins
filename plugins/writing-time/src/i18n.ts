@@ -26,6 +26,12 @@ export const STR = {
     '하루에 목표로 할 집필 시간(분). 0으로 두면 진행률 막대를 숨깁니다.',
     '1日に目標とする執筆時間（分）。0にすると進捗バーを非表示にします。'
   ),
+  dayStart: L('Day starts at', '하루 시작 시각', '一日の開始時刻'),
+  dayStartDesc: L(
+    'Time written before this hour still counts toward the previous day. The analytics charts always use midnight.',
+    '이 시각 이전에 쓴 시간은 전날 몫으로 합산됩니다. 애널리틱스 차트는 항상 자정을 기준으로 합니다.',
+    'この時刻より前の執筆時間は前日に加算されます。アナリティクスのチャートは常に午前0時が基準です。'
+  ),
   settings: L('Writing time settings', '집필 시간 설정', '執筆時間の設定'),
   showFloating: L('Show floating widget', '플로팅 위젯 표시', 'フローティングウィジェットを表示'),
   showFloatingDesc: L(

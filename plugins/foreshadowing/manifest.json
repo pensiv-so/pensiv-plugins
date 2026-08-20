@@ -6,7 +6,7 @@
     "ko": "복선",
     "ja": "伏線"
   },
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": {
     "en": "Mark a sentence as foreshadowing, mark where it pays off, and see what you still owe the reader.",
     "ko": "문장에 복선을 심고 회수 지점을 표시해, 아직 회수하지 않은 복선을 한눈에 봅니다.",

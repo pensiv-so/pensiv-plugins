@@ -4,7 +4,7 @@
  * So the positions are asserted against hand-counted ProseMirror offsets.
  */
 import { describe, expect, it } from 'vitest';
-import { buildThreads, collectAnchors, summarize, threadLabel } from '../src/anchors';
+import { buildThreads, collectAnchors, summarize, threadLabel, threadNote } from '../src/anchors';
 
 const mark = (attrs: Record<string, string>) => ({ type: 'foreshadow', attrs });
 
@@ -202,5 +202,49 @@ describe('threadLabel', () => {
     expect(threadLabel({ ...thread, setup: { ...thread.setup, label: 'The ring' } })).toBe(
       'The ring'
     );
+  });
+});
+
+describe('the note', () => {
+  it('is read off the mark', () => {
+    const noted = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'ring',
+              marks: [
+                mark({ fid: 'a', gid: 'a', kind: 'setup', label: '', note: "It's his mother's." })
+              ]
+            }
+          ]
+        }
+      ]
+    };
+    const [thread] = buildThreads(collectAnchors(noted, 'doc-1'), new Set());
+    if (!thread) throw new Error('expected a thread');
+    expect(threadNote(thread)).toBe("It's his mother's.");
+  });
+
+  /** Every beat planted before this feature shipped has no `note` attribute. */
+  it('reads as empty on a beat from before notes existed', () => {
+    const [thread] = buildThreads(collectAnchors(doc, 'doc-1'), new Set());
+    if (!thread) throw new Error('expected a thread');
+    expect(thread.setup.note).toBe('');
+    expect(threadNote(thread)).toBe('');
+  });
+
+  it('comes from the setup, never from a payoff', () => {
+    const [thread] = buildThreads(collectAnchors(doc, 'doc-1'), new Set());
+    if (!thread) throw new Error('expected a thread');
+    const withNotedPayoff = {
+      ...thread,
+      setup: { ...thread.setup, note: 'the plan' },
+      payoffs: thread.payoffs.map((payoff) => ({ ...payoff, note: 'stale copy' }))
+    };
+    expect(threadNote(withNotedPayoff)).toBe('the plan');
   });
 });

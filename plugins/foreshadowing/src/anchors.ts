@@ -69,7 +69,10 @@ function toAttrs(attrs: Record<string, unknown> | undefined): ForeshadowAttrs | 
     fid,
     gid: typeof attrs?.gid === 'string' && attrs.gid ? attrs.gid : fid,
     kind: kind as ForeshadowKind,
-    label: typeof attrs?.label === 'string' ? attrs.label : ''
+    label: typeof attrs?.label === 'string' ? attrs.label : '',
+    // Absent on beats planted before notes existed — an old document is read
+    // exactly like a new one with an empty note.
+    note: typeof attrs?.note === 'string' ? attrs.note : ''
   };
 }
 
@@ -194,4 +197,12 @@ export function summarize(threads: readonly Thread[]): {
 export function threadLabel(thread: Thread): string {
   const label = thread.setup.label.trim();
   return label || thread.setup.quote.trim() || '…';
+}
+
+/**
+ * The plan the writer wrote down for this beat. Read off the setup, which is the
+ * one anchor that owns it (payoffs carry an empty note by construction).
+ */
+export function threadNote(thread: Thread): string {
+  return thread.setup.note.trim();
 }
