@@ -31,6 +31,7 @@ const STR = {
   chars: L('Chars', '글자', '文字'),
   addedToday: L('Added today', '오늘 입력', '今日追加'),
   removedToday: L('Removed today', '오늘 지움', '今日削除'),
+  netToday: L('Net today', '오늘 순증', '今日純増'),
   settings: L('Daily goal settings', '일일 목표 설정', '毎日の目標設定')
 };
 
@@ -57,6 +58,7 @@ export const DailyGoalSheet: React.FC<WidgetProps> = ({ app }) => {
   const showTotal = app.storage.get<boolean>('showTotal') ?? true;
   const showAdded = app.storage.get<boolean>('showAdded') ?? true;
   const showRemoved = app.storage.get<boolean>('showRemoved') ?? true;
+  const showNet = app.storage.get<boolean>('showNet') ?? false;
   const unit = type === 'words' ? tr(app, STR.words) : tr(app, STR.chars);
 
   // Derived in render from live settings + session; `change` drives session ticks.
@@ -99,6 +101,11 @@ export const DailyGoalSheet: React.FC<WidgetProps> = ({ app }) => {
       key: 'removed',
       label: tr(app, STR.removedToday),
       value: pick(totals.removed).toLocaleString()
+    },
+    showNet && {
+      key: 'net',
+      label: tr(app, STR.netToday),
+      value: pick(totals.net).toLocaleString()
     }
   ].filter(Boolean) as { key: string; label: string; value: string }[];
 

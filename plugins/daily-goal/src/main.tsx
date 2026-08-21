@@ -26,7 +26,8 @@ const STR = {
   words: L('Words', '단어', '言葉'),
   chars: L('Chars', '글자', '文字'),
   addedToday: L('added today', '오늘 입력', '今日追加されました'),
-  removedToday: L('removed today', '오늘 지움', '今日削除されました')
+  removedToday: L('removed today', '오늘 지움', '今日削除されました'),
+  netToday: L('net today', '오늘 순증', '今日純増')
 };
 
 /**
@@ -40,10 +41,12 @@ const STR = {
  * plugin's own on/off state (Plugins manage page), so there is no in-settings
  * enable toggle.
  *
- * Goal progress is GROSS: today's typed additions (plus pasted content when the
- * "include pasted" option is on). Deletions are shown in the "removed today"
- * row but never subtract from the total — netting them used to pin the total at
- * 0 for the rest of the day once removals overtook (never-counted) pasted text.
+ * Goal progress defaults to NET (today's additions minus removals, floored at
+ * 0) — matching how writers read "how much did I write today". A "total counts"
+ * setting switches it to GROSS (additions only, removals ignored), which suits
+ * paste-heavy workflows: under net, removals of never-counted pasted text used
+ * to pin the total at 0 for the rest of the day. Pasted content joins either
+ * mode only when the "include pasted" option is on.
  */
 const charCustom: FieldConditions = [
   { key: 'type', equals: 'characters' },
@@ -117,6 +120,21 @@ const settings: SettingsSchema = {
           ]
         },
         {
+          key: 'totalMode',
+          type: 'radio',
+          label: L('Total counts', '합계 계산 방식', '合計の計算方法'),
+          description: L(
+            'Net subtracts what you removed today from what you added; gross counts additions only, ignoring removals.',
+            '순증은 오늘 입력한 만큼에서 지운 만큼을 뺍니다. 입력량은 지움을 무시하고 입력한 만큼만 셉니다.',
+            '純増は今日追加した分から削除した分を引きます。追加量は削除を無視して追加した分だけを数えます。'
+          ),
+          default: 'net',
+          options: [
+            { value: 'net', label: L('Net (added − removed)', '순증 (입력 − 지움)', '純増(追加 − 削除)') },
+            { value: 'gross', label: L('Gross (ignore removals)', '입력량 (지움 무시)', '追加量(削除を無視)') }
+          ]
+        },
+        {
           key: 'includePasted',
           type: 'toggle',
           label: L('Include pasted content', '붙여넣기 포함', '貼り付けを含める'),
@@ -159,6 +177,17 @@ const settings: SettingsSchema = {
             '今日削除した分を表示します。'
           ),
           default: true
+        },
+        {
+          key: 'showNet',
+          type: 'toggle',
+          label: L('Show net today', '오늘 순증 표시', '今日純増を表示'),
+          description: L(
+            'Show added minus removed as its own row — useful when the total is set to gross.',
+            '입력에서 지움을 뺀 순증을 별도 행으로 표시합니다. 합계를 입력량 기준으로 쓸 때 유용합니다.',
+            '追加から削除を引いた純増を別の行として表示します。合計を追加量基準にしている場合に便利です。'
+          ),
+          default: false
         },
         {
           key: 'useEditorCounting',
@@ -302,10 +331,11 @@ export function sessionTodaySafe(app: WidgetProps['app']): SessionTotals {
 }
 
 /**
- * Today's goal progress for the given totals: gross typed additions, plus
- * pasted content when the "include pasted" option is on. Deletions never
- * subtract — netting them once pinned the total at 0 for the rest of the day
- * whenever removals overtook (never-counted) pasted text.
+ * Today's goal progress for the given totals, per the "total counts" setting:
+ * net (added − removed, floored at 0 by the host — the default) or gross
+ * (added only, removals ignored). Pasted content joins either mode when the
+ * "include pasted" option is on. Gross exists for paste-heavy workflows, where
+ * netting removals of never-counted pasted text pinned a net total at 0.
  */
 export function goalProgress(
   app: WidgetProps['app'],
@@ -314,8 +344,9 @@ export function goalProgress(
 ): number {
   const pick = (p: { words: number; chars: number } | undefined) =>
     p ? (type === 'words' ? p.words : p.chars) : 0;
+  const gross = (app.storage.get<string>('totalMode') ?? 'net') === 'gross';
   const includePasted = app.storage.get<boolean>('includePasted') ?? false;
-  return pick(totals.added) + (includePasted ? pick(totals.pasted) : 0);
+  return pick(gross ? totals.added : totals.net) + (includePasted ? pick(totals.pasted) : 0);
 }
 
 /** Progress for the configured goal type (chip accent / goal-met checks). */
@@ -350,6 +381,7 @@ function DailyGoalWidget({ app }: WidgetProps) {
   const showTotal = app.storage.get<boolean>('showTotal') ?? true;
   const showAdded = app.storage.get<boolean>('showAdded') ?? true;
   const showRemoved = app.storage.get<boolean>('showRemoved') ?? true;
+  const showNet = app.storage.get<boolean>('showNet') ?? false;
   const unit = type === 'words' ? tr(app, STR.words) : tr(app, STR.chars);
 
   // Derived in render from live settings + session; `change` drives session ticks.
@@ -406,6 +438,9 @@ function DailyGoalWidget({ app }: WidgetProps) {
             )}
             {showRemoved && (
               <Row label={tr(app, STR.removedToday)} value={`${pick(totals.removed).toLocaleString()} ${unit}`} />
+            )}
+            {showNet && (
+              <Row label={tr(app, STR.netToday)} value={`${pick(totals.net).toLocaleString()} ${unit}`} />
             )}
           </div>
           <div className="pnsv-track">
