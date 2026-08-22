@@ -1,0 +1,38 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.paragraph-analysis",
+  "name": {
+    "en": "Paragraph Analysis",
+    "ko": "단락 분석",
+    "ja": "段落分析"
+  },
+  "version": "1.0.0",
+  "description": {
+    "en": "See how a manuscript splits between narration, dialogue, monologue and special dialogue — paragraph by paragraph, in Korean, English and Japanese.",
+    "ko": "원고가 묘사·대사·독백·특수 대사로 어떻게 나뉘는지 단락 단위로 보여줍니다. 한국어·영어·일본어를 모두 인식합니다.",
+    "ja": "原稿が描写・セリフ・独白・特殊セリフにどう分かれているかを段落単位で表示します。日本語・韓国語・英語に対応します。"
+  },
+  "author": {
+    "name": "pensiv",
+    "url": "https://pensiv.so"
+  },
+  "icon": "Pilcrow",
+  "accent": "#2f9e8f",
+  "sdk": "^1.1.0",
+  "source": "marketplace",
+  "permissions": ["editor.read", "project.read", "clipboard"],
+  "platforms": ["desktop", "web"],
+  "license": "MIT",
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/paragraph-analysis",
+  "contributes": {
+    "commands": [
+      {
+        "id": "copy-summary",
+        "name": "Paragraph Analysis: copy summary"
+      }
+    ],
+    "settings": {
+      "schema": {}
+    }
+  }
+}

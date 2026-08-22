@@ -24,6 +24,11 @@
 - [Writing time plugin](plugins/writing-time): the reference for the session
   lifecycle — `activeMs` + the write-start/write-stop/tick stream, one shared
   hook behind a floating card, a tray chip and a `@pensiv/plugin-ui` sheet.
+- [Paragraph analysis plugin](plugins/paragraph-analysis): the reference for a
+  read-only analysis plugin — walking `editor.getDoc()` (not `getText()`, which
+  erases empty paragraphs) behind a debounced side pane, the same walker over
+  `project.content(id).doc` for a manuscript-wide scope, a declarative settings
+  form feeding a pure engine, and an analytics section reusing those numbers.
 - [Graph tags plugin](plugins/graph-tags): the reference for the relationship
   graph — a #tag overlay as virtual nodes, a togglable filter, a graph toolbar
   button and a node-menu row, plus a guarded paintNode.
