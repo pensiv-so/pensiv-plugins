@@ -25,7 +25,7 @@ Then run `Sentence Highlighter: Toggle` from the command palette, or type
 
 ## Two things the code is careful about
 
-**Decorations are plain numbers.** You pass `{ from, to }` and the *host* builds
+**Decorations are plain numbers.** You pass `{ from, to }` and the _host_ builds
 the ProseMirror `DecorationSet`. Never build one yourself: a set constructed by a
 plugin's own copy of prosemirror fails the host's `instanceof` check, poisons the
 decoration group, and freezes the editor for the rest of the session. The API
