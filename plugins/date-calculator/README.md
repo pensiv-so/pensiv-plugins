@@ -5,6 +5,8 @@ as an optional floating widget. Built for the questions a manuscript asks: how o
 is she in this scene, how long between these two chapters, what day of the week
 was that.
 
+![An age worked out beside the scene it belongs to](screenshots/02-pane-en.png)
+
 ## Features
 
 - **Age** — completed years (만 나이) with the exact years / months / days, days

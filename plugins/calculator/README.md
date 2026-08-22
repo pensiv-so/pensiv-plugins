@@ -3,6 +3,8 @@
 A calculator that lives where the writing is — docked in the side pane of every
 file type, and as an optional floating widget.
 
+![The calculator docked in a file’s side pane](screenshots/02-pane-en.png)
+
 ## Features
 
 - Full four-function keypad with `%`, sign flip, `CE` / `C` and backspace

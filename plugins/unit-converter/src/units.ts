@@ -105,7 +105,7 @@ export const CATEGORIES: Category[] = [
       {
         id: 'ri-ko',
         symbol: '里',
-        name: L('Ri (Korean, 393 m)', '리(里)', '里（朝鮮）'),
+        name: L('Ri (Korean)', '리(里)', '里（朝鮮）'),
         // 1 리 = 1,296 尺 — the Korean ri, about a tenth of the Japanese one.
         ratio: SHAKU_M * 1296,
         historical: true
@@ -113,7 +113,7 @@ export const CATEGORIES: Category[] = [
       {
         id: 'ri-ja',
         symbol: '里',
-        name: L('Ri (Japanese, 3.9 km)', '리(일본, 3.9km)', '里（日本）'),
+        name: L('Ri (Japanese)', '리(일본)', '里（日本）'),
         ratio: SHAKU_M * 12960,
         historical: true
       }
@@ -139,7 +139,7 @@ export const CATEGORIES: Category[] = [
       {
         id: 'geun',
         symbol: '斤',
-        name: L('Geun / kin (600 g)', '근(斤)', '斤'),
+        name: L('Geun / kin', '근(斤)', '斤'),
         // The market 근 — 160 돈. Meat and produce are still sold by it in Korea.
         ratio: 0.6,
         historical: true
@@ -147,14 +147,14 @@ export const CATEGORIES: Category[] = [
       {
         id: 'don',
         symbol: '錢',
-        name: L('Don / momme (3.75 g)', '돈(錢)', '匁'),
+        name: L('Don / momme', '돈(錢)', '匁'),
         ratio: KAN_KG / 1000,
         historical: true
       },
       {
         id: 'gwan',
         symbol: '貫',
-        name: L('Gwan / kan (3.75 kg)', '관(貫)', '貫'),
+        name: L('Gwan / kan', '관(貫)', '貫'),
         ratio: KAN_KG,
         historical: true
       }
@@ -189,7 +189,7 @@ export const CATEGORIES: Category[] = [
       {
         id: 'pyeong',
         symbol: '坪',
-        name: L('Pyeong / tsubo (3.31 m²)', '평(坪)', '坪'),
+        name: L('Pyeong / tsubo', '평(坪)', '坪'),
         // Still how Korean and Japanese property is spoken about, legal metric
         // labelling notwithstanding.
         ratio: TSUBO_M2,
@@ -198,14 +198,14 @@ export const CATEGORIES: Category[] = [
       {
         id: 'danbo',
         symbol: '段',
-        name: L('Dan / tan (992 m²)', '단보(段)', '段'),
+        name: L('Dan / tan', '단보(段)', '段'),
         ratio: TSUBO_M2 * 300,
         historical: true
       },
       {
         id: 'jeongbo',
         symbol: '町',
-        name: L('Jeongbo / chō (9,917 m²)', '정보(町)', '町'),
+        name: L('Jeongbo / chō', '정보(町)', '町'),
         ratio: TSUBO_M2 * 3000,
         historical: true
       }
@@ -246,21 +246,21 @@ export const CATEGORIES: Category[] = [
       {
         id: 'hop',
         symbol: '合',
-        name: L('Hop / gō (180 mL)', '홉(合)', '合'),
+        name: L('Hop / gō', '홉(合)', '合'),
         ratio: SHO_L / 10,
         historical: true
       },
       {
         id: 'seung',
         symbol: '升',
-        name: L('Seung / shō (1.8 L)', '되(升)', '升'),
+        name: L('Seung / shō', '되(升)', '升'),
         ratio: SHO_L,
         historical: true
       },
       {
         id: 'mal',
         symbol: '斗',
-        name: L('Mal / to (18 L)', '말(斗)', '斗'),
+        name: L('Mal / to', '말(斗)', '斗'),
         ratio: SHO_L * 10,
         historical: true
       }

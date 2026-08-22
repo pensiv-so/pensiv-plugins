@@ -4,6 +4,8 @@ Length, weight, area, volume, temperature, speed and time — docked in the side
 pane of every file type, and as an optional floating widget. Including the units
 period fiction is actually written in.
 
+![30 pyeong in square metres, docked beside the manuscript](screenshots/02-pane-en.png)
+
 ## Features
 
 - Seven categories, with the pair of units remembered per category

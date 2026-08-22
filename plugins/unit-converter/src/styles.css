@@ -256,7 +256,9 @@
 }
 
 .pnsv-uc-pane .pnsv-uc-select {
-  max-width: 9.5rem;
+  /* Wide enough for the longest label a unit carries — the historical ones read
+   * `坪 · Pyeong / tsubo`, and a clipped unit name is worse than a narrow one. */
+  max-width: 12rem;
   height: 2rem;
   font-size: 0.875rem;
 }
