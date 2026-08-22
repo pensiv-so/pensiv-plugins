@@ -1,0 +1,385 @@
+/*
+ * Calculator styles. Bundled to `dist/styles.css` and injected by the host loader
+ * while the plugin is enabled.
+ *
+ * The app's Tailwind build never scans this repo, so we ship our own classes —
+ * but they are *ports of the app's own components*, not a parallel design. The
+ * button block below is `Button` from `components/ui/button.tsx` (same base, same
+ * variants, same `active:scale-[0.98]`, same focus ring), the field block is
+ * `Input`, and the tab block is `Tabs`. Everything reads from the host's design
+ * tokens (`--muted`, `--radius`, `--shadow-sm`, `--ring`), so the plugin follows
+ * the user's theme with no work of its own. The accent (`--primary`) is
+ * deliberately absent — see the solid key below.
+ *
+ * Radius names match the app's Tailwind scale:
+ *   rounded-sm  = calc(var(--radius) - 0.1rem)
+ *   rounded-md  = calc(var(--radius))
+ *   rounded-lg  = calc(var(--radius) + 0.1rem)
+ *   rounded-xl  = calc(var(--radius) + 0.25rem)
+ *
+ * Sizes are in rem so they track the app's root font-size (the user's text-size /
+ * zoom setting), exactly like the native rem-based Tailwind sizes.
+ */
+
+/* ── Button — port of `Button` (variant × sizeVariant) ────────────────────── */
+.pnsv-calc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  height: 2rem; /* sizeVariant="sm" */
+  padding: 0 0.5rem;
+  gap: 0.375rem;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) + 0.1rem); /* rounded-lg */
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-family: inherit;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 400; /* font-normal */
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  -webkit-app-region: no-drag; /* the app's `no-drag`, for the Electron title bar */
+  transition: all 0.15s ease;
+}
+
+.pnsv-calc-btn:active {
+  transform: scale(0.98);
+}
+
+.pnsv-calc-btn:disabled {
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+/* `ringVariants` — the app's focus-visible treatment, shared by every control. */
+.pnsv-calc-btn:focus-visible,
+.pnsv-calc-input:focus-visible,
+.pnsv-calc-tab:focus-visible {
+  outline: 2px solid hsl(var(--ring) / 0.5);
+  box-shadow: 0 0 0 2px hsl(var(--ring));
+  z-index: 10;
+}
+
+/* variant="ghost" */
+.pnsv-calc-btn-ghost:hover {
+  background: hsl(var(--muted) / 0.8);
+  color: hsl(var(--foreground));
+}
+
+/* variant="muted" */
+.pnsv-calc-btn-muted {
+  background: hsl(var(--muted) / 0.7);
+}
+
+.pnsv-calc-btn-muted:hover {
+  background: hsl(var(--muted) / 0.9);
+}
+
+/* The one solid key. Deliberately *not* the accent: `--primary` is whatever
+ * colour the user themed the app with, and a red or orange `=` on a keypad reads
+ * as a warning rather than as the key that finishes the sum. Neutral ink keeps
+ * the hierarchy without borrowing a meaning the colour does not have. */
+.pnsv-calc-btn-solid {
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  box-shadow: var(--shadow-sm);
+}
+
+.pnsv-calc-btn-solid:hover {
+  background: hsl(var(--foreground) / 0.88);
+}
+
+/* typeVariant="icon", sizeVariant="sm" — the app's square icon button. */
+.pnsv-calc-btn-icon {
+  width: 2rem;
+  padding: 0;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-calc-btn-icon:hover {
+  color: hsl(var(--foreground));
+}
+
+/* sizeVariant="xs" — for the memory strip, where five controls share a row. */
+.pnsv-calc-btn-xs {
+  height: 1.5rem;
+  padding: 0 0.25rem;
+  border-radius: var(--radius); /* rounded-md */
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-calc-btn-xs:hover:not(:disabled) {
+  color: hsl(var(--foreground));
+}
+
+/* An xs *icon* button is square, like the app's `typeVariant="icon"` compounds —
+ * the text `xs` above keeps its auto width for the MC/MR/M+ labels. */
+.pnsv-calc-btn-icon.pnsv-calc-btn-xs {
+  width: 1.5rem;
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.pnsv-calc {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-family: inherit;
+  color: hsl(var(--foreground));
+  outline: none;
+}
+
+/* The side pane is full-bleed (the host adds no padding), so the panel owns its
+ * insets and caps its width — a calculator stretched across a wide pane would
+ * put the keypad an inch from the number it belongs to. */
+.pnsv-calc-pane {
+  gap: 0.75rem;
+  /* Full width, always: the pane is the user's to size, and a capped panel
+   * leaves dead space they explicitly dragged open. */
+  width: 100%;
+  /* `px-4`, the inset the app's own side panes use for their content rows. */
+  padding: 0.5rem 1rem 1rem;
+}
+
+.pnsv-calc:focus-visible {
+  outline: 2px solid hsl(var(--ring) / 0.5);
+  box-shadow: 0 0 0 2px hsl(var(--ring));
+  border-radius: calc(var(--radius) + 0.25rem);
+}
+
+/* ── Display ─────────────────────────────────────────────────────────────────
+ * Right-aligned, light weight and tight tracking — the treatment the app gives
+ * large numerals elsewhere (session counts, the timer face). */
+.pnsv-calc-display {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.5rem 0.625rem 0.375rem;
+  border-radius: calc(var(--radius) + 0.25rem);
+  background: hsl(var(--muted) / 0.45);
+}
+
+.pnsv-calc-trail {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 1.125rem;
+  font-size: 0.8125rem;
+  line-height: 1;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.pnsv-calc-trail-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+/* Memory indicator — a quiet muted pill; the accent is reserved for nothing
+ * here, so state reads as state rather than as alarm. */
+.pnsv-calc-mem {
+  display: inline-flex;
+  align-items: center;
+  height: 1.25rem;
+  padding: 0 0.3rem;
+  border-radius: calc(var(--radius) - 0.1rem);
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.pnsv-calc-value {
+  overflow-x: auto;
+  text-align: right;
+  font-size: 1.75rem;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  scrollbar-width: none;
+}
+
+.pnsv-calc-value::-webkit-scrollbar {
+  display: none;
+}
+
+.pnsv-calc-pane .pnsv-calc-value {
+  font-size: 2.25rem;
+}
+
+/* The three display-corner actions (copy / insert / backspace) sit on the
+ * display rather than in the pad, so the pad stays a clean 4×5 grid. */
+.pnsv-calc-display-actions {
+  position: absolute;
+  bottom: 0.3125rem;
+  left: 0.375rem;
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+/* ── Memory strip ────────────────────────────────────────────────────────── */
+.pnsv-calc-memory {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.25rem;
+}
+
+/* ── Keypad ──────────────────────────────────────────────────────────────────
+ * The keys *are* the app's buttons: `muted` for digits, `ghost` for corrections,
+ * accent ink for operators, and one `default` (gradient) button for `=`. Four
+ * filled keys would turn the pad into a traffic light. */
+.pnsv-calc-pad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.3125rem;
+}
+
+.pnsv-calc-key {
+  height: auto; /* the grid row sets the height */
+  padding: 0;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  border-radius: calc(var(--radius) + 0.15rem);
+}
+
+.pnsv-calc-pane .pnsv-calc-key {
+  font-size: 1.0625rem;
+  border-radius: calc(var(--radius) + 0.25rem);
+}
+
+.pnsv-calc-key-operator {
+  background: hsl(var(--muted) / 0.3);
+  color: hsl(var(--foreground));
+  font-size: 1.125rem;
+}
+
+.pnsv-calc-key-operator:hover {
+  background: hsl(var(--muted) / 0.8);
+}
+
+.pnsv-calc-key-utility {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-calc-key-equals {
+  font-size: 1.0625rem;
+}
+
+/* ── Tape ────────────────────────────────────────────────────────────────── */
+.pnsv-calc-tape {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  max-height: 6.5rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.pnsv-calc-pane .pnsv-calc-tape {
+  max-height: 9rem;
+}
+
+.pnsv-calc-tape-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 0.25rem;
+}
+
+.pnsv-calc-tape-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-calc-tape-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+}
+
+/* A tape row is the app's ghost button stretched to a row (same hover, same
+ * press), which is what every list row in the app is. */
+.pnsv-calc-tape-row {
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  height: 1.75rem;
+  padding: 0 0.375rem;
+  text-align: left;
+}
+
+.pnsv-calc-tape-expr {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.pnsv-calc-tape-result {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--foreground));
+}
+
+/* ── Floating card chrome ────────────────────────────────────────────────────
+ * Apple-style edge: one thin neutral hairline plus a directional top highlight
+ * (light from above), mirroring the app's `--floating-ring`. Kept as a class so
+ * the dark-mode ring can key off the host's `.dark` ancestor. */
+.pnsv-calc-card-chrome {
+  border: 1px solid transparent;
+  box-shadow:
+    0 0 0 0.5px hsl(240 6% 84%),
+    inset 0 1px 0 0 #ffffff,
+    var(--shadow-lg);
+}
+
+.dark .pnsv-calc-card-chrome {
+  box-shadow:
+    inset 0 0 0 0.5px #ffffff14,
+    inset 0 1px 0 0 #ffffff2b,
+    var(--shadow-lg);
+}
+
+/* ── Tray chip ───────────────────────────────────────────────────────────── */
+.pnsv-calc-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3125rem;
+  max-width: 9rem;
+}
+
+.pnsv-calc-chip-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--foreground));
+}
+
+.pnsv-calc-chip-mem {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+}

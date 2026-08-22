@@ -1,0 +1,46 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.unit-converter",
+  "name": {
+    "en": "Unit Converter",
+    "ko": "단위 변환",
+    "ja": "単位変換"
+  },
+  "version": "1.0.1",
+  "description": {
+    "en": "Length, weight, area, volume, temperature, speed and time — including the old East Asian units period fiction is written in (尺, 里, 坪, 斤, 되).",
+    "ko": "길이·무게·넓이·부피·온도·속도·시간을 변환합니다. 시대물에 쓰이는 척관법 단위(자·리·평·근·되)도 함께 지원합니다.",
+    "ja": "長さ・重さ・面積・体積・温度・速さ・時間を変換します。時代物で使われる尺貫法の単位（尺・里・坪・斤・升）にも対応。"
+  },
+  "author": {
+    "name": "pensiv",
+    "url": "https://pensiv.so"
+  },
+  "icon": "Ruler",
+  "accent": "#12968a",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": ["editor.write", "clipboard"],
+  "platforms": ["desktop", "web", "mobile"],
+  "license": "MIT",
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/unit-converter",
+  "contributes": {
+    "widgets": [
+      {
+        "id": "unit-converter",
+        "surface": "floating",
+        "defaultCorner": "bottom-right",
+        "storageKey": "pensiv:plugin:unit-converter:corner"
+      }
+    ],
+    "commands": [
+      {
+        "id": "toggle-widget",
+        "name": "Unit Converter: Toggle floating widget"
+      }
+    ],
+    "settings": {
+      "schema": {}
+    }
+  }
+}

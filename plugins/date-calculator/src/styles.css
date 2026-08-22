@@ -1,0 +1,606 @@
+/*
+ * Date Calculator styles. Bundled to `dist/styles.css` and injected by the host
+ * loader while the plugin is enabled.
+ *
+ * The app's Tailwind build never scans this repo, so we ship our own classes —
+ * but they are *ports of the app's own components*, not a parallel design. The
+ * button block is `Button` from `components/ui/button.tsx` (same base, same
+ * variants, same `active:scale-[0.98]`, same focus ring), the field block is
+ * `Input`, and the mode switch is the app's recessed-well switcher
+ * (`view-mode-tabs`). Everything reads from the host's design tokens, so the
+ * plugin follows the user's theme with no work of its own.
+ *
+ * The accent (`--primary`) is deliberately absent: these panels sit beside a
+ * manuscript all day, and a themed accent on a result block reads as a status
+ * the number does not have. Selection is carried by the app's card-on-well
+ * treatment instead, the same one the header switchers use.
+ *
+ * Radius names match the app's Tailwind scale:
+ *   rounded-sm  = calc(var(--radius) - 0.1rem)
+ *   rounded-md  = calc(var(--radius))
+ *   rounded-lg  = calc(var(--radius) + 0.1rem)
+ *   rounded-xl  = calc(var(--radius) + 0.25rem)
+ */
+
+/* ── Button — port of `Button` (variant × sizeVariant) ────────────────────── */
+.pnsv-dc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  height: 2rem; /* sizeVariant="sm" */
+  padding: 0 0.5rem;
+  gap: 0.375rem;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) + 0.1rem); /* rounded-lg */
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  -webkit-app-region: no-drag;
+  transition: all 0.15s ease;
+}
+
+.pnsv-dc-btn:active {
+  transform: scale(0.98);
+}
+
+.pnsv-dc-btn:disabled {
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+/* `ringVariants` — the app's focus-visible treatment, shared by every control. */
+.pnsv-dc-btn:focus-visible,
+.pnsv-dc-input:focus-visible,
+.pnsv-dc-pick-select:focus-visible {
+  outline: 2px solid hsl(var(--ring) / 0.5);
+  box-shadow: 0 0 0 2px hsl(var(--ring));
+  z-index: 10;
+}
+
+/* variant="ghost" */
+.pnsv-dc-btn-ghost:hover {
+  background: hsl(var(--muted) / 0.8);
+}
+
+/* The chosen half of the +/− pair: the app's card-on-well selection, not an
+ * accent wash — same treatment as the segmented control above. */
+.pnsv-dc-btn-selected {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  box-shadow: var(--floating-ring), var(--shadow-sm);
+}
+
+/* variant="link" — the app's inline text action ("Today"). */
+.pnsv-dc-btn-link {
+  height: auto;
+  padding: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8125rem;
+  font-weight: 400;
+  text-underline-offset: 2px;
+}
+
+.pnsv-dc-btn-link:hover {
+  color: hsl(var(--foreground));
+  text-decoration: underline;
+}
+
+/* typeVariant="icon", sizeVariant="sm" */
+.pnsv-dc-btn-icon {
+  width: 2rem;
+  padding: 0;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-dc-btn-icon:hover {
+  color: hsl(var(--foreground));
+}
+
+.pnsv-dc-btn-xs {
+  height: 1.5rem;
+  width: 1.5rem;
+  padding: 0;
+  border-radius: var(--radius);
+}
+
+/* ── Input — port of `Input` (externalInputVariants, sizeVariant="sm") ────── */
+.pnsv-dc-input {
+  width: 100%;
+  height: 2.25rem;
+  padding: 0 0.625rem;
+  border: none;
+  border-radius: calc(var(--radius) + 0.1rem);
+  background: hsl(var(--muted) / 0.5);
+  color: hsl(var(--foreground));
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  -webkit-app-region: no-drag;
+  transition: background-color 0.2s ease;
+}
+
+.pnsv-dc-pane .pnsv-dc-input {
+  height: 2.5rem; /* sizeVariant="default" — a pane has the room for the real one */
+  padding: 0 0.75rem;
+}
+
+.pnsv-dc-input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+/* ── Mode picker ─────────────────────────────────────────────────────────────
+ * A dropdown, not a tab strip. In the pane it is contributed beside the title
+ * (`headerLeading`), so it costs no vertical space and never scrolls away; the
+ * floating card and the phone sheet render it inline instead.
+ *
+ * The visible control is the app's ghost button; the real `<select>` sits
+ * transparently on top, so the menu is the platform's while the button is ours
+ * — the trick the app's calendar caption uses for its year dropdown. */
+.pnsv-dc-pickrow {
+  display: flex;
+}
+
+.pnsv-dc-pick {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 2rem;
+  padding: 0 0.375rem 0 0.5rem;
+  border-radius: calc(var(--radius) + 0.1rem);
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  transition: background-color 0.15s ease;
+}
+
+.pnsv-dc-pick:hover,
+.pnsv-dc-pick:focus-within {
+  background: hsl(var(--muted) / 0.8);
+}
+
+.pnsv-dc-pick-label {
+  white-space: nowrap;
+}
+
+.pnsv-dc-pick-chevron {
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-dc-pick-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font: inherit;
+  -webkit-app-region: no-drag;
+}
+
+/* ── Date field — the app's picker, not the browser's ────────────────────────
+ * A field-shaped trigger (the `Input` treatment) plus a calendar popover. See
+ * `datefield.tsx` for why `<input type="date">` is not used. */
+.pnsv-dc-datefield {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  height: 2.25rem;
+  padding: 0 0.625rem;
+  /* Filled, not outlined: a bordered field next to a filled result block makes
+   * one panel read as two design systems. The fill alone says "editable". */
+  border: none;
+  border-radius: calc(var(--radius) + 0.1rem); /* rounded-lg */
+  background: hsl(var(--muted) / 0.5);
+  color: hsl(var(--foreground));
+  font-family: inherit;
+  font-size: 0.875rem;
+  text-align: left;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: all 0.15s ease;
+}
+
+.pnsv-dc-pane .pnsv-dc-datefield {
+  height: 2.25rem;
+  padding: 0 0.625rem;
+}
+
+.pnsv-dc-datefield:hover {
+  background: hsl(var(--muted) / 0.8);
+}
+
+.pnsv-dc-datefield:focus-visible {
+  outline: 2px solid hsl(var(--ring) / 0.5);
+  box-shadow: 0 0 0 2px hsl(var(--ring));
+}
+
+.pnsv-dc-datefield.is-empty .pnsv-dc-datefield-value {
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-dc-datefield-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.pnsv-dc-datefield-icon {
+  color: hsl(var(--muted-foreground));
+}
+
+/* ── Calendar popover — port of the app's `Calendar` ─────────────────────────
+ * `--cell-size` days as ghost buttons, the chosen day on `muted`, today marked
+ * with a dot rather than a fill, outside days dimmed. Portalled to `body`, so it
+ * escapes the pane's scroll area. Its edge is `--floating-ring` (the app's
+ * hairline-and-highlight), not a border — same treatment as every other floating
+ * surface here. */
+.pnsv-dc-cal {
+  position: fixed;
+  z-index: 60;
+  width: 17rem;
+  padding: 0.5rem;
+  border-radius: calc(var(--radius) + 0.25rem); /* rounded-xl, like popovers */
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  box-shadow: var(--floating-ring), var(--shadow-lg);
+  font-family: inherit;
+  animation: pnsv-dc-pop-in 0.18s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+@keyframes pnsv-dc-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.pnsv-dc-cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.pnsv-dc-cal-caption {
+  position: relative;
+  flex: 1;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+/* The year `select` covers the caption and is invisible — the same trick the
+ * app's calendar dropdown uses, so the caption stays the app's own typography
+ * while the picker is a real native menu. */
+.pnsv-dc-cal-year {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.pnsv-dc-cal-weekdays,
+.pnsv-dc-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.pnsv-dc-cal-weekdays span {
+  padding: 0.25rem 0;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-dc-cal-grid {
+  gap: 0.125rem;
+}
+
+.pnsv-dc-cal-day {
+  position: relative;
+  height: 2rem; /* --cell-size */
+  width: 100%;
+  padding: 0;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.pnsv-dc-cal-day[data-outside] {
+  color: hsl(var(--muted-foreground) / 0.6);
+}
+
+/* The chosen day: the app's card-on-well selection, the same one the segmented
+ * control and the +/− pair use. */
+.pnsv-dc-cal-day[data-selected] {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  box-shadow: var(--floating-ring), var(--shadow-sm);
+}
+
+/* Today is a dot under the number, not a filled cell. A fill would have to be a
+ * colour, and the accent is exactly what this panel is meant to stay out of —
+ * the dot says "today" without competing with the day you actually picked. */
+.pnsv-dc-cal-day[data-today]::after {
+  content: '';
+  position: absolute;
+  bottom: 0.25rem;
+  left: 50%;
+  width: 0.1875rem;
+  height: 0.1875rem;
+  border-radius: 999px;
+  background: hsl(var(--muted-foreground));
+  transform: translateX(-50%);
+}
+
+.pnsv-dc-cal-foot {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.25rem;
+  padding-top: 0.25rem;
+}
+
+.pnsv-dc-cal-today {
+  width: 100%;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-dc-cal-today:hover {
+  color: hsl(var(--foreground));
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.pnsv-dc {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  font-family: inherit;
+  color: hsl(var(--foreground));
+}
+
+/* Plugin panes are rendered full-bleed (the host adds no padding), so the panel
+ * owns its insets and caps its width — form fields stretched across a wide pane
+ * read as a web form, not as part of the app. */
+.pnsv-dc-pane {
+  gap: 0.875rem;
+  width: 100%;
+  max-width: 28rem;
+  /* `px-4`, the inset the app's own side panes use for their content rows. */
+  padding: 0.5rem 1rem 1rem;
+}
+
+/* ── Fields ──────────────────────────────────────────────────────────────── */
+.pnsv-dc-fields {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pnsv-dc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+}
+
+.pnsv-dc-field-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 1rem;
+}
+
+/* `text-xs font-medium text-muted-foreground` — the app's field label. */
+.pnsv-dc-label {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-dc-shift {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.pnsv-dc-number {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: right;
+}
+
+.pnsv-dc-select {
+  flex: 0 0 auto;
+  width: auto;
+  cursor: pointer;
+}
+
+/* The +/− pair is one control, and it wears what the fields beside it wear:
+ * the same muted surface, the same height, the same radius. Two loose buttons
+ * next to a filled input read as a different kit. */
+.pnsv-dc-sign {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.125rem;
+  height: 2.25rem;
+  padding: 0.1875rem;
+  border-radius: calc(var(--radius) + 0.1rem);
+  background: hsl(var(--muted) / 0.5);
+}
+
+.pnsv-dc-sign-btn {
+  width: 1.875rem;
+  height: 100%;
+  padding: 0;
+  border-radius: var(--radius);
+  font-size: 1rem;
+}
+
+/* Swap sits on the seam between the two date fields. */
+.pnsv-dc-swap {
+  position: absolute;
+  top: 50%;
+  right: 0.375rem;
+  transform: translateY(-50%);
+  border: none;
+  border-radius: 999px;
+  background: hsl(var(--card));
+  box-shadow: var(--floating-ring), var(--shadow-sm);
+}
+
+.pnsv-dc-swap:active {
+  transform: translateY(-50%) scale(0.94);
+}
+
+/* ── Result ──────────────────────────────────────────────────────────────── */
+.pnsv-dc-result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.625rem;
+  border-radius: calc(var(--radius) + 0.25rem);
+  background: hsl(var(--muted) / 0.45);
+}
+
+.pnsv-dc-headline-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* The answer leads, but only just. At display size it dwarfed the rows under it
+ * — which carry the same kind of fact — and the block read as a headline with
+ * footnotes rather than as one set of results. One step up from the body, same
+ * weight, same figures. */
+.pnsv-dc-headline {
+  font-size: 1.25rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--foreground));
+}
+
+.pnsv-dc-caption {
+  margin-top: 0.0625rem;
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.pnsv-dc-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  flex-shrink: 0;
+}
+
+.pnsv-dc-rows {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.pnsv-dc-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.3125rem 0;
+  border-top: 1px solid hsl(var(--border) / 0.7);
+}
+
+.pnsv-dc-row:first-child {
+  border-top: none;
+  padding-top: 0.125rem;
+}
+
+/* One size and one weight for every row, label and value alike: the result block
+ * is a table of facts, and varying the type per cell only makes it look like
+ * some facts are louder than others. The value keeps tabular figures so the
+ * column stays aligned. */
+.pnsv-dc-row dt,
+.pnsv-dc-row dd {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.pnsv-dc-row dt {
+  flex-shrink: 0;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-dc-row dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--foreground));
+}
+
+/* A conflict gets one quiet line — no box, no icon, nothing that competes with
+ * the fields it is about. */
+.pnsv-dc-note {
+  margin: 0;
+  padding: 0.25rem 0.125rem;
+  font-size: 0.8125rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ── Floating card chrome ────────────────────────────────────────────────────
+ * Apple-style edge: one thin neutral hairline plus a directional top highlight
+ * (light from above), mirroring the app's `--floating-ring`. Kept as a class so
+ * the dark-mode ring can key off the host's `.dark` ancestor. */
+.pnsv-dc-card-chrome {
+  border: 1px solid transparent;
+  box-shadow:
+    0 0 0 0.5px hsl(240 6% 84%),
+    inset 0 1px 0 0 #ffffff,
+    var(--shadow-lg);
+}
+
+.dark .pnsv-dc-card-chrome {
+  box-shadow:
+    inset 0 0 0 0.5px #ffffff14,
+    inset 0 1px 0 0 #ffffff2b,
+    var(--shadow-lg);
+}
+
+/* ── Tray chip ───────────────────────────────────────────────────────────── */
+.pnsv-dc-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3125rem;
+  max-width: 10rem;
+}
+
+.pnsv-dc-chip-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--foreground));
+}

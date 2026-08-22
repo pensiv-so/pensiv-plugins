@@ -1,0 +1,248 @@
+/*
+ * Paragraph Analysis styles. Bundled to `dist/styles.css` and injected by the
+ * host loader while the plugin is enabled. Own class names (the app's Tailwind
+ * build never scans this repo), host design tokens — so the pane is
+ * theme-correct in light and dark without restating the theme.
+ *
+ * The values come from the analytics page; the chrome deliberately does not.
+ * That page nests bordered cards in tinted trays across a settings-width
+ * column — at a 344px side pane the same nesting reads as boxes inside boxes,
+ * so here the tiles carry a fill instead of a border and the chart sits
+ * directly on the pane.
+ *
+ * Kept from the page, verbatim:
+ *   stat type scale   muted `text-sm` label, `text-lg tracking-tight` figure,
+ *                     `text-xs` hint
+ *   share bar         `h-2 gap-[3px] rounded-full`, `rounded-sm` segments
+ *   legend            `label … value · %`, `rounded-[2px]` swatch
+ *   motion            grow-in / count-up on cubic-bezier(0.22, 1, 0.36, 1)
+ *
+ * Tailwind's scale in rem, since the plugin can't use the classes themselves:
+ * text-xs .75 / text-sm .875 / text-lg 1.125; spacing 1 = .25rem.
+ */
+
+/*
+ * The root carries no padding: the tab rule has to reach both edges of the pane
+ * to read as a rule rather than as an underlined word. Everything below it is
+ * inset by `.pnsv-pa-body` instead.
+ */
+.pnsv-pa-root {
+  display: flex;
+  flex-direction: column;
+  font-family: inherit;
+  color: hsl(var(--foreground));
+}
+
+.pnsv-pa-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 0.875rem;
+}
+
+/* ── underline tabs ──────────────────────────────────────────────────────── */
+
+/* Offset + the buttons' own 0.5rem lands the labels on 0.875rem — the same
+   column the tiles below start at. */
+.pnsv-pa-tabs {
+  position: relative;
+  display: flex;
+  gap: 0.25rem;
+  padding-left: 0.375rem;
+  box-shadow: inset 0 -1px 0 0 hsl(var(--border) / 0.7);
+}
+
+.pnsv-pa-tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  padding: 0.625rem 0.5rem 0.5rem;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 200ms ease;
+}
+
+.pnsv-pa-tab[data-active='true'] {
+  color: hsl(var(--foreground));
+}
+
+.pnsv-pa-tab:hover:not([data-active='true']) {
+  color: hsl(var(--foreground) / 0.75);
+}
+
+/*
+ * The bar rides on the rule rather than replacing it, and slides on the page's
+ * own grow-in easing so the switch belongs to the same motion family as the
+ * chart it filters.
+ */
+.pnsv-pa-tabs-underline {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: hsl(var(--foreground));
+  pointer-events: none;
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── stat tiles ──────────────────────────────────────────────────────────── */
+
+.pnsv-pa-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.375rem;
+}
+
+/* No border, no shadow: the fill is the whole separation. */
+.pnsv-pa-stat {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0.625rem 0.75rem 0.6875rem;
+  border-radius: 0.75rem;
+  background: hsl(var(--muted) / 0.45);
+}
+
+.pnsv-pa-stat-label {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pnsv-pa-stat-value {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  letter-spacing: -0.025em;
+  color: hsl(var(--foreground));
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pnsv-pa-stat-hint {
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── chart ───────────────────────────────────────────────────────────────── */
+
+.pnsv-pa-chart {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0.125rem;
+}
+
+/* The track is clipped, so the outer ends read as pill caps while each inner
+   segment keeps its own small radius. */
+.pnsv-pa-bar {
+  display: flex;
+  width: 100%;
+  height: 0.5rem;
+  gap: 3px;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.pnsv-pa-bar-seg {
+  height: 100%;
+  border-radius: 0.125rem;
+}
+
+/* ── legend ──────────────────────────────────────────────────────────────── */
+
+.pnsv-pa-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.875rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pnsv-pa-legend-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+  min-width: 0;
+}
+
+.pnsv-pa-legend-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.pnsv-pa-legend-head {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+/* Square-ish, not round: the page's legend swatches are `rounded-[2px]`. */
+.pnsv-pa-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 2px;
+  flex: none;
+}
+
+.pnsv-pa-legend-label {
+  color: hsl(var(--foreground));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pnsv-pa-legend-value {
+  flex: none;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+/* Indented past the swatch so it reads as the row's second line rather than a
+   row of its own. */
+.pnsv-pa-legend-hint {
+  padding-left: 0.875rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: hsl(var(--muted-foreground) / 0.8);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── empty state ─────────────────────────────────────────────────────────── */
+
+.pnsv-pa-empty {
+  margin: 0;
+  padding: 0.5rem 0.125rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: hsl(var(--muted-foreground));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pnsv-pa-tabs-underline,
+  .pnsv-pa-tab {
+    transition: none;
+  }
+}

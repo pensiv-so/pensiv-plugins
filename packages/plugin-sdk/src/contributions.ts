@@ -174,6 +174,28 @@ export interface PaneViewContribution extends SurfaceScope {
   /** MonoIcon name. */
   icon: string;
   render: FC<PaneViewProps>;
+  /**
+   * Optional control rendered in the pane header **next to the title**, on the
+   * left — the view's own selector. On mobile, where the view opens in a sheet,
+   * it renders in the sheet header.
+   *
+   * A pane's top-level switch belongs in its chrome, not in its content: a
+   * converter that puts seven categories in a tab strip spends the widest row of
+   * a narrow pane on navigation, and every scroll of the body carries it along.
+   * A dropdown beside the title is always in the same place and costs no height.
+   * Keep it to one compact control — it shares the row with the title, which
+   * truncates to make room.
+   */
+  headerLeading?: FC<PaneViewProps>;
+  /**
+   * Optional controls for the **right end of the pane header** — the view's
+   * options, where the built-in panes put theirs (the dock toggle on AI Review,
+   * for instance).
+   *
+   * Both slots render inside the same error boundary as {@link render} and get
+   * the same props, so they can drive the view's state directly.
+   */
+  headerActions?: FC<PaneViewProps>;
 }
 
 /** Props a full plugin pane (tab) receives. */
