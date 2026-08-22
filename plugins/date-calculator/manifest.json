@@ -1,0 +1,50 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.date-calculator",
+  "name": {
+    "en": "Date Calculator",
+    "ko": "날짜 계산기",
+    "ja": "日付計算"
+  },
+  "version": "1.0.0",
+  "description": {
+    "en": "Ages, spans between two dates, and date arithmetic — in the file header or as a floating widget. Korean counting age included.",
+    "ko": "나이, 두 날짜 사이의 기간, 날짜 더하기·빼기를 파일 헤더나 플로팅 위젯에서 바로 계산합니다. 한국식 세는 나이도 함께 보여 줍니다.",
+    "ja": "年齢、2 つの日付の間隔、日付の加減をファイルヘッダーやフローティングウィジェットで計算します。韓国式の数え年にも対応。"
+  },
+  "author": {
+    "name": "pensiv",
+    "url": "https://pensiv.so"
+  },
+  "icon": "CalendarDays",
+  "accent": "#8a5cd6",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": ["editor.write", "clipboard"],
+  "platforms": ["desktop", "web", "mobile"],
+  "license": "MIT",
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/date-calculator",
+  "contributes": {
+    "widgets": [
+      {
+        "id": "date-calculator",
+        "surface": "floating",
+        "defaultCorner": "bottom-right",
+        "storageKey": "pensiv:plugin:date-calculator:corner"
+      }
+    ],
+    "commands": [
+      {
+        "id": "toggle-widget",
+        "name": "Date Calculator: Toggle floating widget"
+      },
+      {
+        "id": "insert-today",
+        "name": "Date Calculator: Insert today's date"
+      }
+    ],
+    "settings": {
+      "schema": {}
+    }
+  }
+}

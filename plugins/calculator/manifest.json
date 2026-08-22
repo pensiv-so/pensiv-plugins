@@ -1,0 +1,46 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.calculator",
+  "name": {
+    "en": "Calculator",
+    "ko": "계산기",
+    "ja": "電卓"
+  },
+  "version": "1.0.0",
+  "description": {
+    "en": "A calculator that lives in the file header and as a floating widget — memory keys, a short history, and one tap to drop the result into your text.",
+    "ko": "파일 헤더와 플로팅 위젯에서 바로 쓰는 계산기. 메모리 키와 최근 기록을 제공하고, 결과를 한 번에 본문에 넣을 수 있습니다.",
+    "ja": "ファイルヘッダーとフローティングウィジェットから使える電卓。メモリキーと直近の履歴を備え、結果をワンタップで本文に挿入できます。"
+  },
+  "author": {
+    "name": "pensiv",
+    "url": "https://pensiv.so"
+  },
+  "icon": "Calculator",
+  "accent": "#4f6bd8",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": ["editor.write", "clipboard"],
+  "platforms": ["desktop", "web", "mobile"],
+  "license": "MIT",
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/calculator",
+  "contributes": {
+    "widgets": [
+      {
+        "id": "calculator",
+        "surface": "floating",
+        "defaultCorner": "bottom-right",
+        "storageKey": "pensiv:plugin:calculator:corner"
+      }
+    ],
+    "commands": [
+      {
+        "id": "toggle-widget",
+        "name": "Calculator: Toggle floating widget"
+      }
+    ],
+    "settings": {
+      "schema": {}
+    }
+  }
+}
