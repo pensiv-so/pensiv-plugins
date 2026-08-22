@@ -3,7 +3,7 @@
 原稿を開いているあいだ、横で数えつづけるパネルです。描写・セリフ・独白・特殊セリフがそれぞれ何段落で何文字か、
 平均段落はどれくらいの長さか、スマートフォンでは何行に見えるかを表示します。
 
-![この文書の段落構成](screenshots/05-pane-ja.png)
+![この文書の段落構成](https://raw.githubusercontent.com/pensiv-so/pensiv-plugins/main/plugins/paragraph-analysis/screenshots/05-pane-ja.png)
 
 ## どう分類するか
 

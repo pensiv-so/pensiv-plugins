@@ -1,6 +1,6 @@
 {
   "name": "@pensiv-plugins/paragraph-analysis",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Narration / dialogue / monologue / special-dialogue breakdown of a manuscript, by paragraph.",
   "license": "MIT",

@@ -6,7 +6,7 @@
     "ko": "단위 변환",
     "ja": "単位変換"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": {
     "en": "Length, weight, area, volume, temperature, speed and time — including the old East Asian units period fiction is written in (尺, 里, 坪, 斤, 되).",
     "ko": "길이·무게·넓이·부피·온도·속도·시간을 변환합니다. 시대물에 쓰이는 척관법 단위(자·리·평·근·되)도 함께 지원합니다.",

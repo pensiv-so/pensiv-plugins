@@ -4,7 +4,7 @@ A panel that keeps counting beside your manuscript: how many paragraphs and
 characters go to narration, dialogue, monologue and special dialogue, how long
 the average paragraph runs, and how many lines one takes on a phone.
 
-![The paragraph mix of the open file](screenshots/04-pane-en.png)
+![The paragraph mix of the open file](https://raw.githubusercontent.com/pensiv-so/pensiv-plugins/main/plugins/paragraph-analysis/screenshots/04-pane-en.png)
 
 ## How a paragraph is classified
 

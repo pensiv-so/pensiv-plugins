@@ -4,7 +4,7 @@ Length, weight, area, volume, temperature, speed and time — docked in the side
 pane of every file type, and as an optional floating widget. Including the units
 period fiction is actually written in.
 
-![30 pyeong in square metres, docked beside the manuscript](screenshots/02-pane-en.png)
+![30 pyeong in square metres, docked beside the manuscript](https://raw.githubusercontent.com/pensiv-so/pensiv-plugins/main/plugins/unit-converter/screenshots/02-pane-en.png)
 
 ## Features
 

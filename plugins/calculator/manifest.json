@@ -6,7 +6,7 @@
     "ko": "계산기",
     "ja": "電卓"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": {
     "en": "A calculator that lives in the file header and as a floating widget — memory keys, a short history, and one tap to drop the result into your text.",
     "ko": "파일 헤더와 플로팅 위젯에서 바로 쓰는 계산기. 메모리 키와 최근 기록을 제공하고, 결과를 한 번에 본문에 넣을 수 있습니다.",

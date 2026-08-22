@@ -5,7 +5,7 @@ as an optional floating widget. Built for the questions a manuscript asks: how o
 is she in this scene, how long between these two chapters, what day of the week
 was that.
 
-![An age worked out beside the scene it belongs to](screenshots/02-pane-en.png)
+![An age worked out beside the scene it belongs to](https://raw.githubusercontent.com/pensiv-so/pensiv-plugins/main/plugins/date-calculator/screenshots/02-pane-en.png)
 
 ## Features
 

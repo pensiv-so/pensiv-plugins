@@ -6,7 +6,7 @@
     "ko": "날짜 계산기",
     "ja": "日付計算"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": {
     "en": "Ages, spans between two dates, and date arithmetic — in the file header or as a floating widget. Korean counting age included.",
     "ko": "나이, 두 날짜 사이의 기간, 날짜 더하기·빼기를 파일 헤더나 플로팅 위젯에서 바로 계산합니다. 한국식 세는 나이도 함께 보여 줍니다.",

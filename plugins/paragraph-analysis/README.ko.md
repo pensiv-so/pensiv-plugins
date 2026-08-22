@@ -3,7 +3,7 @@
 원고를 열어 두면 옆에서 계속 세고 있는 패널입니다. 묘사·대사·독백·특수 대사가 각각 몇 단락이고 몇
 자인지, 평균 단락은 얼마나 긴지, 휴대폰 화면에서는 몇 줄로 보일지를 보여 줍니다.
 
-![현재 문서의 단락 구성](screenshots/01-pane-ko-light.png)
+![현재 문서의 단락 구성](https://raw.githubusercontent.com/pensiv-so/pensiv-plugins/main/plugins/paragraph-analysis/screenshots/01-pane-ko-light.png)
 
 ## 어떻게 분류하나
 
