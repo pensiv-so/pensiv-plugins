@@ -168,14 +168,6 @@
   color: hsl(var(--muted-foreground));
 }
 
-/* Sits under the menu so a click anywhere else closes it. A sibling element
-   rather than a document listener: the pane can unmount mid-gesture. */
-.pnsv-sw-scrim {
-  position: fixed;
-  inset: 0;
-  z-index: 20;
-}
-
 /* The app's floating panel (`DropdownMenuContent`): bg-popover, rounded-xl,
    border-transparent, p-1, shadow `var(--floating-ring), var(--shadow-xl)`. */
 .pnsv-sw-menu {

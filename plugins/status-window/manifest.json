@@ -6,7 +6,7 @@
     "ko": "상태창",
     "ja": "ステータス"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": {
     "en": "Character stat blocks for web novels. Typed attributes, per-episode change tracking with growth arrows, and six presets that match how Korean, Japanese and LitRPG serials actually format them.",
     "ko": "웹소설용 캐릭터 상태창. 타입이 있는 능력치, 회차별 변화 추적과 성장 화살표, 그리고 한국·일본·LitRPG 연재물이 실제로 쓰는 표기를 옮긴 프리셋 6종.",

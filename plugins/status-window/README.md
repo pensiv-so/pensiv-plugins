@@ -11,17 +11,9 @@ HP: 100 | MP: 10
 =====
 ```
 
-## Why
+Serials in the game-fantasy, hunter, isekai and LitRPG lineages print a character's numbers into the prose, over and over, for hundreds of chapters. Done by hand, the formatting stays consistent only through vigilance, the numbers have to be carried forward from the last time by memory, and the growth line — `근력 : 14 [F] → 16(+2)[F]` — has to be assembled from two sheets that were never in the same place.
 
-Serials in the game-fantasy, hunter, isekai and LitRPG lineages print a character's numbers into the prose, over and over, for hundreds of chapters. Done by hand that costs three things:
-
-- the formatting stays consistent only through vigilance;
-- the numbers have to be carried forward from the last time by memory;
-- the growth line — `근력 : 14 [F] → 16(+2)[F]` — has to be assembled from two sheets that were never in the same place.
-
-The usual answer is a spreadsheet in another window. The complaint about that is never that the spreadsheet is hard to build; it is that updating it means leaving the manuscript, and that it only ever knows the _current_ state, so **"what were her stats in chapter 31?"** has no answer.
-
-This lives in the editor, and stores what changed per episode rather than a snapshot per episode. Both of those follow from the complaint.
+The usual answer is a spreadsheet in another window. The trouble is never that the spreadsheet is hard to build; it is that updating it means leaving the manuscript, and that it only ever knows the _current_ state, so "what were her stats in chapter 31?" has no answer. This plugin lives in the editor instead, and remembers what changed in each episode — so every chapter's numbers stay recoverable.
 
 ## What it does
 
@@ -39,7 +31,7 @@ This lives in the editor, and stores what changed per episode rather than a snap
 
 **Carry-forward and growth arrows.** A value typed in chapter 4 is still there in chapter 40. Change it and the block prints the arrow: `14 [F] → 16(+2)[F]`. Correct an early chapter and every later one follows, because no later chapter ever stored a copy.
 
-**Six presets, each pre-filled — and all of them yours.** Not just a template string: separator, padding, column count, list punctuation and number grouping all differ by lineage, and each preset seeds its own attribute rows so you are not typing seventeen stat names before you see anything.
+**Six presets, each pre-filled — and all of them yours.** Not just a layout: separator, padding, column count, list punctuation and number grouping all differ by lineage, and each preset seeds its own attribute rows so you are not typing seventeen stat names before you see anything.
 
 They ship as **starting content**, copied into your own storage the first time you open the plugin. From then on: rename, retune, duplicate, delete. A status window is a house style, and six transcriptions of other people's serials are a good place to start and a bad place to stop — your own convention is the one that has to be expressible. _Restore defaults_ copies the seed in again.
 
@@ -56,12 +48,12 @@ They ship as **starting content**, copied into your own storage the first time y
 
 **System messages.** `레벨 업!` / `능력치 포인트 (1)` is its own thing — no character, no attributes. `/system message` opens a two-field composer.
 
-**Column alignment that actually aligns.** Padding is computed in display columns, so `근력` counts as four and the colons line up. `String.padEnd` gets this wrong for every CJK sheet.
+**Column alignment that actually aligns.** Character width is measured the way it prints, so `근력` counts as four columns and the colons line up — even in an all-CJK sheet.
 
 ## Using it
 
 1. Open a chapter and click the **Status window** button in the document header.
-2. Pick a character — every sheet in the project is listed, and you can add one that lives only here.
+2. Pick a character — every sheet in the project is listed, and you can add one that lives only here. (Your character sheets are only ever read, never written to.)
 3. Fill in the rows. The line beside each name is what the reader will see.
 4. **Insert into text.**
 
@@ -83,44 +75,6 @@ Disabling the plugin also removes the marks — and leaves every status window e
 - **Episode order** — whether stats carry through the current folder or the whole project.
 - **Live status windows** / **Refresh blocks when stats change**.
 
-**Presets** — the second tab. The preset list (add, duplicate, rename, delete, set as default), every convention option on the selected one — columns, name and value alignment, padding character, thousands grouping, list separator, growth arrow, regen wording, bar width — its template, a live preview, and the attribute library.
+**Presets** — the second tab. The preset list (add, duplicate, rename, delete, set as default), every convention option on the selected one — columns, name and value alignment, padding character, thousands grouping, list separator, growth arrow, regen wording, bar width — a live preview, and the attribute library.
 
 There is no third panel: presets are content, and content belongs in settings next to the list it edits.
-
-## Templates
-
-A mustache subset: `{{name}}`, `{{#section}}…{{/section}}`, `{{^section}}…{{/section}}`, `{{.}}`, dotted paths.
-
-```
-=====
-{{#rows}}{{#cells}}{{name}} : {{value}}{{^last}}   {{/last}}{{/cells}}
-{{/rows}}=====
-```
-
-Top level: `characterName`, `episodeTitle`, `episodeNumber`, `attributes`, `groups`, `rows`, `changed`, `by`.
-Per attribute: `name` (padded), `rawName`, `value`, `rawValue`, `raw`, `base`, `bonus`, `grade`, `note`, `cur`, `max`, `regen`, `percent`, `bar`, `items`, `prev`, `delta`, `arrow`, `pad`, `first`, `last`.
-
-`{{by.<id>}}` addresses one attribute directly, for layouts that pack several onto a line:
-
-```
-名前：{{by.name.value}}　種族：{{by.race.value}}　Ｌv{{by.level.value}}
-```
-
-## Permissions
-
-`editor.read`, `editor.write` — read the document to find live blocks, insert and refresh them.
-`project.read` — list character sheets and order the episodes.
-`storage.synced` — keep sheets and per-episode values across your devices.
-
-It never writes to your character sheets.
-
-## Development
-
-```bash
-npm run build     -w @pensiv-plugins/status-window
-npm run typecheck -w @pensiv-plugins/status-window
-npx vitest run plugins/status-window/test/
-node scripts/pack-plugin.mjs plugins/status-window
-```
-
-The format research the presets are built from is in the app repo at `docs/status-window-formats.md`.

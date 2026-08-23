@@ -8,7 +8,7 @@ Inspired by Squibler's [Dangerous Writing Prompt App](https://www.squibler.io/da
 
 ![Pick a goal and arm your document from the 🔥 toolbar popover](https://raw.githubusercontent.com/pensiv-so/pensiv-plugins/main/plugins/dangerous-writing/screenshots/01-launcher.png)
 
-### How it works
+### Usage
 
 1. Open a document and hit the 🔥 button in the toolbar.
 2. Pick a goal — survive for a set **time**, or reach a **word count**.

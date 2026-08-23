@@ -413,6 +413,10 @@ install`). What you must know when authoring for publication:
   permissions and the app asks for consent before running any code. A root
   `README.md` seeds the listing description, and `screenshots/*` seed the
   gallery, when publishing via the web wizard.
+- Because `README.md` becomes the listing, keep it **user-facing only** — what
+  the plugin does, how to use it, no implementation detail. Engineering notes
+  (design decisions, host-API patterns, traps) go in the plugin's
+  `DEVELOPER.md`; see `llms.txt` for the index of those.
 
 Publish at <https://pensiv.so/community/publish/plugin> (folder or
 `npm run bundle-source plugins/<name>` zip), or in-app via Settings → Plugins →
