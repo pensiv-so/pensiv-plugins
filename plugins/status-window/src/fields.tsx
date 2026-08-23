@@ -37,17 +37,29 @@ const toNumber = (raw: string): number => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-/** A labelled cell inside a row editor. */
-const Cell: React.FC<{ label: string; children: React.ReactNode; grow?: boolean }> = ({
-  label,
-  children,
-  grow
-}) => (
-  <label className="pnsv-sw-cell" data-grow={grow ? 'true' : undefined}>
-    <span className="pnsv-sw-cell-label">{label}</span>
-    {children}
-  </label>
-);
+/**
+ * A labelled cell inside a row editor.
+ *
+ * `interactive` renders a `<div>` instead of a `<label>`. A label re-dispatches
+ * any click on itself to its first button descendant, so wrapping a custom
+ * dropdown in one makes every press inside the cell — including the panel the
+ * trigger opened — toggle the trigger again. Only real form controls get the
+ * label element.
+ */
+const Cell: React.FC<{
+  label: string;
+  children: React.ReactNode;
+  grow?: boolean;
+  interactive?: boolean;
+}> = ({ label, children, grow, interactive }) => {
+  const Element: 'div' | 'label' = interactive ? 'div' : 'label';
+  return (
+    <Element className="pnsv-sw-cell" data-grow={grow ? 'true' : undefined}>
+      <span className="pnsv-sw-cell-label">{label}</span>
+      {children}
+    </Element>
+  );
+};
 
 const NumberInput: React.FC<{
   value: number;
@@ -113,7 +125,7 @@ export const FieldEditor: React.FC<FieldProps> = ({ def, value, onChange, t }) =
           </Cell>
           {/* A ladder if the attribute defines one, free text otherwise — plenty
               of serials use grades the plugin has never heard of. */}
-          <Cell label={t('fieldGrade')}>
+          <Cell label={t('fieldGrade')} interactive={Boolean(def.grades?.length)}>
             {def.grades && def.grades.length > 0 ? (
               <Dropdown
                 label={t('fieldGrade')}
@@ -177,7 +189,7 @@ export const FieldEditor: React.FC<FieldProps> = ({ def, value, onChange, t }) =
     case 'rank':
       return (
         <div className="pnsv-sw-fields">
-          <Cell label={t('fieldGrade')} grow>
+          <Cell label={t('fieldGrade')} grow interactive={Boolean(def.grades?.length)}>
             {def.grades && def.grades.length > 0 ? (
               <Dropdown
                 label={t('fieldGrade')}

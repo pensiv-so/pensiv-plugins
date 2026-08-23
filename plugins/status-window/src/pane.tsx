@@ -117,6 +117,20 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
   const [pickerOpen, setPickerOpen] = React.useState(false);
   const [adding, setAdding] = React.useState(false);
   const [addName, setAddName] = React.useState('');
+  const pickerRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Light dismiss, same as the Dropdown: a capture-phase press outside closes
+  // the list without eating the press, and nothing blocks scrolling while it
+  // is open. The listener exists only while open; the effect cleanup also
+  // covers the pane unmounting mid-gesture.
+  React.useEffect(() => {
+    if (!pickerOpen) return undefined;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!pickerRef.current?.contains(event.target as Node)) setPickerOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown, true);
+    return () => document.removeEventListener('pointerdown', onPointerDown, true);
+  }, [pickerOpen]);
 
   const settings = React.useMemo(() => readSettings(app), [app, revision]);
   const characters = React.useMemo(() => readCharacters(app), [app, revision]);
@@ -221,7 +235,7 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
     <div className="pnsv-sw" data-variant={variant}>
       {/* ── character picker ─────────────────────────────────────────────── */}
       <div className="pnsv-sw-top">
-        <div className="pnsv-sw-picker">
+        <div className="pnsv-sw-picker" ref={pickerRef}>
           <button
             type="button"
             className="pnsv-sw-picker-button"
@@ -247,11 +261,7 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
           </button>
 
           {pickerOpen ? (
-            <>
-              {/* Click-away. A transparent sibling rather than a document
-                  listener: the pane can be unmounted mid-gesture. */}
-              <div className="pnsv-sw-scrim" onClick={() => setPickerOpen(false)} />
-              <ul className="pnsv-sw-menu" role="listbox">
+            <ul className="pnsv-sw-menu" role="listbox">
                 {characters.length === 0 ? (
                   <li className="pnsv-sw-menu-empty">{t('noCharacters')}</li>
                 ) : null}
@@ -325,8 +335,7 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
                     </button>
                   )}
                 </li>
-              </ul>
-            </>
+            </ul>
           ) : null}
         </div>
 

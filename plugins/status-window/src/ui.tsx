@@ -150,8 +150,14 @@ export interface DropdownOption {
  * The app's Select, re-drawn: outline trigger with a chevron, a popover panel
  * on the floating-ring shadow, and a check beside the current value. A native
  * `<select>` can't be styled into this — the panel is OS chrome — so the panel
- * is ours, closed by a sibling scrim (the settings page can unmount mid-click,
- * which a document listener would outlive).
+ * is ours.
+ *
+ * Dismissal is a **capture-phase `pointerdown` listener**, not a full-screen
+ * scrim. The scrim looked safe and wasn't: it blocked scrolling and every
+ * other control while open, and inside a `<label>` its click was re-dispatched
+ * to the trigger by label activation — close, reopen, and the panel reads as
+ * stuck. The listener closes on any press outside without eating it, exists
+ * only while open, and unregisters on unmount via the effect cleanup.
  */
 export const Dropdown: React.FC<{
   value: string;
@@ -166,10 +172,20 @@ export const Dropdown: React.FC<{
   align?: 'start' | 'end';
 }> = ({ value, onChange, options, label, wide, size = 'default', align = 'end' }) => {
   const [open, setOpen] = React.useState(false);
+  const rootRef = React.useRef<HTMLSpanElement | null>(null);
   const current = options.find((option) => option.value === value);
 
+  React.useEffect(() => {
+    if (!open) return undefined;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown, true);
+    return () => document.removeEventListener('pointerdown', onPointerDown, true);
+  }, [open]);
+
   return (
-    <span className="pnsv-sw-dd">
+    <span className="pnsv-sw-dd" ref={rootRef}>
       <button
         type="button"
         className="pnsv-sw-dd-trigger"
@@ -200,49 +216,46 @@ export const Dropdown: React.FC<{
       </button>
 
       {open ? (
-        <>
-          <div className="pnsv-sw-scrim" onClick={() => setOpen(false)} />
-          <ul
-            className="pnsv-sw-dd-menu"
-            data-align={align}
-            role="listbox"
-            aria-label={label}
-            onKeyDown={(event) => {
-              if (event.key === 'Escape') setOpen(false);
-            }}
-          >
-            {options.map((option) => (
-              <li key={option.value}>
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={option.value === value}
-                  className="pnsv-sw-dd-item"
-                  onClick={() => {
-                    setOpen(false);
-                    onChange(option.value);
-                  }}
-                >
-                  {option.value === value ? (
-                    <svg
-                      className="pnsv-sw-dd-check"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5" />
-                    </svg>
-                  ) : null}
-                  <span className="pnsv-sw-dd-item-label">{option.label}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
+        <ul
+          className="pnsv-sw-dd-menu"
+          data-align={align}
+          role="listbox"
+          aria-label={label}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') setOpen(false);
+          }}
+        >
+          {options.map((option) => (
+            <li key={option.value}>
+              <button
+                type="button"
+                role="option"
+                aria-selected={option.value === value}
+                className="pnsv-sw-dd-item"
+                onClick={() => {
+                  setOpen(false);
+                  onChange(option.value);
+                }}
+              >
+                {option.value === value ? (
+                  <svg
+                    className="pnsv-sw-dd-check"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                ) : null}
+                <span className="pnsv-sw-dd-item-label">{option.label}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
       ) : null}
     </span>
   );

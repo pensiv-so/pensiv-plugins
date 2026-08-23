@@ -1,6 +1,6 @@
 {
   "name": "@pensiv-plugins/status-window",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Character stat blocks for web novels — typed attributes, per-episode growth tracking, and presets for Korean, Japanese and LitRPG conventions.",
   "license": "MIT",

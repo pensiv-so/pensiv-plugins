@@ -579,6 +579,58 @@ const LibrarySection: React.FC<{
   );
 };
 
+/**
+ * Comma-separated list editing without the round-trip trap.
+ *
+ * Parsing on every keystroke and re-rendering `join(', ')` deletes the comma
+ * or space the writer just typed (`split → trim → filter` drops it before it
+ * ever paints) and clamps the caret to the end of the box. So the box owns its
+ * raw text while it is being edited: it parses **outward** on every change but
+ * re-reads the canonical value only when unfocused, and normalizes what it
+ * shows on blur.
+ */
+const ListInput: React.FC<{
+  label: string;
+  value: string[];
+  placeholder?: string;
+  onChange: (next: string[]) => void;
+}> = ({ label, value, placeholder, onChange }) => {
+  const joined = value.join(', ');
+  const [text, setText] = React.useState(joined);
+  const focused = React.useRef(false);
+
+  // An outside change (restore defaults, another device) lands while the box
+  // is idle; while the writer is typing, their raw text wins.
+  React.useEffect(() => {
+    if (!focused.current) setText(joined);
+  }, [joined]);
+
+  return (
+    <input
+      className="pnsv-sw-input3"
+      aria-label={label}
+      value={text}
+      placeholder={placeholder}
+      onFocus={() => {
+        focused.current = true;
+      }}
+      onBlur={() => {
+        focused.current = false;
+        setText(joined);
+      }}
+      onChange={(event) => {
+        setText(event.target.value);
+        onChange(
+          event.target.value
+            .split(',')
+            .map((grade) => grade.trim())
+            .filter(Boolean)
+        );
+      }}
+    />
+  );
+};
+
 /** Badge text for a kind — the full labels carry a parenthetical the badge doesn't need. */
 function kindBadgeKey(kind: AttributeKind): StringKey {
   switch (kind) {
@@ -741,7 +793,9 @@ const LibraryRow: React.FC<{
                 onChange={(event) => patchDef({ name: event.target.value })}
               />
             </label>
-            <label className="pnsv-sw-cell">
+            {/* A `<div>`, not a `<label>` — a label would re-dispatch every
+                click inside the cell (panel included) back to the trigger. */}
+            <div className="pnsv-sw-cell">
               <span className="pnsv-sw-cell-label">{t('fieldKind')}</span>
               {/* `end`: this cell sits at the row's right edge, and a panel
                   hanging start-ward would walk out of the card. */}
@@ -753,7 +807,7 @@ const LibraryRow: React.FC<{
                 options={KIND_KEYS.map(({ kind, label }) => ({ value: kind, label: t(label) }))}
                 onChange={(kind) => patchDef({ kind: kind as AttributeKind })}
               />
-            </label>
+            </div>
           </div>
 
           <div className="pnsv-sw-fields">
@@ -768,17 +822,11 @@ const LibraryRow: React.FC<{
             {entry.def.kind === 'stat' || entry.def.kind === 'rank' ? (
               <label className="pnsv-sw-cell" data-grow="true">
                 <span className="pnsv-sw-cell-label">{t('fieldGrades')}</span>
-                <input
-                  className="pnsv-sw-input3"
-                  value={(entry.def.grades ?? []).join(', ')}
+                <ListInput
+                  label={t('fieldGrades')}
+                  value={entry.def.grades ?? []}
                   placeholder={t('gradesHint')}
-                  onChange={(event) => {
-                    const grades = event.target.value
-                      .split(',')
-                      .map((grade) => grade.trim())
-                      .filter(Boolean);
-                    patchDef({ grades: grades.length > 0 ? grades : undefined });
-                  }}
+                  onChange={(grades) => patchDef({ grades: grades.length > 0 ? grades : undefined })}
                 />
               </label>
             ) : null}
