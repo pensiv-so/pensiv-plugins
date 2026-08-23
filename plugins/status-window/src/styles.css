@@ -1,0 +1,1552 @@
+/*
+ * Status Window styles — bundled to `dist/styles.css`, injected by the host
+ * while the plugin is enabled.
+ *
+ * ## Rules this file follows
+ *
+ * 1. **Nothing invented.** Every value is the app's own, re-stated. The app's
+ *    Tailwind build never scans this repo, so the classes can't be imported —
+ *    only copied. Inputs come from `components/ui/input.tsx`, the primary button
+ *    from `button.tsx`, the row hover fill and `rounded-lg` from the task row,
+ *    the pane inset from the notes pane's `p-4`.
+ * 2. **Radii come from `--radius`.** The app's Tailwind maps every `rounded-*`
+ *    to `calc(var(--radius) ± n)` — `rounded-sm` is NOT the Tailwind default
+ *    2px here. Re-stated the same way, so a theme that changes `--radius`
+ *    changes this plugin too.
+ * 3. **Two type sizes per home, both the app's.** The pane reads at the pane
+ *    scale (`text-sm` 0.875 / `text-xs` 0.75); the settings tab reads at the
+ *    settings scale its neighbours use (`text-md` 1rem / `text-sm` 0.875).
+ *    Emphasis is weight and colour, never a third size.
+ * 4. **One alignment line** (`--sw-inset`). The picker, the rows, the group
+ *    headings and the footer all start on it. Rows carry it as their own
+ *    padding, the way the task row does, so the hover fill spans the pane while
+ *    the text stays on the line.
+ * 5. **Host tokens only** — colours, `--radius`, `--shadow-*` — and dark mode
+ *    through the app's `.dark` class (`darkMode: ['class']`), never
+ *    `prefers-color-scheme`.
+ */
+
+/* The app's preflight normally supplies border-box; state it ourselves so a
+   `width: 100%` control never overflows its card by its own padding, whatever
+   the host build does. */
+.pnsv-sw,
+.pnsv-sw *,
+.pnsv-sw *::before,
+.pnsv-sw *::after {
+  box-sizing: border-box;
+}
+
+.pnsv-sw {
+  /* pane scale: text-sm / text-xs */
+  --sw-text: 0.875rem;
+  --sw-meta: 0.75rem;
+  /* the notes pane's p-4 — the host renders pane views full-bleed, so this is
+     the whole inset */
+  --sw-inset: 1rem;
+  /* the task row's gap-3 / gap-2 */
+  --sw-gap: 0.5rem;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  font-size: var(--sw-text);
+  line-height: 1.5;
+  color: hsl(var(--foreground));
+}
+
+/* The host dialog and the settings card own their outer padding and height. */
+.pnsv-sw[data-variant='sheet'],
+.pnsv-sw[data-variant='settings'] {
+  height: auto;
+  gap: 0.625rem;
+}
+
+.pnsv-sw[data-variant='sheet'] {
+  --sw-inset: 0.75rem;
+}
+
+/* On the settings page the card sits between native settings cards, so it reads
+   at their scale: `SettingsRow` labels are text-md (1rem) and the small print is
+   text-sm (0.875), per `PluginSettingsForm`. Rows get the native inset (px-5). */
+.pnsv-sw[data-variant='settings'] {
+  --sw-text: 1rem;
+  --sw-meta: 0.875rem;
+  --sw-inset: 0;
+}
+
+/* ── the character picker ─────────────────────────────────────────────────── */
+
+.pnsv-sw-top {
+  display: flex;
+  align-items: center;
+  gap: var(--sw-gap);
+  /* Tighter than the body inset — this strip is a control, not a text line,
+     and the picker button carries its own inner padding. */
+  padding: 0.5rem 0.625rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.pnsv-sw-picker {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The app's Select trigger (outline): rounded-lg, --input hairline, bg-card,
+   shadow-sm — at the pane's compact height. */
+.pnsv-sw-picker-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sw-gap);
+  width: 100%;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) + 0.1rem);
+  background: hsl(var(--card));
+  box-shadow: var(--shadow-sm);
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.pnsv-sw-picker-button:hover {
+  background: hsl(var(--muted));
+}
+
+.pnsv-sw-picker-button:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.pnsv-sw-picker-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.pnsv-sw-picker-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── the character's face, as the file tree draws it ──────────────────────── */
+
+/* Portrait thumbnail: the tree's h-5 w-5 rounded-sm object-cover. */
+.pnsv-sw-charicon-img {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: calc(var(--radius) - 0.1rem);
+  object-fit: cover;
+}
+
+/* Custom emoji: a plain text span at the tree's text-lg. */
+.pnsv-sw-charicon-emoji {
+  flex: none;
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+/* Category glyph: MonoIcon's h-4.5 w-4.5 at stroke 1.5. */
+.pnsv-sw-charicon-glyph {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-sw-chevron {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Sits under the menu so a click anywhere else closes it. A sibling element
+   rather than a document listener: the pane can unmount mid-gesture. */
+.pnsv-sw-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+}
+
+/* The app's floating panel (`DropdownMenuContent`): bg-popover, rounded-xl,
+   border-transparent, p-1, shadow `var(--floating-ring), var(--shadow-xl)`. */
+.pnsv-sw-menu {
+  position: absolute;
+  z-index: 21;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  max-height: 18rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) + 0.25rem);
+  box-shadow:
+    var(--floating-ring, 0 0 0 1px hsl(var(--border))),
+    var(--shadow-xl, var(--shadow-md));
+}
+
+/* DropdownMenuItem: px-2 py-1.5 gap-2.5 rounded-lg text-sm, hover bg-muted. */
+.pnsv-sw-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.375rem 0.5rem;
+  border: 0;
+  border-radius: calc(var(--radius) + 0.1rem);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.pnsv-sw-menu-item:hover {
+  background: hsl(var(--muted));
+}
+
+.pnsv-sw-menu-item[data-active='true'] {
+  background: hsl(var(--muted));
+  font-weight: 500;
+}
+
+/* Icon + name, grouped left of the badge. */
+.pnsv-sw-menu-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.pnsv-sw-menu-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pnsv-sw-menu-empty,
+.pnsv-sw-menu-foot {
+  padding: 0.375rem 0.5rem;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--sw-meta);
+}
+
+.pnsv-sw-menu-foot {
+  padding: 0.25rem 0;
+  border-top: 1px solid hsl(var(--border));
+  margin-top: 0.25rem;
+}
+
+/* `작성됨` / `추가하기`. The written state borrows the app's badge-secondary. */
+.pnsv-sw-badge {
+  flex: none;
+  padding: 0.0625rem 0.375rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 0.1rem);
+  font-size: var(--sw-meta);
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+
+.pnsv-sw-badge[data-written='true'] {
+  border-color: transparent;
+  background: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+  font-weight: 500;
+}
+
+.pnsv-sw-add {
+  display: flex;
+  gap: 0.375rem;
+  padding: 0.25rem 0.5rem 0.375rem;
+}
+
+/* ── body ─────────────────────────────────────────────────────────────────── */
+
+.pnsv-sw-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.5rem 0 0.75rem;
+}
+
+.pnsv-sw[data-variant='sheet'] .pnsv-sw-body,
+.pnsv-sw[data-variant='settings'] .pnsv-sw-body {
+  overflow: visible;
+}
+
+.pnsv-sw-empty,
+.pnsv-sw-hint {
+  margin: 0;
+  padding: 0 var(--sw-inset);
+  color: hsl(var(--muted-foreground));
+  font-size: var(--sw-meta);
+}
+
+.pnsv-sw-empty {
+  padding: 1.5rem var(--sw-inset);
+  text-align: center;
+}
+
+.pnsv-sw-error {
+  margin: 0 var(--sw-inset) 0.5rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: calc(var(--radius));
+  background: hsl(var(--destructive) / 0.1);
+  color: hsl(var(--destructive));
+  font-size: var(--sw-meta);
+}
+
+/* ── rows ─────────────────────────────────────────────────────────────────── */
+
+.pnsv-sw-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.pnsv-sw-group {
+  margin-top: 0.5rem;
+}
+
+.pnsv-sw-group-title {
+  margin: 0.5rem 0 0.125rem;
+  padding: 0 var(--sw-inset);
+  font-size: var(--sw-meta);
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+}
+
+/* The task row: px-3 py-2 (the pane inset as the row's own padding, so the
+   hover fill spans the pane), gap-3, rounded-lg. */
+.pnsv-sw-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.375rem var(--sw-inset);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.pnsv-sw-row:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+
+.pnsv-sw-row-wrap[data-open='true'] .pnsv-sw-row {
+  background: hsl(var(--muted) / 0.5);
+}
+
+.pnsv-sw-row-name {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-sw-unnamed {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* The value is the thing being read, so it takes the foreground and the
+   tabular figures — a column of numbers that jitters as digits change reads as
+   broken even when it's right. */
+.pnsv-sw-row-value {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.pnsv-sw-row-value[data-changed='true'] {
+  font-weight: 500;
+}
+
+/* Changed-in-this-episode. A dot rather than a colour on the text: the value is
+   already the emphasised element, and tinting it would fight the hierarchy. */
+.pnsv-sw-dot {
+  flex: none;
+  align-self: center;
+  width: 0.3125rem;
+  height: 0.3125rem;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+}
+
+/* ── the expanded row editor ──────────────────────────────────────────────── */
+
+.pnsv-sw-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem var(--sw-inset) 0.75rem;
+  background: hsl(var(--muted) / 0.35);
+}
+
+.pnsv-sw-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.375rem;
+}
+
+.pnsv-sw-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+  min-width: 3.5rem;
+  flex: 0 0 auto;
+}
+
+.pnsv-sw-cell[data-grow='true'] {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+.pnsv-sw-cell-label {
+  font-size: var(--sw-meta);
+  color: hsl(var(--muted-foreground));
+}
+
+/* The app's Input at a compact height: `bg-muted`, `rounded-lg`, `--input`
+   hairline and shadow-sm are the component's own; only the height comes down
+   (h-8 rather than h-10) because the pane is a dense column, the way the app's
+   own side panels tighten their controls. */
+.pnsv-sw-input {
+  width: 100%;
+  min-width: 0;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) + 0.1rem);
+  background: hsl(var(--muted));
+  box-shadow: var(--shadow-sm);
+  color: hsl(var(--foreground));
+  font: inherit;
+  font-size: var(--sw-text);
+}
+
+/*
+ * Text-field focus, quiet on purpose. `--ring` is the brand primary, and
+ * Chromium gives a text field `:focus-visible` on every click — a 2px solid
+ * ring paints a loud coloured frame around whatever is being typed in, worst
+ * on the template textarea. A tinted hairline says "focused" without it.
+ */
+.pnsv-sw-input:focus-visible {
+  outline: none;
+  border-color: hsl(var(--ring) / 0.55);
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.12);
+}
+
+.pnsv-sw-input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-sw-textarea {
+  height: auto;
+  min-height: 4rem;
+  padding: 0.375rem 0.5rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.pnsv-sw-unit {
+  align-self: center;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--sw-meta);
+}
+
+.pnsv-sw-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sw-gap);
+}
+
+/*
+ * The app's Button, ghost variant at the `sm` size: h-8 p-2 rounded-lg text-sm
+ * font-normal, hover bg-muted/80, active scale-[0.98]. The app has no
+ * underlined text-link actions in settings rows — quiet actions are ghost
+ * buttons, destructive ones the same in `--destructive`.
+ */
+.pnsv-sw-ghostbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) + 0.1rem);
+  background: transparent;
+  color: hsl(var(--foreground));
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 400;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pnsv-sw-ghostbtn:hover:not(:disabled) {
+  background: hsl(var(--muted) / 0.8);
+}
+
+.pnsv-sw-ghostbtn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.pnsv-sw-ghostbtn:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.pnsv-sw-ghostbtn[data-variant='outline'] {
+  border-color: hsl(var(--input));
+  background: hsl(var(--card));
+  box-shadow: var(--shadow-sm);
+}
+
+.pnsv-sw-ghostbtn[data-variant='outline']:hover:not(:disabled) {
+  background: hsl(var(--muted));
+}
+
+.pnsv-sw-ghostbtn[data-icon='true'] {
+  width: 2rem;
+  padding: 0;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-sw-ghostbtn[data-icon='true']:hover:not(:disabled) {
+  color: hsl(var(--foreground));
+}
+
+.pnsv-sw-ghostbtn svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+.pnsv-sw-ghostbtn[data-icon='true'] svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.pnsv-sw-ghostbtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── add-attribute ────────────────────────────────────────────────────────── */
+
+.pnsv-sw-add-row {
+  padding: 0.5rem var(--sw-inset) 0;
+}
+
+.pnsv-sw-kinds {
+  position: relative;
+}
+
+.pnsv-sw-kinds > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pnsv-sw-kinds > summary::-webkit-details-marker {
+  display: none;
+}
+
+.pnsv-sw-kind-menu {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.25rem;
+  padding: 0.25rem;
+  max-height: 20rem;
+  overflow-y: auto;
+  background: hsl(var(--popover));
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) + 0.25rem);
+  box-shadow:
+    var(--floating-ring, 0 0 0 1px hsl(var(--border))),
+    var(--shadow-xl, var(--shadow-md));
+}
+
+.pnsv-sw-kind-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.0625rem;
+  padding: 0.375rem 0.5rem;
+  border: 0;
+  border-radius: calc(var(--radius) + 0.1rem);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.pnsv-sw-kind-item:hover {
+  background: hsl(var(--muted));
+}
+
+.pnsv-sw-kind-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The entry's one-line "what this is" — visible before the row is added. */
+.pnsv-sw-kind-desc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--sw-meta);
+  color: hsl(var(--muted-foreground));
+}
+
+/* A library entry: the row adds it, the × takes it out of the library. The ×
+   only appears on hover — it is destructive and secondary to the whole point of
+   the row, which is being clicked. */
+.pnsv-sw-kind-row {
+  display: flex;
+  align-items: center;
+}
+
+.pnsv-sw-kind-row .pnsv-sw-kind-item {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.pnsv-sw-kind-remove {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-inline-end: 0.125rem;
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--radius) - 0.1rem);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.pnsv-sw-kind-row:hover .pnsv-sw-kind-remove,
+.pnsv-sw-kind-remove:focus-visible {
+  opacity: 1;
+}
+
+.pnsv-sw-kind-remove:hover {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+/* Separates the library from the bare kinds below it. */
+.pnsv-sw-kind-divider {
+  margin-top: 0.25rem;
+  padding: 0.375rem 0.5rem 0.1875rem;
+  border-top: 1px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+  font-size: var(--sw-meta);
+}
+
+/* ── buttons ──────────────────────────────────────────────────────────────── */
+
+/* The app's Button: h-9, px-4, rounded-md, medium weight. */
+.pnsv-sw-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  height: 2.25rem;
+  padding: 0 1rem;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius));
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--sw-text);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pnsv-sw-button[data-variant='primary'] {
+  flex: 1 1 auto;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.pnsv-sw-button[data-variant='primary']:hover:not(:disabled) {
+  background: hsl(var(--primary) / 0.9);
+}
+
+.pnsv-sw-button[data-variant='ghost'] {
+  width: 100%;
+  border-color: hsl(var(--border));
+  border-style: dashed;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-sw-button[data-variant='ghost']:hover {
+  background: hsl(var(--muted) / 0.5);
+  color: hsl(var(--foreground));
+}
+
+.pnsv-sw-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.pnsv-sw-button:focus-visible,
+.pnsv-sw-icon-button:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* The app's icon button: square, h-9, rounded-md, --input hairline. */
+.pnsv-sw-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius));
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+}
+
+.pnsv-sw-icon-button:hover {
+  background: hsl(var(--muted) / 0.5);
+  color: hsl(var(--foreground));
+}
+
+.pnsv-sw-icon-button[data-active='true'] {
+  background: hsl(var(--accent));
+  color: hsl(var(--foreground));
+}
+
+.pnsv-sw-icon-button svg {
+  width: 1.0625rem;
+  height: 1.0625rem;
+}
+
+/* ── chips (preset picker) ────────────────────────────────────────────────── */
+
+.pnsv-sw-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.pnsv-sw-chip {
+  padding: 0.25rem 0.625rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 9999px;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font: inherit;
+  font-size: var(--sw-meta);
+  cursor: pointer;
+}
+
+.pnsv-sw-chip:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+
+.pnsv-sw-chip[data-active='true'] {
+  border-color: transparent;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-weight: 500;
+}
+
+/* A library entry in the settings tab — a label, not a control. */
+.pnsv-sw-chip[data-static='true'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-inline-end: 0.25rem;
+  cursor: default;
+}
+
+.pnsv-sw-chip[data-static='true']:hover {
+  background: transparent;
+}
+
+.pnsv-sw-chip-x {
+  width: 1.125rem;
+  height: 1.125rem;
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pnsv-sw-chip-x:hover {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+/* Marks which preset is the default, in the chip row. */
+.pnsv-sw-chip-tag {
+  margin-inline-start: 0.25rem;
+  opacity: 0.8;
+}
+
+/* ── settings-tab structure ───────────────────────────────────────────────── */
+
+/*
+ * The app's own settings language, re-stated: `SettingsSection` (heading, then
+ * cards) → `SettingsCard` (muted outer frame around an elevated inner card) →
+ * `SettingsRow` (label left, control right, hairline between). Every value here
+ * is read off `containers/layouts/settings/SettingsCard.tsx`, not chosen —
+ * `PluginSettingsForm` renders host-drawn plugin settings with exactly these,
+ * so this tab has to match them to sit beside one.
+ */
+
+.pnsv-sw[data-variant='settings'] {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.pnsv-sw-sec {
+  /* SettingsSection: space-y-3 pt-2 */
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+/* Headings carry px-2 so they line up with the card's inner edge. */
+.pnsv-sw-sec-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-inline: 0.5rem;
+}
+
+@media (min-width: 32rem) {
+  .pnsv-sw-sec-head {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+.pnsv-sw-sec-text {
+  min-width: 0;
+}
+
+/* The app's settings `header` item: text-base font-semibold tracking-tight. */
+.pnsv-sw-sec-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: hsl(var(--foreground));
+}
+
+.pnsv-sw-sec-desc {
+  margin: 0.25rem 0 0;
+  font-size: 1rem; /* text-md */
+  line-height: 1.625;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-sw-sec-action {
+  flex: none;
+}
+
+.pnsv-sw-sec-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* rounded-2xl bg-muted/20 p-1.5 → inner rounded-xl border bg-card shadow-sm */
+.pnsv-sw-card {
+  border-radius: calc(var(--radius) + 0.6rem);
+  background: hsl(var(--muted) / 0.2);
+  padding: 0.375rem;
+}
+
+.pnsv-sw-card-inner {
+  overflow: hidden;
+  border: 1px solid hsl(var(--border) / 0.6);
+  border-radius: calc(var(--radius) + 0.25rem);
+  background: hsl(var(--card));
+  box-shadow: var(--shadow-sm);
+}
+
+.pnsv-sw-card-inner[data-variant='plain'] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+}
+
+.dark .pnsv-sw-card-inner {
+  border-color: hsl(var(--border) / 0.5);
+  box-shadow: none;
+}
+
+/* SettingsRow: px-5 py-4, label left / control right, divided by a hairline.
+   The divide is `> * + *`, the app's `divide-y`, so library rows and the add
+   footer get the same hairline as the labelled rows. */
+.pnsv-sw-srow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.pnsv-sw-card-inner[data-variant='rows'] > * + * {
+  border-top: 1px solid hsl(var(--border) / 0.5);
+}
+
+@media (min-width: 32rem) {
+  .pnsv-sw-srow:not([data-stacked='true']) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+}
+
+.pnsv-sw-srow-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem; /* the schema renderer's space-y-0.5 */
+}
+
+/* The app's Label: text-md font-medium leading-none. */
+.pnsv-sw-srow-label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: hsl(var(--foreground));
+}
+
+/* The row description: text-md text-muted-foreground. */
+.pnsv-sw-srow-desc {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-sw-srow-control {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pnsv-sw-card-foot {
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* ── the attribute library, in the 템플릿-settings row shape ──────────────── */
+
+/*
+ * The app's template list row (`TemplatesSettingsTab.tsx`): grip · chevron ·
+ * title over a muted description, at `px-2 py-2`; expanding opens a hairlined
+ * body inset to `px-12` so its content hangs under the title. The drop
+ * indicator is the mobile variant's `h-1 rounded-full bg-primary/50` bar.
+ */
+.pnsv-sw-librow-wrap {
+  position: relative;
+  background: hsl(var(--card));
+}
+
+.pnsv-sw-librow-wrap[data-drop='top']::before,
+.pnsv-sw-librow-wrap[data-drop='bottom']::after {
+  content: '';
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  height: 0.25rem;
+  border-radius: 9999px;
+  background: hsl(var(--primary) / 0.5);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.pnsv-sw-librow-wrap[data-drop='top']::before {
+  top: -0.125rem;
+}
+
+.pnsv-sw-librow-wrap[data-drop='bottom']::after {
+  bottom: -0.125rem;
+}
+
+.pnsv-sw-librow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+.pnsv-sw-grip {
+  cursor: grab;
+}
+
+.pnsv-sw-grip:active {
+  cursor: grabbing;
+}
+
+.pnsv-sw-librow-trigger {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.pnsv-sw-librow-chevron {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: hsl(var(--muted-foreground));
+  transition: transform 0.15s;
+}
+
+.pnsv-sw-librow-chevron[data-open='true'] {
+  transform: rotate(90deg);
+}
+
+.pnsv-sw-librow-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+/* Title text-sm font-medium; description text-md muted — the app's pairing. */
+.pnsv-sw-librow-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+}
+
+.pnsv-sw-librow-desc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-sw-librow-side {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* What the row prints — `415(+12) [E]` — so the list answers "which one is
+   this" without opening anything. */
+.pnsv-sw-librow-sample {
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--muted-foreground));
+}
+
+/* The expanded editor: hairline top, inset under the title like the app's
+   expanded template body (border-t px-12 py-3). */
+.pnsv-sw-libbody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  border-top: 1px solid hsl(var(--border) / 0.5);
+  padding: 0.75rem 3rem;
+}
+
+.pnsv-sw-libbody .pnsv-sw-cell-label {
+  font-size: 0.75rem;
+}
+
+/* The object-list field's compact input: h-8 rounded-md border-border/80
+   bg-card text-sm shadow-sm. */
+.pnsv-sw-input3 {
+  width: 100%;
+  min-width: 0;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border: 1px solid hsl(var(--border) / 0.8);
+  border-radius: calc(var(--radius));
+  background: hsl(var(--card));
+  box-shadow: var(--shadow-sm);
+  color: hsl(var(--foreground));
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.pnsv-sw-input3[data-width='sm'] {
+  width: 6rem;
+}
+
+.pnsv-sw-input3:focus-visible {
+  outline: none;
+  border-color: hsl(var(--ring) / 0.55);
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.12);
+}
+
+.pnsv-sw-input3::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-sw-lib-example {
+  margin: 0;
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-sw-lib-example span {
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--foreground));
+}
+
+.pnsv-sw-lib-add {
+  display: flex;
+  padding: 0.5rem;
+}
+
+/* The app's list empty state: px-5 py-8 text-center text-md muted. */
+.pnsv-sw-lib-empty {
+  margin: 0;
+  padding: 2rem 1.25rem;
+  text-align: center;
+  font-size: 1rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* A settled state where a button would otherwise sit — "✓ 기본". */
+.pnsv-sw-tag {
+  font-size: var(--sw-meta);
+  color: hsl(var(--muted-foreground));
+}
+
+/* ── controls, at the app's measurements ──────────────────────────────────── */
+
+/* ui/switch.tsx at its default size (`sm`): track h-4 w-8, thumb h-3 w-4,
+   translate-x-3 when on. The schema renderer passes no size, so `sm` is what
+   every native settings toggle actually is — `md` reads twice as heavy. */
+.pnsv-sw-switch {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  width: 2rem;
+  height: 1rem;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  background: hsl(var(--muted));
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.pnsv-sw-switch[data-on='true'] {
+  background: hsl(var(--primary));
+}
+
+.pnsv-sw-switch-thumb {
+  display: block;
+  width: 1rem;
+  height: 0.75rem;
+  border-radius: 9999px;
+  background: hsl(var(--card));
+  box-shadow: var(--shadow-lg);
+  transform: translateX(0);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pnsv-sw-switch[data-on='true'] .pnsv-sw-switch-thumb {
+  transform: translateX(0.75rem);
+}
+
+.pnsv-sw-switch:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/*
+ * The app's Select, in two pieces (`components/ui/select.tsx`):
+ *
+ *   trigger  outline — h-10 (sm h-8) rounded-lg border-input bg-card shadow-sm
+ *            px-3 text-sm, hover bg-muted, ChevronDown at 50%
+ *   panel    rounded-xl border-transparent bg-popover p-1,
+ *            shadow `var(--floating-ring), var(--shadow-xl)`
+ *   item     rounded-lg py-1.5 pl-8 pr-2 text-sm, hover/focus bg-muted,
+ *            check in an absolute h-3.5 w-3.5 slot at left-2
+ */
+.pnsv-sw-dd {
+  position: relative;
+  display: inline-flex;
+}
+
+.pnsv-sw-dd-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  height: 2.5rem;
+  min-width: 11rem; /* the schema renderer's w-44 */
+  padding: 0 0.75rem;
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) + 0.1rem);
+  background: hsl(var(--card));
+  box-shadow: var(--shadow-sm);
+  color: hsl(var(--foreground));
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: start;
+  cursor: pointer;
+}
+
+.pnsv-sw-dd-trigger[data-wide='true'] {
+  min-width: 14rem;
+}
+
+.pnsv-sw-dd-trigger[data-size='sm'] {
+  height: 2rem;
+  min-width: 6rem;
+}
+
+.pnsv-sw-dd-trigger:hover {
+  background: hsl(var(--muted));
+}
+
+.pnsv-sw-dd-trigger:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.pnsv-sw-dd-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pnsv-sw-dd-menu {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 0.25rem);
+  min-width: 100%;
+  width: max-content;
+  /* Never wider than the window — a long option list must ellipsize, not walk
+     out of the card. */
+  max-width: min(20rem, calc(100vw - 2rem));
+  max-height: 24rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) + 0.25rem);
+  box-shadow:
+    var(--floating-ring, 0 0 0 1px hsl(var(--border))),
+    var(--shadow-xl, var(--shadow-md));
+}
+
+.pnsv-sw-dd-menu[data-align='end'] {
+  right: 0;
+}
+
+.pnsv-sw-dd-menu[data-align='start'] {
+  left: 0;
+}
+
+.pnsv-sw-dd-item {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  padding: 0.375rem 0.5rem 0.375rem 2rem;
+  border: 0;
+  border-radius: calc(var(--radius) + 0.1rem);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: start;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pnsv-sw-dd-item:hover,
+.pnsv-sw-dd-item:focus-visible {
+  background: hsl(var(--muted));
+  outline: none;
+}
+
+.pnsv-sw-dd-check {
+  position: absolute;
+  left: 0.5rem;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.pnsv-sw-dd-item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ui/input.tsx: h-10, rounded-lg, border-input, bg-muted, shadow-sm. */
+.pnsv-sw-input2 {
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) + 0.1rem);
+  background: hsl(var(--muted));
+  box-shadow: var(--shadow-sm);
+  color: hsl(var(--foreground));
+  font: inherit;
+  font-size: var(--sw-meta);
+}
+
+.pnsv-sw-input2[data-width='sm'] {
+  width: 6rem;
+}
+
+.pnsv-sw-input2[data-width='md'] {
+  width: 14rem;
+}
+
+.pnsv-sw-input2[data-mono='true'] {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+.pnsv-sw-input2:focus-visible {
+  outline: none;
+  border-color: hsl(var(--ring) / 0.55);
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.12);
+}
+
+.pnsv-sw-input2::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-sw-textarea2 {
+  width: 100%;
+  height: auto;
+  min-height: 9rem;
+  padding: 0.625rem 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+/* Right-hand cluster of a row's actions, so the destructive one sits at the
+   far edge and never next to the one you actually meant to press. */
+.pnsv-sw-row-actions-end {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+/* ── preview ──────────────────────────────────────────────────────────────── */
+
+/*
+ * The preview is the only monospace surface in the plugin, and it has to be:
+ * the alignment the renderer computes is in display columns, so a proportional
+ * font would show the writer a block that doesn't line up and let them "fix" an
+ * output that was already correct.
+ */
+.pnsv-sw-preview {
+  margin: 0 var(--sw-inset);
+  padding: 0.75rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) + 0.1rem);
+  background: hsl(var(--muted) / 0.4);
+  color: hsl(var(--foreground));
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: var(--sw-meta);
+  line-height: 1.6;
+  white-space: pre;
+  overflow-x: auto;
+  tab-size: 4;
+}
+
+.pnsv-sw[data-variant='settings'] .pnsv-sw-preview,
+.pnsv-sw[data-variant='sheet'] .pnsv-sw-preview {
+  margin: 0;
+}
+
+.pnsv-sw-template {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: var(--sw-meta);
+}
+
+/* ── footer ───────────────────────────────────────────────────────────────── */
+
+.pnsv-sw-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--sw-gap);
+  padding: 0.625rem var(--sw-inset);
+  border-top: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+}
+
+.pnsv-sw[data-variant='sheet'] .pnsv-sw-foot,
+.pnsv-sw[data-variant='settings'] .pnsv-sw-foot {
+  border-top: 0;
+  background: transparent;
+  padding-inline: 0;
+}
+
+/* ── the template syntax panel ────────────────────────────────────────────── */
+
+/* Inline under the textarea (no sheet host exists on the settings route), as a
+   quiet inset panel between the source and the preview. */
+.pnsv-sw-help {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid hsl(var(--border) / 0.6);
+  border-radius: calc(var(--radius) + 0.25rem);
+  background: hsl(var(--muted) / 0.2);
+}
+
+.pnsv-sw-help-h {
+  margin: 0.75rem 0 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: hsl(var(--foreground));
+}
+
+.pnsv-sw-help-h:first-child {
+  margin-top: 0;
+}
+
+.pnsv-sw-help-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.pnsv-sw-help-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.3125rem 0;
+}
+
+.pnsv-sw-help-row + .pnsv-sw-help-row {
+  border-top: 1px solid hsl(var(--border) / 0.4);
+}
+
+/* The app's `sample` chip: rounded-sm border bg-muted/40 px-1 py-0.5 mono. */
+.pnsv-sw-help-code {
+  flex: none;
+  width: 11.5rem;
+  padding: 0.125rem 0.25rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 0.1rem);
+  background: hsl(var(--muted) / 0.4);
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: hsl(var(--foreground));
+  overflow-wrap: break-word;
+}
+
+.pnsv-sw-help-desc {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: hsl(var(--muted-foreground));
+}
+
+/* The snippet rows' 삽입 — a smaller ghost, centred against the chip. */
+.pnsv-sw-help-insert {
+  flex: none;
+  align-self: center;
+  height: 1.5rem;
+  padding: 0 0.375rem;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.pnsv-sw-help-insert:hover:not(:disabled) {
+  color: hsl(var(--foreground));
+}
+
+/* ── the mark in the prose ────────────────────────────────────────────────── */
+
+/*
+ * A rule down the left edge, not a highlight. A manuscript page already carries
+ * comments, spell-check and search highlights; another block of colour behind
+ * the text is what makes a writer turn a feature off. This says "this text is
+ * managed" and nothing more.
+ */
+.pnsv-sw-block {
+  box-shadow: -0.5rem 0 0 -0.4375rem hsl(var(--primary) / 0.45);
+}

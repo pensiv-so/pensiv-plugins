@@ -55,7 +55,21 @@ export interface ProjectFile {
   rank: string;
   labelId?: string | null;
   statusId?: string | null;
+  /**
+   * Either an icon name (`'Layers'`) or a raw emoji character — the app stores
+   * both in one field. Test for emoji before treating it as a name.
+   */
   icon?: string;
+  /**
+   * The sheet's category (`'character'`, `'location'`, …). Sheets only; it picks
+   * the default glyph the file tree shows when no custom {@link icon} is set.
+   */
+  sheetCategory?: string;
+  /**
+   * The sheet's portrait thumbnail URL, when one is set. Sheets only. The file
+   * tree shows this in preference to the icon.
+   */
+  portraitUrl?: string;
   createdAt: string;
   updatedAt: string;
   /** Set when the file is in the trash. Trashed files are excluded unless asked for. */

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://pensiv.so/schemas/plugin-manifest-v1.json",
+  "id": "so.pensiv.status-window",
+  "name": {
+    "en": "Status Window",
+    "ko": "상태창",
+    "ja": "ステータス"
+  },
+  "version": "1.0.0",
+  "description": {
+    "en": "Character stat blocks for web novels. Typed attributes, per-episode change tracking with growth arrows, and six presets that match how Korean, Japanese and LitRPG serials actually format them.",
+    "ko": "웹소설용 캐릭터 상태창. 타입이 있는 능력치, 회차별 변화 추적과 성장 화살표, 그리고 한국·일본·LitRPG 연재물이 실제로 쓰는 표기를 옮긴 프리셋 6종.",
+    "ja": "ウェブ小説向けのキャラクターステータス。型のある能力値、話ごとの変化追跡と成長の矢印、そして韓国・日本・LitRPGの連載が実際に使う表記を写したプリセット6種。"
+  },
+  "author": {
+    "name": "pensiv",
+    "url": "https://pensiv.so"
+  },
+  "icon": "Id",
+  "accent": "#7c5cff",
+  "sdk": "^1.0.0",
+  "source": "marketplace",
+  "permissions": ["editor.read", "editor.write", "project.read", "storage.synced"],
+  "platforms": ["desktop", "web"],
+  "license": "MIT",
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/plugins/status-window",
+  "contributes": {
+    "commands": [
+      { "id": "insert", "name": "Status Window: Insert into text" },
+      { "id": "refresh", "name": "Status Window: Refresh blocks in this episode" },
+      { "id": "flatten", "name": "Status Window: Convert live blocks to plain text" }
+    ],
+    "slash": [{ "id": "status", "title": "Status window", "icon": "Id" }],
+    "settings": { "schema": {} }
+  }
+}
