@@ -6,7 +6,7 @@ Track a per-document writing goal with a floating progress widget.
 
 - Set a word or character target for the document you're working on
 - A floating progress ring fills as the document grows
-- Each document keeps its own goal — drafts, chapters, and notes track separately
+- Each document keeps its own goal, so drafts, chapters, and notes track separately
 
 ## Usage
 

@@ -4,7 +4,7 @@ A built-in web browser pane with bookmarks and a configurable homepage.
 
 ## Features
 
-- Browse the web in a pane right inside your workspace — research without switching apps
+- Browse the web in a pane right inside your workspace, so you can research without switching apps
 - Bookmark pages you come back to
 - Set the homepage the pane opens with
 - `Browser: Open` command to open the pane from anywhere

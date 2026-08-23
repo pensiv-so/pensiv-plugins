@@ -20,17 +20,17 @@ manuscript and a straight quote inside an English one both read correctly.
 | **Monologue**        | `‘ ’` `' '` `( )` `（ ）`                                   |
 | **Special dialogue** | `[ ]` `［ ］` `【 】` `〔 〕` `〈 〉` `《 》` `『 』` `{ }` |
 | **Narration**        | everything else                                             |
-| _(empty)_            | nothing but whitespace — counted, never bucketed            |
+| _(empty)_            | nothing but whitespace; counted, never bucketed             |
 
 A speech tag after the line doesn't change it: `"Not bad," he said.` is dialogue.
 A quote in the middle of a sentence doesn't create one. An opener with no closer
 stays narration rather than becoming a guess, and an apostrophe is never read as
-a closing quote, so `'Tis the season` stays narration too. Indentation — the
-full-width space included — is stripped before judging, so a manuscript pasted in
+a closing quote, so `'Tis the season` stays narration too. Indentation (the
+full-width space included) is stripped before judging, so a manuscript pasted in
 from somewhere else still reads correctly.
 
 The defaults follow what Korean, English-language and Japanese manuscripts
-actually use, and every ambiguous family is remappable in settings — some writers
+actually use, and every ambiguous family is remappable in settings: some writers
 put system messages in parentheses, some reserve `『 』` for titles.
 
 A narration-heavy English manuscript is not a bug. English inner voice is carried
@@ -46,7 +46,7 @@ figure on screen is what you actually wrote.
 The rest of the counting is tuned for manuscripts too:
 
 - An emoji or a rare CJK ideograph counts as one character.
-- A Shift+Enter line break is its own paragraph by default — writers who never
+- A Shift+Enter line break is its own paragraph by default; writers who never
   press Enter would otherwise show one 4,000-character "paragraph".
 - Headings are left out entirely; a chapter title is not prose.
 - The mobile estimate works out each paragraph's line count separately before

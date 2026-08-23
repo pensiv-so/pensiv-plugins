@@ -14,7 +14,7 @@ Live active-writing time as a floating widget, tray chip and sheet.
 
 ## Usage
 
-Enable the plugin — the floating card appears in the corner and can be dragged
+Enable the plugin, and the floating card appears in the corner; it can be dragged
 or hidden from its settings. Set a **daily time goal** there to get the progress
 bar (`0` turns it off).
 
