@@ -37,6 +37,32 @@
   singleton store across surfaces, ephemeral run-state vs durable `app.storage`,
   a multi-surface `registerWidget` (floating + chip + sheet), and the i18n recipe.
 
+## Per-plugin developer notes (DEVELOPER.md)
+
+Plugin `README.md` files are user-facing only — they seed the marketplace
+listing description, so they carry no implementation detail. The engineering
+write-ups (design decisions, host-API patterns, traps) live in each plugin's
+`DEVELOPER.md`:
+
+- [Calculator](plugins/calculator/DEVELOPER.md): pure state-machine engine,
+  run-state vs durable settings, pane-not-dialog, panel-scoped keyboard.
+- [Date calculator](plugins/date-calculator/DEVELOPER.md): civil dates instead
+  of `Date` objects, round-tripping diffs, the 29 February convention.
+- [Unit converter](plugins/unit-converter/DEVELOPER.md): ratio tables with exact
+  definitions, temperature as functions, historical units as a filter.
+- [Pomodoro basic](plugins/pomodoro-basic/DEVELOPER.md): wall-clock countdown
+  that survives renderer throttling, the CSS-only dial, accent-only phase colour.
+- [Foreshadowing](plugins/foreshadowing/DEVELOPER.md): anchoring plugin data to
+  prose — the mark IS the database, writing to off-screen files, `target.range`.
+- [Paragraph analysis](plugins/paragraph-analysis/DEVELOPER.md): `getDoc()` over
+  `getText()`, debounced walks, porting app chrome without the card shell.
+- [Canvas checklist](plugins/canvas-checklist/DEVELOPER.md): the host/plugin
+  split for canvas nodes, the 16 KB state cap, deterministic ids, `readOnly`.
+- [Writing time](plugins/writing-time/DEVELOPER.md): the session lifecycle,
+  what `activeMs` measures, three surfaces from one hook.
+- [Status window](plugins/status-window/DEVELOPER.md): the template language,
+  permissions rationale, build commands.
+
 ## SDK contract (read these for exact types)
 
 - [Plugin base class](packages/plugin-sdk/src/plugin.ts): onload/onunload,
