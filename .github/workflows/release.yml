@@ -1,11 +1,22 @@
 name: release
 
-# Manual-only for now: npm publishing isn't decided yet. Leaving this on a
-# `push: main` trigger would make `changeset publish` run (and fail, since no
-# NPM_TOKEN is set) on every push. When you're ready to publish:
-#   1. add an `NPM_TOKEN` repo secret,
-#   2. switch the trigger below to `on: push: branches: [main]`.
+# Publishing happens at merge time, never on a plain push.
+#
+# On every push to `main` this runs the changesets action, which does one of two
+# things depending on whether there are unconsumed changesets:
+#
+#   - some pending  → it opens/updates a "Version Packages" PR that bumps the
+#                     versions and rewrites the changelogs. Nothing is published.
+#   - none pending  → the version bumps are already on `main` (because that PR
+#                     was merged), so it publishes every package whose version
+#                     is ahead of the registry.
+#
+# So the only thing that ever triggers a publish is merging the Version Packages
+# PR, which is a human clicking merge on a diff that shows exactly what will go
+# out. `workflow_dispatch` stays for re-running a failed publish by hand.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 concurrency: release-${{ github.ref }}
