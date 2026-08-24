@@ -170,12 +170,12 @@
 
 /* The app's floating panel (`DropdownMenuContent`): bg-popover, rounded-xl,
    border-transparent, p-1, shadow `var(--floating-ring), var(--shadow-xl)`. */
+/* Same portal treatment as .pnsv-sw-dd-menu — fixed against the picker button,
+   never clipped by the pane, above the host's dialogs. */
 .pnsv-sw-menu {
-  position: absolute;
-  z-index: 21;
-  top: calc(100% + 0.25rem);
-  left: 0;
-  right: 0;
+  position: fixed;
+  z-index: 60;
+  pointer-events: auto;
   max-height: 18rem;
   overflow-y: auto;
   margin: 0;
@@ -280,6 +280,14 @@
 .pnsv-sw[data-variant='sheet'] .pnsv-sw-body,
 .pnsv-sw[data-variant='settings'] .pnsv-sw-body {
   overflow: visible;
+}
+
+/* The system-message composer, hosted as a mode of the pane. */
+.pnsv-sw-systembody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.75rem var(--sw-inset);
 }
 
 .pnsv-sw-empty,
@@ -1060,30 +1068,16 @@
   transform: rotate(90deg);
 }
 
-.pnsv-sw-librow-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-  min-width: 0;
-}
 
-/* Title text-sm font-medium; description text-md muted — the app's pairing. */
+/* One line per row — the body text size of the surface it sits in. */
 .pnsv-sw-librow-title {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.875rem;
+  font-size: var(--sw-text);
   font-weight: 500;
   color: hsl(var(--foreground));
-}
-
-.pnsv-sw-librow-desc {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 1rem;
-  line-height: 1.5;
-  color: hsl(var(--muted-foreground));
 }
 
 .pnsv-sw-librow-side {
@@ -1281,11 +1275,14 @@
   white-space: nowrap;
 }
 
+/* A portal onto <body>, placed fixed against the trigger (useMenuPanel) — so
+   no overflow ancestor (settings card, scroll viewport, pane body) can clip
+   it. z-index above the host's dialogs; explicit pointer-events because a
+   modal host disables them on <body> and re-enables only its own content. */
 .pnsv-sw-dd-menu {
-  position: absolute;
-  z-index: 50;
-  top: calc(100% + 0.25rem);
-  min-width: 100%;
+  position: fixed;
+  z-index: 60;
+  pointer-events: auto;
   width: max-content;
   /* Never wider than the window — a long option list must ellipsize, not walk
      out of the card. */
@@ -1304,13 +1301,6 @@
     var(--shadow-xl, var(--shadow-md));
 }
 
-.pnsv-sw-dd-menu[data-align='end'] {
-  right: 0;
-}
-
-.pnsv-sw-dd-menu[data-align='start'] {
-  left: 0;
-}
 
 .pnsv-sw-dd-item {
   position: relative;

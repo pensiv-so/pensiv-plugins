@@ -33,6 +33,7 @@
  * `--radius` so a theme that changes it changes this too.
  */
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { resolveLocalizedText, type HostApi } from '@pensiv/plugin-sdk';
 import { insertBlock, refreshBlocks, renderFor } from './blocks';
 import { FieldEditor } from './fields';
@@ -57,6 +58,7 @@ import {
 } from './library';
 import { formatArrow, formatValue } from './format';
 import { CharacterIcon } from './icons';
+import { useMenuPanel } from './ui';
 import {
   addLocalCharacter,
   clearValue,
@@ -71,6 +73,8 @@ import {
   writeSchema
 } from './storage';
 import { readAutoRefresh, readSettings } from './settings';
+import { consumePaneRequest, onPaneRequest } from './focus';
+import { SystemMessageBody } from './system';
 
 /**
  * The seven engine kinds, offered under "blank row".
@@ -118,24 +122,42 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
   const [adding, setAdding] = React.useState(false);
   const [addName, setAddName] = React.useState('');
   const pickerRef = React.useRef<HTMLDivElement | null>(null);
+  const closePicker = React.useCallback(() => setPickerOpen(false), []);
+  const { menuRef: pickerMenuRef, menuStyle: pickerMenuStyle } = useMenuPanel(
+    pickerOpen,
+    pickerRef,
+    'stretch',
+    closePicker
+  );
 
   // Light dismiss, same as the Dropdown: a capture-phase press outside closes
   // the list without eating the press, and nothing blocks scrolling while it
   // is open. The listener exists only while open; the effect cleanup also
-  // covers the pane unmounting mid-gesture.
+  // covers the pane unmounting mid-gesture. The menu is a portal, not a DOM
+  // descendant of the picker, so it needs its own containment check.
   React.useEffect(() => {
     if (!pickerOpen) return undefined;
     const onPointerDown = (event: PointerEvent) => {
-      if (!pickerRef.current?.contains(event.target as Node)) setPickerOpen(false);
+      const target = event.target as Node;
+      if (!pickerRef.current?.contains(target) && !pickerMenuRef.current?.contains(target)) {
+        setPickerOpen(false);
+      }
     };
     document.addEventListener('pointerdown', onPointerDown, true);
     return () => document.removeEventListener('pointerdown', onPointerDown, true);
-  }, [pickerOpen]);
+  }, [pickerOpen, pickerMenuRef]);
 
   const settings = React.useMemo(() => readSettings(app), [app, revision]);
   const characters = React.useMemo(() => readCharacters(app), [app, revision]);
 
-  const [selectedId, setSelectedId] = React.useState<string | undefined>(initialCharacterId);
+  // A gesture in the prose ("edit this block", "/system message") may have
+  // parked a request just before this mount.
+  const initialRequest = React.useMemo(() => consumePaneRequest(), []);
+  const [selectedId, setSelectedId] = React.useState<string | undefined>(
+    initialCharacterId ?? (initialRequest?.kind === 'character' ? initialRequest.id : undefined)
+  );
+  // The composer is a mode of this panel, not a modal over the prose.
+  const [systemMode, setSystemMode] = React.useState(initialRequest?.kind === 'system');
   const characterId = selectedId ?? characters[0]?.id;
   const character = characters.find((c) => c.id === characterId);
 
@@ -143,6 +165,21 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
   React.useEffect(() => {
     if (initialCharacterId) setSelectedId(initialCharacterId);
   }, [initialCharacterId]);
+
+  // And follow later asks while already open — a second block's "edit this"
+  // retargets the pane rather than opening anything new.
+  React.useEffect(
+    () =>
+      onPaneRequest((next) => {
+        if (next.kind === 'character') {
+          setSelectedId(next.id);
+          setSystemMode(false);
+        } else {
+          setSystemMode(true);
+        }
+      }),
+    []
+  );
 
   // Project edits (a renamed sheet, a reordered chapter) change what this pane
   // shows, so re-read rather than hold a stale snapshot.
@@ -231,6 +268,23 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
     );
   }
 
+  // `/시스템 메시지` — the composer as a mode of this panel. A back link rather
+  // than a dismiss: the writer came from the rows and goes back to them.
+  if (systemMode) {
+    return (
+      <div className="pnsv-sw" data-variant={variant}>
+        <div className="pnsv-sw-top">
+          <button type="button" className="pnsv-sw-ghostbtn" onClick={() => setSystemMode(false)}>
+            ‹ {t('systemMessage')}
+          </button>
+        </div>
+        <div className="pnsv-sw-body pnsv-sw-systembody">
+          <SystemMessageBody app={app} onDone={() => setSystemMode(false)} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pnsv-sw" data-variant={variant}>
       {/* ── character picker ─────────────────────────────────────────────── */}
@@ -261,7 +315,8 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
           </button>
 
           {pickerOpen ? (
-            <ul className="pnsv-sw-menu" role="listbox">
+            createPortal(
+            <ul className="pnsv-sw-menu" ref={pickerMenuRef} style={pickerMenuStyle} role="listbox">
                 {characters.length === 0 ? (
                   <li className="pnsv-sw-menu-empty">{t('noCharacters')}</li>
                 ) : null}
@@ -335,7 +390,9 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
                     </button>
                   )}
                 </li>
-            </ul>
+            </ul>,
+              document.body
+            )
           ) : null}
         </div>
 

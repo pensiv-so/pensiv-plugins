@@ -98,6 +98,7 @@ const STRINGS = {
   saveToLibrary: { en: 'Save to library', ko: '라이브러리에 추가', ja: 'ライブラリに追加' },
   savedToLibrary: { en: 'Saved to library', ko: '라이브러리에 추가했습니다', ja: 'ライブラリに追加しました' },
   removeFromLibrary: { en: 'Remove from library', ko: '라이브러리에서 삭제', ja: 'ライブラリから削除' },
+  duplicateEntry: { en: 'Duplicate', ko: '복제', ja: '複製' },
   blankRow: { en: 'Blank row', ko: '빈 행', ja: '空の行' },
   restoreDefaults: { en: 'Restore defaults', ko: '기본값 복원', ja: '既定に戻す' },
   restoreConfirm: {

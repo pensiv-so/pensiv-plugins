@@ -192,6 +192,28 @@ export function reorderAttributeTemplate(app: HostApi, id: string, toIndex: numb
   writeList(app, KEY_TEMPLATES, next);
 }
 
+/**
+ * Copy an entry under a new id, landing right below the original.
+ *
+ * `label` is the resolved display name plus the copy suffix — a plain string,
+ * because from the moment of the copy the entry is the writer's, not ours to
+ * translate.
+ */
+export function duplicateAttributeTemplate(
+  app: HostApi,
+  id: string,
+  label: string
+): AttributeTemplate | undefined {
+  const list = listAttributeTemplates(app);
+  const index = list.findIndex((entry) => entry.id === id);
+  if (index === -1) return undefined;
+  const copy: AttributeTemplate = { ...clone(list[index] as AttributeTemplate), id: newId('t'), label };
+  const next = [...list];
+  next.splice(index + 1, 0, copy);
+  writeList(app, KEY_TEMPLATES, next);
+  return copy;
+}
+
 export function deleteAttributeTemplate(app: HostApi, id: string): void {
   writeList(
     app,

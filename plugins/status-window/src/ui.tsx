@@ -23,6 +23,7 @@
  *   input     h-10 rounded-lg border-input bg-muted
  */
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 
 export const Section: React.FC<{
   title: string;
@@ -146,6 +147,105 @@ export interface DropdownOption {
   label: string;
 }
 
+/** .25rem — the gap between a trigger and its panel. */
+const MENU_GAP = 4;
+/** Breathing room kept between a panel and the viewport edge. */
+const MENU_MARGIN = 8;
+/** Below this many pixels a panel flips to whichever side has more room. */
+const MENU_MIN = 120;
+/** The design cap — the app's own select never grows past 24rem. */
+const MENU_CAP = 384;
+
+/**
+ * Popover panel placement and wheel scrolling, shared by every menu here.
+ *
+ * The panels used to be `position: absolute` under their trigger, and every
+ * `overflow` ancestor clipped them — the settings card, the scroll viewport,
+ * the pane body. A panel opened low in the view ran past the clip line, and
+ * the hidden options were unreachable: the wheel latched onto the panel's own
+ * (barely movable) scroller and went nowhere. So the panel is now a **portal**
+ * onto `document.body`, placed `fixed` against the trigger: nothing clips it,
+ * it hangs upward when the room below is cramped, its height is capped to the
+ * room it actually has, and it scrolls itself on wheel — by hand, because the
+ * host wraps these surfaces in scroll locks and custom scroll areas that can
+ * swallow the native gesture.
+ *
+ * Fixed placement doesn't track the page, so any scroll or resize outside the
+ * panel closes it (the native `<select>` rule). `onRequestClose` is also how
+ * the anchored-side dismissal keeps working: the panel is no longer a DOM
+ * descendant of the trigger, so "outside" checks must test `menuRef` too.
+ */
+export function useMenuPanel(
+  open: boolean,
+  anchorRef: React.RefObject<HTMLElement | null>,
+  align: 'start' | 'end' | 'stretch',
+  onRequestClose: () => void
+) {
+  const menuRef = React.useRef<HTMLUListElement | null>(null);
+  const [style, setStyle] = React.useState<React.CSSProperties | null>(null);
+
+  React.useLayoutEffect(() => {
+    if (!open) {
+      setStyle(null);
+      return;
+    }
+    const anchor = anchorRef.current;
+    if (!anchor) return;
+    const rect = anchor.getBoundingClientRect();
+    const below = window.innerHeight - rect.bottom - MENU_GAP - MENU_MARGIN;
+    const above = rect.top - MENU_GAP - MENU_MARGIN;
+    const up = below < MENU_MIN && above > below;
+    const room = up ? above : below;
+    const next: React.CSSProperties = {
+      position: 'fixed',
+      top: up ? 'auto' : rect.bottom + MENU_GAP,
+      bottom: up ? window.innerHeight - rect.top + MENU_GAP : 'auto',
+      // Never taller than the side it hangs from — a floor here would poke
+      // back out past the very edge the measurement was for.
+      maxHeight: Math.min(MENU_CAP, Math.max(48, room)),
+      minWidth: rect.width,
+      left: align === 'end' ? 'auto' : rect.left,
+      right: align === 'end' ? window.innerWidth - rect.right : 'auto',
+      width: align === 'stretch' ? rect.width : undefined
+    };
+    setStyle(next);
+  }, [open, anchorRef, align]);
+
+  React.useEffect(() => {
+    if (!open) return undefined;
+    const menu = menuRef.current;
+    if (!menu) return undefined;
+    const onWheel = (event: WheelEvent) => {
+      if (menu.scrollHeight <= menu.clientHeight) return;
+      // deltaMode 1 is lines; Chromium reports pixels, but cheap to honor.
+      const delta = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
+      const before = menu.scrollTop;
+      menu.scrollTop += delta;
+      if (menu.scrollTop !== before) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    const onScroll = (event: Event) => {
+      // The panel scrolling itself is fine; the page moving under a fixed
+      // panel is not — the panel would drift off its trigger.
+      if (event.target instanceof Node && menu.contains(event.target)) return;
+      onRequestClose();
+    };
+    // React 17+ registers `onWheel` passively, which forbids preventDefault.
+    menu.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', onRequestClose);
+    return () => {
+      menu.removeEventListener('wheel', onWheel);
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', onRequestClose);
+    };
+  }, [open, onRequestClose]);
+
+  return { menuRef, menuStyle: style ?? undefined };
+}
+
 /**
  * The app's Select, re-drawn: outline trigger with a chevron, a popover panel
  * on the floating-ring shadow, and a check beside the current value. A native
@@ -173,16 +273,27 @@ export const Dropdown: React.FC<{
 }> = ({ value, onChange, options, label, wide, size = 'default', align = 'end' }) => {
   const [open, setOpen] = React.useState(false);
   const rootRef = React.useRef<HTMLSpanElement | null>(null);
+  const close = React.useCallback(() => setOpen(false), []);
+  const { menuRef, menuStyle } = useMenuPanel(open, rootRef, align, close);
   const current = options.find((option) => option.value === value);
 
   React.useEffect(() => {
     if (!open) return undefined;
     const onPointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (!rootRef.current?.contains(target) && !menuRef.current?.contains(target)) setOpen(false);
     };
     document.addEventListener('pointerdown', onPointerDown, true);
     return () => document.removeEventListener('pointerdown', onPointerDown, true);
-  }, [open]);
+  }, [open, menuRef]);
+
+  // Escape closes the panel and nothing else — without the stopPropagation the
+  // same press reaches the host dialog and closes the whole settings page.
+  const onEscape = (event: React.KeyboardEvent) => {
+    if (event.key !== 'Escape' || !open) return;
+    event.stopPropagation();
+    setOpen(false);
+  };
 
   return (
     <span className="pnsv-sw-dd" ref={rootRef}>
@@ -195,9 +306,7 @@ export const Dropdown: React.FC<{
         aria-expanded={open}
         aria-haspopup="listbox"
         onClick={() => setOpen((was) => !was)}
-        onKeyDown={(event) => {
-          if (event.key === 'Escape') setOpen(false);
-        }}
+        onKeyDown={onEscape}
       >
         <span className="pnsv-sw-dd-value">{current?.label ?? value}</span>
         {/* The app's ChevronDown at opacity-50, from its own sprite. */}
@@ -215,15 +324,15 @@ export const Dropdown: React.FC<{
         </svg>
       </button>
 
-      {open ? (
+      {open
+        ? createPortal(
         <ul
           className="pnsv-sw-dd-menu"
-          data-align={align}
+          ref={menuRef}
+          style={menuStyle}
           role="listbox"
           aria-label={label}
-          onKeyDown={(event) => {
-            if (event.key === 'Escape') setOpen(false);
-          }}
+          onKeyDown={onEscape}
         >
           {options.map((option) => (
             <li key={option.value}>
@@ -255,8 +364,10 @@ export const Dropdown: React.FC<{
               </button>
             </li>
           ))}
-        </ul>
-      ) : null}
+        </ul>,
+            document.body
+          )
+        : null}
     </span>
   );
 };

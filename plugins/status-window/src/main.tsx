@@ -37,6 +37,7 @@ import {
 } from '@pensiv/plugin-sdk';
 import './styles.css';
 import { blockAtSelection, flattenBlocks, insertBlock, refreshBlocks } from './blocks';
+import { focusCharacter, focusSystemMessage } from './focus';
 import { createT, fill, text as strings } from './i18n';
 import { StatusBlockMark } from './mark';
 import { StatusWindowPane } from './pane';
@@ -181,6 +182,11 @@ export default class StatusWindowPlugin extends Plugin {
         onClick: (ctx: SurfaceItemContext) => {
           const block = blockAtSelection(ctx.app);
           if (!block) return;
+          // The side pane, on the block's character — the same surface the
+          // header toggle opens, where the writer already knows the controls.
+          // Hosts that predate `ui.openPaneView` still get the sheet.
+          focusCharacter(block.cid);
+          if (ctx.app.ui.openPaneView?.(PANE_ID)) return;
           ctx.app.ui.openSheet(
             <StatusWindowPane
               app={ctx.app}
@@ -206,7 +212,10 @@ export default class StatusWindowPlugin extends Plugin {
     });
   }
 
+  /** The composer, in the side pane — sheet only where a pane can't be opened. */
   private openSystemSheet(): void {
+    focusSystemMessage();
+    if (this.app.ui.openPaneView?.(PANE_ID)) return;
     this.app.ui.openSheet(
       <SystemMessageSheet app={this.app} onDone={() => this.app.ui.closeSheet()} />,
       { title: createT(this.app)('systemMessage') }

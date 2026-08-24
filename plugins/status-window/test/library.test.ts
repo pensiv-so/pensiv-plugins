@@ -9,6 +9,7 @@ import type { HostApi } from '@pensiv/plugin-sdk';
 import {
   deleteAttributeTemplate,
   deletePreset,
+  duplicateAttributeTemplate,
   duplicatePreset,
   getPreset,
   instantiate,
@@ -152,6 +153,31 @@ describe('the attribute library', () => {
     expect(a.id).not.toBe(b.id);
     expect(a.name).toBe(entry.def.name);
     expect(b.kind).toBe(entry.def.kind);
+  });
+
+  it('duplicates an entry right below the original, under a new id', () => {
+    const source = listAttributeTemplates(app)[1];
+    if (!source) throw new Error('library is empty');
+    const copy = duplicateAttributeTemplate(app, source.id, '근력 복사본');
+    if (!copy) throw new Error('duplicate returned nothing');
+
+    const list = listAttributeTemplates(app);
+    expect(list).toHaveLength(DEFAULT_ATTRIBUTE_TEMPLATES.length + 1);
+    const at = list.findIndex((entry) => entry.id === copy.id);
+    expect(at).toBe(2); // right below its source
+    expect(copy.id).not.toBe(source.id);
+    expect(copy.label).toBe('근력 복사본');
+    expect(copy.def).toEqual(source.def);
+
+    // A deep copy — editing the duplicate must not touch the original.
+    upsertAttributeTemplate(app, { ...copy, def: { ...copy.def, name: '변경' } });
+    const untouched = listAttributeTemplates(app).find((entry) => entry.id === source.id);
+    expect(untouched?.def).toEqual(source.def);
+  });
+
+  it('duplicate of an unknown id is a no-op', () => {
+    expect(duplicateAttributeTemplate(app, 'nope', 'x')).toBeUndefined();
+    expect(listAttributeTemplates(app)).toHaveLength(DEFAULT_ATTRIBUTE_TEMPLATES.length);
   });
 
   it('deletes an example, permanently', () => {

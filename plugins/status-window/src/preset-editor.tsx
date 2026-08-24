@@ -38,6 +38,7 @@ import { createT, type StringKey } from './i18n';
 import {
   deleteAttributeTemplate,
   deletePreset,
+  duplicateAttributeTemplate,
   duplicatePreset,
   listAttributeTemplates,
   listPresets,
@@ -521,6 +522,17 @@ const LibrarySection: React.FC<{
                 upsertAttributeTemplate(app, next);
                 bump();
               }}
+              onDuplicate={() => {
+                const title =
+                  resolveLocalizedText(entry.label, app.app.locale) || entry.def.name;
+                const copy = duplicateAttributeTemplate(
+                  app,
+                  entry.id,
+                  `${title} ${t('copySuffix')}`.trim()
+                );
+                if (copy) setOpenId(copy.id);
+                bump();
+              }}
               onDelete={() => {
                 deleteAttributeTemplate(app, entry.id);
                 bump();
@@ -668,6 +680,7 @@ const LibraryRow: React.FC<{
   open: boolean;
   onToggle: () => void;
   onChange: (next: AttributeTemplate) => void;
+  onDuplicate: () => void;
   onDelete: () => void;
   dragging: boolean;
   dropEdge?: 'top' | 'bottom';
@@ -682,6 +695,7 @@ const LibraryRow: React.FC<{
   open,
   onToggle,
   onChange,
+  onDuplicate,
   onDelete,
   dragging,
   dropEdge,
@@ -742,17 +756,29 @@ const LibraryRow: React.FC<{
           >
             <path d="M9 18l6-6-6-6" />
           </svg>
-          <span className="pnsv-sw-librow-text">
-            <span className="pnsv-sw-librow-title">
-              {title || <em className="pnsv-sw-unnamed">{t('libraryNewEntry')}</em>}
-            </span>
-            {description ? <span className="pnsv-sw-librow-desc">{description}</span> : null}
+          {/* One clean line — the description lives in the expanded editor. */}
+          <span className="pnsv-sw-librow-title">
+            {title || <em className="pnsv-sw-unnamed">{t('libraryNewEntry')}</em>}
           </span>
         </button>
 
         <span className="pnsv-sw-librow-side">
           <span className="pnsv-sw-librow-sample">{sample}</span>
           <span className="pnsv-sw-badge">{t(kindBadgeKey(entry.def.kind))}</span>
+          <IconGhostButton label={t('duplicateEntry')} onClick={() => onDuplicate()}>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+            </svg>
+          </IconGhostButton>
           <IconGhostButton label={t('removeFromLibrary')} onClick={() => onDelete()}>
             <svg
               viewBox="0 0 24 24"

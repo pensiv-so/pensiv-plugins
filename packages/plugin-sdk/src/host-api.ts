@@ -301,6 +301,13 @@ export interface UiApi {
   /** Open a plugin-contributed full pane/tab (see `Plugin.registerPane`) in the split view. */
   openPane(pluginPaneId: string): void;
   /**
+   * Open one of this plugin's side-pane views (see `Plugin.registerPaneView`)
+   * for the current file — the programmatic twin of its header toggle. Returns
+   * `false` when no file is open or no pane host is mounted. Optional: older
+   * hosts don't have it, so feature-detect and fall back (e.g. to `openSheet`).
+   */
+  openPaneView?(viewId: string): boolean;
+  /**
    * Open one of the project's files in the split view — the navigation half of
    * `app.project`, so a plugin's list of results can behave like the app's own
    * (click a row, land on the text).
