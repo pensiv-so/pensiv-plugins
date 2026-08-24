@@ -6,9 +6,10 @@
  * reach for it far more often than for the full sheet. So it gets its own tiny
  * surface: a textarea, a live preview, and insert.
  *
- * Opened as a host sheet (`app.ui.openSheet`) rather than another pane, because
- * it is a thirty-second interaction and the host already draws the right chrome
- * for that — a dialog on desktop, a bottom sheet on a phone.
+ * It shows up **inside the side pane**, as a mode of the same panel the header
+ * toggle opens — one surface for the plugin, not a modal that covers the prose
+ * the writer is composing against. `SystemMessageSheet` keeps the old host-sheet
+ * wrapper for hosts too old to open a pane view programmatically.
  */
 import * as React from 'react';
 import type { HostApi } from '@pensiv/plugin-sdk';
@@ -18,7 +19,8 @@ import { renderSystemBlock } from './render';
 import { getSystemPreset, listSystemPresets } from './library';
 import { KEY_SYSTEM_PRESET, readSystemPresetId } from './settings';
 
-export const SystemMessageSheet: React.FC<{ app: HostApi; onDone: () => void }> = ({
+/** The composer itself, with no surface chrome — the pane supplies its own. */
+export const SystemMessageBody: React.FC<{ app: HostApi; onDone: () => void }> = ({
   app,
   onDone
 }) => {
@@ -31,7 +33,7 @@ export const SystemMessageSheet: React.FC<{ app: HostApi; onDone: () => void }> 
   const preview = renderSystemBlock(getSystemPreset(app, presetId), lines);
 
   return (
-    <div className="pnsv-sw" data-variant="sheet">
+    <>
       <div className="pnsv-sw-chips">
         {systemPresets.map((preset) => (
           <button
@@ -75,6 +77,13 @@ export const SystemMessageSheet: React.FC<{ app: HostApi; onDone: () => void }> 
           {t('insert')}
         </button>
       </div>
-    </div>
+    </>
   );
 };
+
+/** Host-sheet wrapper — the fallback path on hosts without `ui.openPaneView`. */
+export const SystemMessageSheet: React.FC<{ app: HostApi; onDone: () => void }> = (props) => (
+  <div className="pnsv-sw" data-variant="sheet">
+    <SystemMessageBody {...props} />
+  </div>
+);
