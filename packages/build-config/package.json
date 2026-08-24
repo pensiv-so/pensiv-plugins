@@ -3,6 +3,12 @@
   "version": "1.0.0",
   "description": "Shared vite library build for pensiv plugins (externalizes react + @pensiv/plugin-sdk).",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pensiv-so/pensiv-plugins.git",
+    "directory": "packages/build-config"
+  },
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/packages/build-config",
   "type": "module",
   "main": "./vite.shared.js",
   "types": "./vite.shared.d.ts",

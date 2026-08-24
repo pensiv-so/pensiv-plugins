@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "description": "Scaffold a new pensiv plugin from the canonical sample (npm init pensiv-plugin).",
   "license": "MIT",
-  "type": "module",
-  "bin": {
-    "create-pensiv-plugin": "./bin/index.js"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pensiv-so/pensiv-plugins.git",
+    "directory": "packages/create-pensiv-plugin"
   },
+  "homepage": "https://github.com/pensiv-so/pensiv-plugins/tree/main/packages/create-pensiv-plugin",
+  "type": "module",
+  "bin": "./bin/index.js",
   "files": [
     "bin"
   ],
