@@ -92,6 +92,25 @@ export function readCharacters(app: HostApi): Character[] {
   return [...fromProject, ...localList];
 }
 
+/**
+ * The character a freshly opened pane is about.
+ *
+ * Sheet-backed characters *are* project files, so when the open file is one of
+ * them the answer is already on screen: the writer is looking at 무진's sheet and
+ * wants 무진's numbers, not whichever character happens to sort first. Falling
+ * back to `[0]` meant picking `세계관` — the first sheet in the project — every
+ * time, and re-picking by hand on every open.
+ *
+ * Returns `undefined` only when there are no characters at all.
+ */
+export function defaultCharacterId(
+  characters: readonly Character[],
+  fileId: string | undefined
+): string | undefined {
+  if (fileId && characters.some((character) => character.id === fileId)) return fileId;
+  return characters[0]?.id;
+}
+
 /** Add a character that lives only in the plugin. Returns its id. */
 export function addLocalCharacter(app: HostApi, name: string): string {
   const id = `${LOCAL_PREFIX}${newId('c')}`;

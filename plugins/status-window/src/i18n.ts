@@ -106,6 +106,13 @@ const STRINGS = {
     ko: '목록을 기본 예시로 되돌릴까요? 추가하거나 수정한 항목은 사라집니다.',
     ja: '一覧を既定の例に戻しますか？追加・編集したものは失われます。'
   },
+  /* Named, because the button sits inside one preset's card and used to reset
+     every preset the writer had. */
+  restorePresetConfirm: {
+    en: 'Put this preset back to how it shipped? Your other presets are untouched.',
+    ko: '이 프리셋만 처음 상태로 되돌릴까요? 다른 프리셋은 그대로입니다.',
+    ja: 'このプリセットだけ初期状態に戻しますか？他のプリセットはそのままです。'
+  },
 
   /* ── presets and templates ────────────────────────────────────────────── */
   preset: { en: 'Preset', ko: '프리셋', ja: 'プリセット' },

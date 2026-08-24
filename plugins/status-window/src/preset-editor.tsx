@@ -40,11 +40,12 @@ import {
   deletePreset,
   duplicateAttributeTemplate,
   duplicatePreset,
+  hasDefaults,
   listAttributeTemplates,
   listPresets,
   reorderAttributeTemplate,
   restoreDefaultAttributeTemplates,
-  restoreDefaultPresets,
+  restoreDefaultPreset,
   savePreset,
   upsertAttributeTemplate
 } from './library';
@@ -417,22 +418,37 @@ export const PresetEditor: React.FC<{ app: HostApi }> = ({ app }) => {
             <pre className="pnsv-sw-preview">{preview.text || '—'}</pre>
           )}
 
-          <div className="pnsv-sw-card-foot">
-            <GhostButton
-              onClick={() => {
-                if (!globalThis.confirm?.(t('restoreConfirm'))) return;
-                restoreDefaultPresets(app);
-                bump();
-              }}
-            >
-              ↺ {t('restoreDefaults')}
-            </GhostButton>
-          </div>
+          {/* This preset, not the list. The button is at the foot of one
+              preset's card, so resetting all six from here threw away work on
+              presets the writer wasn't looking at. A preset they made
+              themselves has no shipped version to go back to. */}
+          {hasDefaults(preset.id) ? (
+            <div className="pnsv-sw-card-foot">
+              <GhostButton
+                onClick={() => {
+                  if (!globalThis.confirm?.(t('restorePresetConfirm'))) return;
+                  restoreDefaultPreset(app, preset.id);
+                  bump();
+                }}
+              >
+                ↺ {t('restoreDefaults')}
+              </GhostButton>
+            </div>
+          ) : null}
         </Card>
       </Section>
 
       {/* ── attribute library ────────────────────────────────────────────── */}
-      <LibrarySection app={app} t={t} revision={revision} bump={bump} />
+      {/* Keyed by preset: the library is this preset's, and an expanded row
+          from the last one must not stay open over a list that lacks it. */}
+      <LibrarySection
+        key={preset.id}
+        app={app}
+        t={t}
+        preset={preset}
+        revision={revision}
+        bump={bump}
+      />
     </div>
   );
 };
@@ -445,14 +461,22 @@ export const PresetEditor: React.FC<{ app: HostApi }> = ({ app }) => {
  * description, and what the row prints on the right. Expanding opens the
  * entry's fields in place — a library of seventeen rows is a list to scan, and
  * seventeen open editors is a wall.
+ *
+ * It belongs to the preset above it. Everything here writes through `preset.id`,
+ * so a row deleted under 헌터물 is still there under 게임판타지.
  */
 const LibrarySection: React.FC<{
   app: HostApi;
   t: (key: StringKey) => string;
+  preset: Preset;
   revision: number;
   bump: () => void;
-}> = ({ app, t, revision, bump }) => {
-  const library = React.useMemo(() => listAttributeTemplates(app), [app, revision]);
+}> = ({ app, t, preset, revision, bump }) => {
+  const presetId = preset.id;
+  const library = React.useMemo(
+    () => listAttributeTemplates(app, presetId),
+    [app, presetId, revision]
+  );
   const [openId, setOpenId] = React.useState<string | undefined>();
   const [dragId, setDragId] = React.useState<string | null>(null);
   const [overIndex, setOverIndex] = React.useState<number | null>(null);
@@ -469,7 +493,7 @@ const LibrarySection: React.FC<{
         // `overIndex` counts positions in the list as shown (moved entry still
         // in place); the store wants the index after the entry is lifted out.
         const to = overIndex > from ? overIndex - 1 : overIndex;
-        if (to !== from) reorderAttributeTemplate(app, dragId, to);
+        if (to !== from) reorderAttributeTemplate(app, presetId, dragId, to);
       }
     }
     endDrag();
@@ -483,7 +507,7 @@ const LibrarySection: React.FC<{
       family: 'any',
       def: { name: '', kind: 'stat' }
     };
-    upsertAttributeTemplate(app, entry);
+    upsertAttributeTemplate(app, presetId, entry);
     setOpenId(entry.id);
     bump();
   };
@@ -496,7 +520,7 @@ const LibrarySection: React.FC<{
         <GhostButton
           onClick={() => {
             if (!globalThis.confirm?.(t('restoreConfirm'))) return;
-            restoreDefaultAttributeTemplates(app);
+            restoreDefaultAttributeTemplates(app, presetId);
             bump();
           }}
         >
@@ -519,7 +543,7 @@ const LibrarySection: React.FC<{
                 setOpenId((current) => (current === entry.id ? undefined : entry.id))
               }
               onChange={(next) => {
-                upsertAttributeTemplate(app, next);
+                upsertAttributeTemplate(app, presetId, next);
                 bump();
               }}
               onDuplicate={() => {
@@ -527,6 +551,7 @@ const LibrarySection: React.FC<{
                   resolveLocalizedText(entry.label, app.app.locale) || entry.def.name;
                 const copy = duplicateAttributeTemplate(
                   app,
+                  presetId,
                   entry.id,
                   `${title} ${t('copySuffix')}`.trim()
                 );
@@ -534,7 +559,7 @@ const LibrarySection: React.FC<{
                 bump();
               }}
               onDelete={() => {
-                deleteAttributeTemplate(app, entry.id);
+                deleteAttributeTemplate(app, presetId, entry.id);
                 bump();
               }}
               dragging={dragId !== null}

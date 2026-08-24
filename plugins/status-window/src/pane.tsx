@@ -62,6 +62,7 @@ import { useMenuPanel } from './ui';
 import {
   addLocalCharacter,
   clearValue,
+  defaultCharacterId,
   episodeOrder,
   foldTo,
   hasEntry,
@@ -158,13 +159,36 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
   );
   // The composer is a mode of this panel, not a modal over the prose.
   const [systemMode, setSystemMode] = React.useState(initialRequest?.kind === 'system');
-  const characterId = selectedId ?? characters[0]?.id;
+
+  // The open file, when it is itself one of the characters. Sheet-backed
+  // characters are project files, so this is just an id match.
+  const fileCharacterId = React.useMemo(
+    () => (fileId && characters.some((c) => c.id === fileId) ? fileId : undefined),
+    [fileId, characters]
+  );
+
+  const characterId = selectedId ?? defaultCharacterId(characters, fileId);
   const character = characters.find((c) => c.id === characterId);
 
   // Follow the host when a live block asks for a particular character.
   React.useEffect(() => {
     if (initialCharacterId) setSelectedId(initialCharacterId);
   }, [initialCharacterId]);
+
+  // Opening another character's sheet retargets the pane. A pane still showing
+  // the previous character over 무진's sheet is a wrong answer to "whose numbers
+  // are these", and the writer navigated there on purpose.
+  //
+  // The ref is what keeps an explicit pick sticky: it only fires when the *file*
+  // changes to a different character, not on every re-read of the project.
+  const lastFileCharacter = React.useRef(fileCharacterId);
+  React.useEffect(() => {
+    if (fileCharacterId && fileCharacterId !== lastFileCharacter.current) {
+      setSelectedId(fileCharacterId);
+      setOpenRow(undefined);
+    }
+    lastFileCharacter.current = fileCharacterId;
+  }, [fileCharacterId]);
 
   // And follow later asks while already open — a second block's "edit this"
   // retargets the pane rather than opening anything new.
@@ -201,7 +225,12 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
     () => getPreset(app, settings.presetId),
     [app, settings.presetId, revision]
   );
-  const library = React.useMemo(() => listAttributeTemplates(app), [app, revision]);
+  // This preset's library, not a shared one — the picker offers the rows of the
+  // convention the writer is actually rendering in.
+  const library = React.useMemo(
+    () => listAttributeTemplates(app, preset.id),
+    [app, preset.id, revision]
+  );
 
   const schema: CharacterSchema = React.useMemo(
     () => (characterId ? readSchema(app, characterId, preset) : { groups: [], attrs: [] }),
@@ -456,7 +485,7 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
               bump();
             }}
             onSaveToLibrary={(def) => {
-              saveAttributeTemplate(app, def);
+              saveAttributeTemplate(app, preset.id, def);
               app.ui.toast(t('savedToLibrary'));
               bump();
             }}
@@ -498,7 +527,7 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
                       title={t('removeFromLibrary')}
                       aria-label={t('removeFromLibrary')}
                       onClick={() => {
-                        deleteAttributeTemplate(app, entry.id);
+                        deleteAttributeTemplate(app, preset.id, entry.id);
                         bump();
                       }}
                     >
