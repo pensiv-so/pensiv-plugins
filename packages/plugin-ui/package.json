@@ -38,7 +38,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pensiv-so/pensiv-plugins.git",
+    "url": "git+https://github.com/pensiv-so/pensiv-plugins.git",
     "directory": "packages/plugin-ui"
   }
 }
