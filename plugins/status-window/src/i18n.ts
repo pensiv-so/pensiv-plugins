@@ -41,12 +41,12 @@ const STRINGS = {
   attributeName: { en: 'Attribute name', ko: '속성 이름', ja: '項目名' },
   removeAttribute: { en: 'Remove', ko: '삭제', ja: '削除' },
   inherited: {
-    en: 'Carried over from the previous episode',
-    ko: '이전 회차에서 이어받음',
-    ja: '前話から引き継ぎ'
+    en: 'The character’s current value, unchanged here',
+    ko: '캐릭터의 현재 값 — 이 문서에서 바꾸지 않았습니다',
+    ja: 'キャラクターの現在値 — この文書では変更なし'
   },
-  changedHere: { en: 'Changed in this episode', ko: '이번 회차에서 변경됨', ja: 'この話で変更' },
-  revert: { en: 'Carry over instead', ko: '이어받기로 되돌리기', ja: '引き継ぎに戻す' },
+  changedHere: { en: 'Changed in this document', ko: '이 문서에서 변경됨', ja: 'この文書で変更' },
+  revert: { en: 'Undo this change', ko: '변경 되돌리기', ja: 'この変更を戻す' },
 
   /* attribute kinds — the labels in the "add attribute" picker */
   kindText: { en: 'Text', ko: '텍스트', ja: 'テキスト' },
@@ -296,9 +296,9 @@ const STRINGS = {
   },
   settingsScope: { en: 'Episode order', ko: '회차 범위', ja: '話の範囲' },
   settingsScopeHint: {
-    en: 'Which documents count as the episode sequence that stats carry through.',
-    ko: '능력치가 이어지는 회차 순서로 볼 문서의 범위입니다.',
-    ja: '能力値が引き継がれる話の並びとして扱う範囲です。'
+    en: 'Which documents count as the episode sequence, for the episode number a status window prints. Stats themselves belong to the character and are the same everywhere.',
+    ko: '상태창에 찍히는 회차 번호를 셀 때 회차 순서로 볼 문서의 범위입니다. 능력치 자체는 캐릭터의 것이라 어디서나 같습니다.',
+    ja: 'ステータスに表示する話数を数えるときに、話の並びとして扱う範囲です。能力値そのものはキャラクターのもので、どこでも同じです。'
   },
   scopeFolder: { en: 'This folder', ko: '현재 폴더', ja: 'このフォルダ' },
   scopeProject: { en: 'Whole project', ko: '프로젝트 전체', ja: 'プロジェクト全体' },

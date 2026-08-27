@@ -16,13 +16,18 @@
  * a wall; seventeen collapsed ones is a status window, which is the thing the
  * writer is trying to look at.
  *
- * ## Carry-forward is visible
+ * ## The change made *here* is what's visible
  *
- * Every row shows where its value came from. A row edited in this episode gets a
- * dot and its growth arrow (`14 [F] → 16(+2)[F]`); a row inherited from an
- * earlier episode is plain. That distinction is the plugin's whole reason for
- * existing, so it is on the row rather than behind a toggle — and "carry over
- * instead" undoes an edit without the writer having to remember the old number.
+ * A character's stats are the character's: the same numbers on their sheet, in
+ * chapter 4 and in chapter 200. Editing one anywhere edits it everywhere, which
+ * is the only reading of "B's level is 10" that survives contact with a writer
+ * who fills the sheet in first.
+ *
+ * What is per-document is the *change*. A row this document edited gets a dot
+ * and its growth arrow (`14 [F] → 16(+2)[F]`) against what it read on the way
+ * in; a row it didn't touch is plain. So it is on the row rather than behind a
+ * toggle — and "undo this change" puts the number back without the writer
+ * having to remember it.
  *
  * ## Looking native
  *
@@ -65,7 +70,7 @@ import {
   defaultCharacterId,
   episodeOrder,
   foldTo,
-  hasEntry,
+  hasValues,
   pruneDeltas,
   readCharacters,
   readSchema,
@@ -263,7 +268,7 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
   /** Write a value, then rewrite live blocks if the writer asked for that. */
   const commitValue = (attrId: string, next: AttributeValue) => {
     if (!characterId || !fileId) return;
-    setValue(app, fileId, characterId, attrId, next, fold.previous[attrId]);
+    setValue(app, fileId, characterId, attrId, next);
     bump();
     if (readAutoRefresh(app) && settings.liveBlocks) refreshBlocks(app, settings, fileId);
   };
@@ -350,7 +355,9 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
                   <li className="pnsv-sw-menu-empty">{t('noCharacters')}</li>
                 ) : null}
                 {characters.map((entry) => {
-                  const written = hasEntry(app, fileId, entry.id);
+                  // "Has a status window at all", not "was edited in this file" —
+                  // the values are the character's, not the open file's.
+                  const written = hasValues(app, entry.id);
                   return (
                     <li key={entry.id}>
                       <button

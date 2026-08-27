@@ -22,11 +22,25 @@ Per attribute: `name` (padded), `rawName`, `value`, `rawValue`, `raw`, `base`, `
 名前：{{by.name.value}}　種族：{{by.race.value}}　Ｌv{{by.level.value}}
 ```
 
+`prev` / `delta` / `arrow` / `{{#changed}}` compare against what the **current document** read before it touched the attribute — not against the previous episode. A document that changed nothing has an empty `changed` block.
+
+## Storage
+
+| Key | What |
+| --- | --- |
+| `schema:<charId>` | the character's attribute definitions |
+| `values:<charId>` | the character's stats — global, read identically from every file |
+| `delta:<fileId>:<charId>` | what this file changed, so it can be undone |
+| `prev:<fileId>:<charId>` | what those attributes read before this file touched them — the arrow's baseline |
+| `blocks:<fileId>` | which character each live block in this file is for |
+
+`values:` is the state. `delta:`/`prev:` are annotations on it and are never folded in. Before 1.1.0 there was no `values:` key and `delta:` maps *were* the state, folded in episode order — see `storage.ts` for why that was wrong and how the one-time migration recovers it.
+
 ## Permissions
 
 `editor.read`, `editor.write` — read the document to find live blocks, insert and refresh them.
-`project.read` — list character sheets and order the episodes.
-`storage.synced` — keep sheets and per-episode values across your devices.
+`project.read` — list character sheets, order the episodes, and find pre-1.1.0 values during the one-time migration.
+`storage.synced` — keep sheets and stats across your devices.
 
 It never writes to your character sheets.
 

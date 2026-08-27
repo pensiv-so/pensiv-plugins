@@ -13,7 +13,7 @@ HP: 100 | MP: 10
 
 Serials in the game-fantasy, hunter, isekai and LitRPG lineages print a character's numbers into the prose, over and over, for hundreds of chapters. Done by hand, the formatting stays consistent only through vigilance, the numbers have to be carried forward from the last time by memory, and the growth line (`근력 : 14 [F] → 16(+2)[F]`) has to be assembled from two sheets that were never in the same place.
 
-The usual answer is a spreadsheet in another window. The trouble is never that the spreadsheet is hard to build; it is that updating it means leaving the manuscript, and that it only ever knows the _current_ state, so "what were her stats in chapter 31?" has no answer. This plugin lives in the editor instead, and remembers what changed in each episode, so every chapter's numbers stay recoverable.
+The usual answer is a spreadsheet in another window, and the trouble is never that the spreadsheet is hard to build — it is that updating it means leaving the manuscript. This plugin lives in the editor instead. The numbers belong to the character, so a stat filled in on their sheet is the stat every chapter prints, and no chapter is ever retyped from memory.
 
 ## What it does
 
@@ -29,7 +29,7 @@ The usual answer is a spreadsheet in another window. The trouble is never that t
 | Rank     | `노말`                                    |
 | List     | `[인터페이스]` `[퀘스트 시스템]`          |
 
-**Carry-forward and growth arrows.** A value typed in chapter 4 is still there in chapter 40. Change it and the block prints the arrow: `14 [F] → 16(+2)[F]`. Correct an early chapter and every later one follows, because no later chapter ever stored a copy.
+**One value per character, and growth arrows.** Stats belong to the character, not to the file you were in when you typed them — fill them in on the character's sheet, in chapter 4 or in chapter 40 and every one of those reads the same. Change a value and the document you changed it in prints the arrow: `14 [F] → 16(+2)[F]`, against what it read before you touched it. **Undo this change** puts it back.
 
 **Six presets, each pre-filled, and all of them yours.** Not just a layout: separator, padding, column count, list punctuation and number grouping all differ by lineage, and each preset seeds its own attribute rows so you are not typing seventeen stat names before you see anything.
 
@@ -72,7 +72,7 @@ Disabling the plugin also removes the marks, and leaves every status window exac
 **Preferences**
 
 - **Omit empty rows**: leave out attributes with no value. Zero still prints; `자유 스텟 : 0` is a real line.
-- **Episode order**: whether stats carry through the current folder or the whole project.
+- **Episode order**: whether the episode number a block prints counts the current folder or the whole project.
 - **Live status windows** / **Refresh blocks when stats change**.
 
 **Presets** is the second tab. It holds the preset list (add, duplicate, rename, delete, set as default) and, for the selected preset only, every convention option (columns, name and value alignment, padding character, thousands grouping, list separator, growth arrow, regen wording, bar width), a live preview, its attribute library, and "restore defaults" — all of it scoped to the preset in the picker, never to the others.
