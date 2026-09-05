@@ -6,7 +6,7 @@
     "ko": "위험한 글쓰기",
     "ja": "デンジャラス・ライティング"
   },
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": {
     "en": "Keep writing or lose it all. Arm your open document from the toolbar — stop typing too long and its content is erased. A port of the Dangerous Writing Prompt App.",
     "ko": "계속 쓰지 않으면 모두 잃습니다. 툴바에서 열린 문서를 무장하세요 — 너무 오래 멈추면 내용이 지워집니다. 위험한 글쓰기 프롬프트 앱 이식.",

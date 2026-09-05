@@ -1,12 +1,13 @@
 import type { HostApi, SettingsSchema } from '@pensiv/plugin-sdk';
 import { L } from './i18n';
+import { toClipboardMode } from './clipboard';
 import type { GoalType, SessionConfig } from './store';
 
 /**
- * The plugin's settings tab — just the goal and the difficulty. Sessions always
- * run on the open document; there is no prompt, sound, or practice mode. Values
- * live in `app.storage`; {@link readConfig} reads them back into a
- * {@link SessionConfig} when a session starts.
+ * The plugin's settings tab — the goal, the difficulty, and how much clipboard
+ * survives a run. Sessions always run on the open document; there is no prompt,
+ * sound, or practice mode. Values live in `app.storage`; {@link readConfig}
+ * reads them back into a {@link SessionConfig} when a session starts.
  */
 export const settingsSchema: SettingsSchema = {
   fields: [
@@ -99,6 +100,43 @@ export const settingsSchema: SettingsSchema = {
           default: false
         }
       ]
+    },
+    {
+      type: 'group',
+      title: L('Clipboard', '클립보드', 'クリップボード'),
+      description: L(
+        'Only applies while a session is running — outside one the clipboard works normally.',
+        '세션이 실행 중일 때만 적용됩니다 — 세션 밖에서는 클립보드가 평소대로 동작합니다.',
+        'セッション実行中のみ適用されます — セッション外ではクリップボードは通常どおり動きます。'
+      ),
+      fields: [
+        {
+          key: 'clipboard',
+          type: 'radio',
+          label: L(
+            'Clipboard during a session',
+            '세션 중 클립보드',
+            'セッション中のクリップボード'
+          ),
+          description: L(
+            'Copying your words out is a backup of the page you might burn, and pasting fills a word goal with text you never wrote.',
+            '복사는 불탈지 모르는 글의 백업이 되고, 붙여넣기는 직접 쓰지 않은 글로 단어 목표를 채웁니다.',
+            'コピーは燃えるかもしれない原稿のバックアップになり、貼り付けは自分で書いていない文章で目標を埋めてしまいます。'
+          ),
+          default: 'all',
+          options: [
+            {
+              value: 'all',
+              label: L('Block copy and paste', '복사·붙여넣기 모두 차단', 'コピーと貼り付けを禁止')
+            },
+            {
+              value: 'paste',
+              label: L('Block paste only', '붙여넣기만 차단', '貼り付けのみ禁止')
+            },
+            { value: 'off', label: L('Allow both', '모두 허용', '両方許可') }
+          ]
+        }
+      ]
     }
   ]
 };
@@ -114,5 +152,6 @@ export function readConfig(app: HostApi): SessionConfig {
   const baseFuse = app.storage.get<number>('fuseSec') ?? 5;
   const hardcore = app.storage.get<boolean>('hardcore') ?? false;
   const fuseSec = hardcore ? Math.max(2, baseFuse - 2) : baseFuse;
-  return { goalType, durationSec, wordTarget, fuseSec, hardcore };
+  const clipboard = toClipboardMode(app.storage.get<string>('clipboard'));
+  return { goalType, durationSec, wordTarget, fuseSec, hardcore, clipboard };
 }

@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { WidgetProps } from '@pensiv/plugin-sdk';
 import { dwStore, useDangerStore } from './store';
 import { armDocument } from './document';
+import { installClipboardGuard } from './clipboard';
 import { STR, tr } from './i18n';
 import { formatClock, warnIntensity, warnThreshold } from './format';
 import { ResultCard } from './components';
@@ -46,6 +47,15 @@ export const DangerousWritingOverlay: React.FC<WidgetProps> = ({ app }) => {
     }
     return unsub;
   }, [running, app]);
+
+  // Lock the clipboard for the run, per the armed session's own config — so
+  // flipping the setting mid-session can't hand you an escape hatch you didn't
+  // start with. Uninstalls the moment the session ends.
+  const clipboardMode = store.config.clipboard;
+  React.useEffect(() => {
+    if (!running) return;
+    return installClipboardGuard(app, clipboardMode);
+  }, [running, app, clipboardMode]);
 
   // Safety: if the focused file changes out from under a running session, cancel
   // rather than risk wiping a document the user didn't arm.

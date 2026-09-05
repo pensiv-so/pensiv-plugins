@@ -22,6 +22,7 @@ Inspired by Squibler's [Dangerous Writing Prompt App](https://www.squibler.io/da
 - **Two goals**: outlast a timer or hit a word target
 - **Adjustable fuse**: set how long you can pause before the wipe (3–10s)
 - **Hardcore mode**: a shorter fuse and almost no warning
+- **Clipboard lock**: block copy and paste for the run — no stashing a backup of the page you might burn, and no filling a word goal with text you never wrote. Block both (the default), block pasting only, or allow both
 - **Full-screen tension**: the screen reddens as the fuse burns
 
 ### ⚠️ Warning

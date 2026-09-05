@@ -252,7 +252,15 @@ export const DangerLauncherPopover: React.FC<{ app: HostApi; closing?: boolean }
           >
             {tr(app, STR.start)}
           </button>
-          {!docFocused ? <p className="dw-note">{tr(app, STR.openDocToStart)}</p> : null}
+          {!docFocused ? (
+            <p className="dw-note">{tr(app, STR.openDocToStart)}</p>
+          ) : live.clipboard !== 'off' ? (
+            // Say the clipboard rule up front — finding out mid-sprint that
+            // Cmd+V is dead reads as a broken editor, not as the dare.
+            <p className="dw-note">
+              {tr(app, live.clipboard === 'all' ? STR.clipNoteAll : STR.clipNotePaste)}
+            </p>
+          ) : null}
         </>
       )}
     </div>
