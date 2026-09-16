@@ -40,7 +40,7 @@ import { blockAtSelection, flattenBlocks, insertBlock, refreshBlocks } from './b
 import { focusCharacter, focusSystemMessage } from './focus';
 import { createT, fill, text as strings } from './i18n';
 import { StatusBlockMark } from './mark';
-import { StatusWindowPane } from './pane';
+import { StatusWindowPane, StatusWindowHeaderActions } from './pane';
 import { SystemMessageSheet } from './system';
 import { PresetEditor } from './preset-editor';
 import { readSettings, settingsSchema } from './settings';
@@ -78,7 +78,10 @@ export default class StatusWindowPlugin extends Plugin {
       // file types that hold prose rather than to every pane the app has.
       fileTypes: ['document', 'sheet'],
       viewModes: ['file'],
-      render: SidePane
+      render: SidePane,
+      // The pane header's right end — where the app's built-in panes keep their
+      // view options, instead of a second strip of chrome under the host's.
+      headerActions: StatusWindowHeaderActions
     });
 
     // No `registerHeaderAction` alongside it. `registerPaneView` already puts a

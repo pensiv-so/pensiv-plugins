@@ -156,37 +156,76 @@
   }
 }
 
-/* More-options dropdown (portal) — popover styling. */
+/*
+ * More-options dropdown (portal) — the app's `DropdownMenuContent`: rounded-xl,
+ * a transparent border over `var(--floating-ring)` rather than a hairline of its
+ * own, `bg-popover/95` on `backdrop-blur-sm`, `shadow-xl`, p-1.
+ */
 .pnsv-br-menu {
   position: fixed;
   z-index: 60;
   min-width: 13rem;
   padding: 0.25rem;
-  border: 1px solid hsl(var(--border));
-  border-radius: calc(var(--radius) + 0.1rem);
-  background: hsl(var(--popover));
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) + 0.25rem);
+  background: hsl(var(--popover) / 0.95);
+  backdrop-filter: blur(4px);
   color: hsl(var(--popover-foreground));
-  box-shadow: var(--shadow-xl);
+  box-shadow:
+    var(--floating-ring, 0 0 0 1px hsl(var(--border))),
+    var(--shadow-xl, var(--shadow-md));
   font-family: inherit;
+  transform-origin: top;
+  animation: pnsv-br-dropdown-in 0.3s cubic-bezier(0.47, 1.14, 0.41, 1);
 }
+
+/*
+ * The app's `animate-dropdown-bounce-in` (`tailwind.config.js`), keyframes and
+ * easing included — every floating panel in the app arrives this way.
+ */
+@keyframes pnsv-br-dropdown-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(-6px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.01) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pnsv-br-menu {
+    animation: none;
+  }
+}
+
+/* `DropdownMenuItem`: gap-2.5 px-2 py-1.5 rounded-lg text-sm, hover bg-muted,
+   `transition-colors`. Accent was the wrong token — the app's menus hover muted. */
 .pnsv-br-menuitem {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
   width: 100%;
   padding: 0.375rem 0.5rem;
   border: none;
-  border-radius: calc(var(--radius) - 0.05rem);
+  border-radius: calc(var(--radius) + 0.1rem);
   background: transparent;
   color: inherit;
   font-size: 0.875rem;
   font-family: inherit;
   text-align: left;
   cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 .pnsv-br-menuitem:hover {
-  background: hsl(var(--accent));
-  color: hsl(var(--accent-foreground));
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
 }
 .pnsv-br-menuitem > svg {
   flex-shrink: 0;
@@ -202,9 +241,11 @@
 .pnsv-br-menurow > span {
   font-size: 0.875rem;
 }
+/* `DropdownMenuSeparator`: `-mx-1 my-1 h-px bg-border` — it spans the panel,
+   past the p-1 gutter the items sit in. */
 .pnsv-br-sep {
   height: 1px;
-  margin: 0.25rem 0;
+  margin: 0.25rem -0.25rem;
   background: hsl(var(--border));
 }
 .pnsv-br-fallback {

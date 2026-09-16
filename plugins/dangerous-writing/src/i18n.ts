@@ -63,11 +63,7 @@ export const STR = {
 
   // End states — the number talks ({count} is a localized "312 words" chunk).
   burnedTitle: L('{count} burned.', '{count}가 불탔습니다.', '{count}が燃えました。'),
-  survivedTitle: L(
-    '{count} survived.',
-    '{count}가 살아남았습니다.',
-    '{count}が生き残りました。'
-  ),
+  survivedTitle: L('{count} survived.', '{count}가 살아남았습니다.', '{count}が生き残りました。'),
   burnedBody: L(
     'You paused longer than {fuse} seconds. The page is blank again.',
     '{fuse}초 넘게 멈췄습니다. 페이지가 다시 백지가 되었습니다.',
@@ -94,6 +90,28 @@ export const STR = {
     'Open a document to arm it',
     '무장하려면 문서를 여세요',
     '武装するにはドキュメントを開く'
+  ),
+
+  // Clipboard lock — the note under the contract, and the toast on an attempt.
+  clipNoteAll: L(
+    'Copy and paste are locked while you write.',
+    '쓰는 동안 복사·붙여넣기가 잠깁니다.',
+    '書いているあいだ、コピーと貼り付けは使えません。'
+  ),
+  clipNotePaste: L(
+    'Pasting is locked while you write.',
+    '쓰는 동안 붙여넣기가 잠깁니다.',
+    '書いているあいだ、貼り付けは使えません。'
+  ),
+  pasteLocked: L(
+    'No pasting — the words have to be yours.',
+    '붙여넣기 금지 — 직접 쓴 글이어야 합니다.',
+    '貼り付けは禁止 — 自分で書いた言葉だけです。'
+  ),
+  copyLocked: L(
+    'No copying — you can’t back up what you might burn.',
+    '복사 금지 — 불탈 글을 미리 빼돌릴 수 없습니다.',
+    'コピーは禁止 — 燃えるかもしれない原稿は持ち出せません。'
   ),
 
   words: L('words', '단어', '単語')

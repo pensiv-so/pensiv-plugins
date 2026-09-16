@@ -16,13 +16,18 @@
  * a wall; seventeen collapsed ones is a status window, which is the thing the
  * writer is trying to look at.
  *
- * ## Carry-forward is visible
+ * ## The change made *here* is what's visible
  *
- * Every row shows where its value came from. A row edited in this episode gets a
- * dot and its growth arrow (`14 [F] → 16(+2)[F]`); a row inherited from an
- * earlier episode is plain. That distinction is the plugin's whole reason for
- * existing, so it is on the row rather than behind a toggle — and "carry over
- * instead" undoes an edit without the writer having to remember the old number.
+ * A character's stats are the character's: the same numbers on their sheet, in
+ * chapter 4 and in chapter 200. Editing one anywhere edits it everywhere, which
+ * is the only reading of "B's level is 10" that survives contact with a writer
+ * who fills the sheet in first.
+ *
+ * What is per-document is the *change*. A row this document edited gets a dot
+ * and its growth arrow (`14 [F] → 16(+2)[F]`) against what it read on the way
+ * in; a row it didn't touch is plain. So it is on the row rather than behind a
+ * toggle — and "undo this change" puts the number back without the writer
+ * having to remember it.
  *
  * ## Looking native
  *
@@ -34,7 +39,7 @@
  */
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import { resolveLocalizedText, type HostApi } from '@pensiv/plugin-sdk';
+import { resolveLocalizedText, type HostApi, type PaneViewProps } from '@pensiv/plugin-sdk';
 import { insertBlock, refreshBlocks, renderFor } from './blocks';
 import { FieldEditor } from './fields';
 import { createT, type StringKey } from './i18n';
@@ -57,7 +62,7 @@ import {
   saveAttributeTemplate
 } from './library';
 import { formatArrow, formatValue } from './format';
-import { CharacterIcon } from './icons';
+import { CharacterIcon, Icon } from './icons';
 import { useMenuPanel } from './ui';
 import {
   addLocalCharacter,
@@ -65,7 +70,7 @@ import {
   defaultCharacterId,
   episodeOrder,
   foldTo,
-  hasEntry,
+  hasValues,
   pruneDeltas,
   readCharacters,
   readSchema,
@@ -263,7 +268,7 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
   /** Write a value, then rewrite live blocks if the writer asked for that. */
   const commitValue = (attrId: string, next: AttributeValue) => {
     if (!characterId || !fileId) return;
-    setValue(app, fileId, characterId, attrId, next, fold.previous[attrId]);
+    setValue(app, fileId, characterId, attrId, next);
     bump();
     if (readAutoRefresh(app) && settings.liveBlocks) refreshBlocks(app, settings, fileId);
   };
@@ -304,7 +309,8 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
       <div className="pnsv-sw" data-variant={variant}>
         <div className="pnsv-sw-top">
           <button type="button" className="pnsv-sw-ghostbtn" onClick={() => setSystemMode(false)}>
-            ‹ {t('systemMessage')}
+            <Icon name="chevronLeft" />
+            {t('systemMessage')}
           </button>
         </div>
         <div className="pnsv-sw-body pnsv-sw-systembody">
@@ -350,7 +356,9 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
                   <li className="pnsv-sw-menu-empty">{t('noCharacters')}</li>
                 ) : null}
                 {characters.map((entry) => {
-                  const written = hasEntry(app, fileId, entry.id);
+                  // "Has a status window at all", not "was edited in this file" —
+                  // the values are the character's, not the open file's.
+                  const written = hasValues(app, entry.id);
                   return (
                     <li key={entry.id}>
                       <button
@@ -365,15 +373,35 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
                           setOpenRow(undefined);
                         }}
                       >
+                        {/* Selection lives in the left slot, like the app's
+                            `SelectItem` — a fill would be the hover state. */}
+                        {entry.id === characterId ? (
+                          <svg
+                            className="pnsv-sw-menu-check"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="M20 6 9 17l-5-5" />
+                          </svg>
+                        ) : null}
                         <span className="pnsv-sw-menu-main">
                           {/* The sheet's own face — portrait, emoji or category
                               glyph — exactly as the file tree draws it. */}
                           <CharacterIcon character={entry} />
                           <span className="pnsv-sw-menu-name">{entry.name}</span>
                         </span>
-                        <span className="pnsv-sw-badge" data-written={written ? 'true' : undefined}>
-                          {written ? t('written') : t('notWritten')}
-                        </span>
+                        {/* Trailing metadata, the way the app's list rows carry
+                            theirs — quiet muted text, not a badge. A boxed chip
+                            on a popover row competes with the name beside it,
+                            and only the exception is marked at all. */}
+                        {written ? (
+                          <span className="pnsv-sw-menu-meta">{t('written')}</span>
+                        ) : null}
                       </button>
                     </li>
                   );
@@ -415,7 +443,8 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
                       className="pnsv-sw-menu-item"
                       onClick={() => setAdding(true)}
                     >
-                      <span className="pnsv-sw-menu-name">＋ {t('addCharacter')}</span>
+                      <Icon name="plus" />
+                      <span className="pnsv-sw-menu-name">{t('addCharacter')}</span>
                     </button>
                   )}
                 </li>
@@ -454,6 +483,7 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
             </svg>
           </button>
         ) : null}
+
       </div>
 
       {/* ── body ─────────────────────────────────────────────────────────── */}
@@ -495,8 +525,11 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
         {!showPreview && characterId ? (
           <div className="pnsv-sw-add-row">
             <details className="pnsv-sw-kinds">
-              <summary className="pnsv-sw-button" data-variant="ghost">
-                ＋ {t('addAttribute')}
+              {/* An ordinary outline button, left on the line — the app has no
+                  full-bleed dashed action, and that shape reads as a drop zone. */}
+              <summary className="pnsv-sw-button" data-variant="outline">
+                <Icon name="plus" />
+                {t('addAttribute')}
               </summary>
               <div className="pnsv-sw-kind-menu">
                 {/* The library first: these are named and configured, so one
@@ -531,7 +564,7 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
                         bump();
                       }}
                     >
-                      ×
+                      <Icon name="x" />
                     </button>
                   </div>
                 ))}
@@ -557,16 +590,9 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
       </div>
 
       {/* ── footer ───────────────────────────────────────────────────────── */}
+      {/* Confirm last, the secondary before it — the app's dialog-footer order,
+          which is also the tab order a right-aligned footer implies. */}
       <div className="pnsv-sw-foot">
-        <button
-          type="button"
-          className="pnsv-sw-button"
-          data-variant="primary"
-          disabled={!characterId}
-          onClick={onInsert}
-        >
-          {t('insert')}
-        </button>
         <button
           type="button"
           className="pnsv-sw-icon-button"
@@ -588,6 +614,15 @@ export const StatusWindowPane: React.FC<PaneBodyProps> = ({
             <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
             <circle cx="12" cy="12" r="3" />
           </svg>
+        </button>
+        <button
+          type="button"
+          className="pnsv-sw-button"
+          data-variant="primary"
+          disabled={!characterId}
+          onClick={onInsert}
+        >
+          {t('insert')}
         </button>
       </div>
     </div>
@@ -704,39 +739,48 @@ const Row: React.FC<ListProps & { def: AttributeDef }> = ({
             onChange={(next) => onChangeValue(def.id, next)}
           />
 
+          {/* Non-destructive actions left, `삭제` alone on the right: the one
+              irreversible action gets its own edge instead of sitting next to
+              the one that only files an attribute away. */}
           <div className="pnsv-sw-row-actions">
-            {changed ? (
-              <button type="button" className="pnsv-sw-ghostbtn" onClick={() => onRevert(def.id)}>
-                {t('revert')}
-              </button>
-            ) : (
-              <span className="pnsv-sw-hint">{before !== undefined ? t('inherited') : ''}</span>
-            )}
-            <span className="pnsv-sw-row-actions-end">
+            <span className="pnsv-sw-row-actions-start">
+              {/* Nothing at all when there is nothing to say. An empty <span>
+                  still costs the flex `gap`, which is what pushed
+                  `라이브러리에 추가` off the editor's left line. */}
+              {changed ? (
+                <button type="button" className="pnsv-sw-ghostbtn" onClick={() => onRevert(def.id)}>
+                  {t('revert')}
+                </button>
+              ) : before !== undefined ? (
+                <span className="pnsv-sw-hint">{t('inherited')}</span>
+              ) : null}
               {/* How the library actually grows: the fastest way to get
                   `기술 (능력치, F–SSS)` into the picker is to have built one. */}
               {def.name.trim() ? (
                 <button
                   type="button"
                   className="pnsv-sw-ghostbtn"
+                  data-variant="outline"
                   onClick={() => onSaveToLibrary(def)}
                 >
                   {t('saveToLibrary')}
                 </button>
               ) : null}
-              <button
-                type="button"
-                className="pnsv-sw-ghostbtn"
-                onClick={() =>
-                  onChangeSchema({
-                    ...schema,
-                    attrs: schema.attrs.filter((attr) => attr.id !== def.id)
-                  })
-                }
-              >
-                {t('removeAttribute')}
-              </button>
             </span>
+            <button
+              type="button"
+              className="pnsv-sw-ghostbtn"
+              data-variant="outline"
+              data-tone="destructive"
+              onClick={() =>
+                onChangeSchema({
+                  ...schema,
+                  attrs: schema.attrs.filter((attr) => attr.id !== def.id)
+                })
+              }
+            >
+              {t('removeAttribute')}
+            </button>
           </div>
         </div>
       ) : null}
@@ -757,4 +801,44 @@ const PANE_FORMAT = {
   barChars: ['█', '░'] as [string, string],
   barWidth: 8,
   listJoin: ', '
+};
+
+/**
+ * The pane header's right end (`registerPaneView`'s `headerActions`) — where the
+ * app's built-in panes keep their view options. The gear used to live in the
+ * plugin's own picker strip, which meant a second row of chrome directly under
+ * the host's, and it ate width from the character picker.
+ *
+ * Ghost, not the outline icon button the pane body uses: the host's header
+ * buttons are ghost, and a bordered card-filled square next to them reads as a
+ * control that wandered in from somewhere else.
+ */
+export const StatusWindowHeaderActions: React.FC<PaneViewProps> = ({ app }) => {
+  const t = React.useMemo(() => createT(app), [app]);
+  return (
+    <button
+      type="button"
+      className="pnsv-sw-ghostbtn"
+      data-icon="true"
+      title={t('settings')}
+      aria-label={t('settings')}
+      onClick={() => app.ui.openSettings()}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        {/* The app's `Cog` (`shared/ui/icons/svg/cog.svg`), path for path. The
+            previous one was lucide's older `settings` geometry, which the app
+            doesn't ship — a gear that isn't quite the app's gear. */}
+        <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+    </button>
+  );
 };

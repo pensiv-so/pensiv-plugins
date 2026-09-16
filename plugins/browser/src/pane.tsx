@@ -38,14 +38,17 @@ interface Bookmark {
 }
 
 // --- lucide icons (match the native MonoIcon set) -------------------------
+// `MonoIcon`'s own box is `h-4.5 w-4.5` (1.125rem) and the app's sprites are
+// Lucide re-stroked to **1.5**. This wrapper claimed to match the set while
+// drawing 1rem at stroke 2 — smaller and bolder than every icon beside it.
 const Svg: React.FC<{ children: React.ReactNode; spin?: boolean }> = ({ children, spin }) => (
   <svg
     className={spin ? 'pnsv-br-spin' : undefined}
-    style={{ width: '1rem', height: '1rem' }}
+    style={{ width: '1.125rem', height: '1.125rem' }}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
   >

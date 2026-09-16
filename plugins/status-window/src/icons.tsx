@@ -112,3 +112,54 @@ export const CharacterIcon: React.FC<{ character: Character }> = ({ character })
     </svg>
   );
 };
+
+/**
+ * The app's UI icons, path for path from `shared/ui/icons/svg/`.
+ *
+ * These places used to print a literal character — `＋`, `✓`, `↺`, `×`, `‹` —
+ * which renders at the *text* size in whatever weight the UI font happens to
+ * have. Next to the app's own icons (Lucide at stroke 1.5, `MonoIcon`'s default
+ * `h-4.5 w-4.5` box) they read as small, thin and off-family. A glyph character
+ * is not an icon.
+ */
+const UI_GLYPHS = {
+  plus: (
+    <>
+      <path d="M5 12h14" />
+      <path d="M12 5v14" />
+    </>
+  ),
+  check: <path d="M20 6 9 17l-5-5" />,
+  x: (
+    <>
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </>
+  ),
+  chevronLeft: <path d="m15 18-6-6 6-6" />,
+  rotateCcw: (
+    <>
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+      <path d="M3 3v5h5" />
+    </>
+  )
+} satisfies Record<string, React.ReactNode>;
+
+export type UiIconName = keyof typeof UI_GLYPHS;
+
+/** One app icon at `MonoIcon`'s default box (h-4.5 = 1.125rem), stroke 1.5. */
+export const Icon: React.FC<{ name: UiIconName; className?: string }> = ({ name, className }) => (
+  <svg
+    className={className ?? 'pnsv-sw-glyph'}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    focusable="false"
+  >
+    {UI_GLYPHS[name]}
+  </svg>
+);

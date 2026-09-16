@@ -27,9 +27,12 @@ const STRINGS = {
   addCharacter: { en: 'Add a character', ko: '캐릭터 추가', ja: 'キャラクターを追加' },
   newCharacter: { en: 'New character', ko: '새 캐릭터', ja: '新しいキャラクター' },
   characterNamePlaceholder: { en: 'Name', ko: '이름', ja: '名前' },
+  // Only the written state is labelled — an unwritten character carries no
+  // badge at all, so the picker marks the exception instead of tagging every
+  // row with the same word.
   written: { en: 'Written', ko: '작성됨', ja: '記入済み' },
-  notWritten: { en: 'Add', ko: '추가하기', ja: '追加' },
   removeCharacter: { en: 'Remove character', ko: '캐릭터 삭제', ja: 'キャラクターを削除' },
+  settings: { en: 'Settings', ko: '설정', ja: '設定' },
   noCharacters: {
     en: 'No characters yet. Add one, or create a sheet in the project.',
     ko: '캐릭터가 없습니다. 하나 추가하거나 프로젝트에 시트를 만드세요.',
@@ -41,12 +44,12 @@ const STRINGS = {
   attributeName: { en: 'Attribute name', ko: '속성 이름', ja: '項目名' },
   removeAttribute: { en: 'Remove', ko: '삭제', ja: '削除' },
   inherited: {
-    en: 'Carried over from the previous episode',
-    ko: '이전 회차에서 이어받음',
-    ja: '前話から引き継ぎ'
+    en: 'The character’s current value, unchanged here',
+    ko: '캐릭터의 현재 값 — 이 문서에서 바꾸지 않았습니다',
+    ja: 'キャラクターの現在値 — この文書では変更なし'
   },
-  changedHere: { en: 'Changed in this episode', ko: '이번 회차에서 변경됨', ja: 'この話で変更' },
-  revert: { en: 'Carry over instead', ko: '이어받기로 되돌리기', ja: '引き継ぎに戻す' },
+  changedHere: { en: 'Changed in this document', ko: '이 문서에서 변경됨', ja: 'この文書で変更' },
+  revert: { en: 'Undo this change', ko: '변경 되돌리기', ja: 'この変更を戻す' },
 
   /* attribute kinds — the labels in the "add attribute" picker */
   kindText: { en: 'Text', ko: '텍스트', ja: 'テキスト' },
@@ -278,27 +281,27 @@ const STRINGS = {
   /* ── settings ─────────────────────────────────────────────────────────── */
   settingsPreset: { en: 'Default preset', ko: '기본 프리셋', ja: '既定のプリセット' },
   settingsPresetHint: {
-    en: 'The convention new characters and new blocks start from.',
-    ko: '새 캐릭터와 새 블록이 시작할 표기 관례입니다.',
-    ja: '新しいキャラクターやブロックが使う表記の既定です。'
+    en: 'What new characters and blocks start from.',
+    ko: '새 캐릭터와 블록이 시작할 표기입니다.',
+    ja: '新しいキャラクターとブロックの既定の表記です。'
   },
   settingsOmitEmpty: { en: 'Omit empty rows', ko: '빈 값 제외', ja: '空の項目を除く' },
   settingsOmitEmptyHint: {
-    en: 'Leave out attributes with no value. Zero still prints — `자유 스텟 : 0` is a real line.',
-    ko: '값이 없는 속성을 빼고 출력합니다. 0은 그대로 출력됩니다 — `자유 스텟 : 0`은 의미 있는 줄입니다.',
-    ja: '値のない項目を出力しません。0 はそのまま出力されます。'
+    en: 'Leaves out attributes with no value. Zero still prints.',
+    ko: '값이 빈 속성만 뺍니다. 0은 그대로 나옵니다.',
+    ja: '値が空の項目だけ除きます。0 はそのまま出ます。'
   },
   settingsLiveBlocks: { en: 'Live status windows', ko: '라이브 상태창', ja: 'ライブステータス' },
   settingsLiveBlocksHint: {
-    en: 'Tag inserted blocks so they can be refreshed in place. The text stays plain either way, and turning this off leaves existing blocks alone.',
-    ko: '삽입한 블록에 표시를 남겨 제자리 갱신을 가능하게 합니다. 어느 쪽이든 본문은 평문이며, 꺼도 기존 블록은 그대로입니다.',
-    ja: '挿入したブロックに印を付け、その場で更新できるようにします。どちらでも本文はプレーンテキストのままです。'
+    en: 'Lets an inserted block refresh in place. The text stays plain.',
+    ko: '삽입한 블록을 제자리에서 갱신합니다. 본문은 평문 그대로입니다.',
+    ja: '挿入したブロックをその場で更新します。本文は平文のままです。'
   },
   settingsScope: { en: 'Episode order', ko: '회차 범위', ja: '話の範囲' },
   settingsScopeHint: {
-    en: 'Which documents count as the episode sequence that stats carry through.',
-    ko: '능력치가 이어지는 회차 순서로 볼 문서의 범위입니다.',
-    ja: '能力値が引き継がれる話の並びとして扱う範囲です。'
+    en: 'Which documents the episode number counts.',
+    ko: '회차 번호를 셀 범위입니다. 능력치는 어디서나 같습니다.',
+    ja: '話数を数える範囲です。能力値はどこでも同じです。'
   },
   scopeFolder: { en: 'This folder', ko: '현재 폴더', ja: 'このフォルダ' },
   scopeProject: { en: 'Whole project', ko: '프로젝트 전체', ja: 'プロジェクト全体' },
@@ -308,9 +311,9 @@ const STRINGS = {
     ja: '能力値の変更時にブロックを自動更新'
   },
   settingsAutoRefreshHint: {
-    en: 'Rewrite live status windows in the open episode as soon as a value is edited.',
-    ko: '값을 편집하면 열려 있는 회차의 라이브 상태창을 즉시 다시 씁니다.',
-    ja: '値を編集すると、開いている話のライブステータスをすぐに書き直します。'
+    en: 'Rewrites the open episode as soon as a value changes.',
+    ko: '값을 고치면 열린 회차를 바로 다시 씁니다.',
+    ja: '値を変えると開いている話をすぐ書き直します。'
   }
 } satisfies Record<string, LocalizedText>;
 

@@ -18,9 +18,9 @@
  *
  * {@link AttributeDef} is the *shape* of a character's sheet — it belongs to the
  * character and rarely changes. {@link AttributeValue} is what that attribute
- * reads in one episode, and it is stored per episode as a delta. Keeping them
- * apart is what makes "what were her stats at chapter 31?" a fold rather than a
- * search, and it is the one thing every spreadsheet-based workflow fails at.
+ * currently reads. Both belong to the character rather than to any one file, so
+ * a stat typed on a character's sheet is the stat every chapter prints; see
+ * `storage.ts` for why that is a correction rather than a simplification.
  */
 
 /** The six shapes a stat takes in real serials. */

@@ -1,29 +1,45 @@
 /**
- * Where the numbers live, and how "her stats at chapter 31" becomes a lookup.
+ * Where the numbers live.
  *
- * ## Deltas, not snapshots
+ * ## One state per character, global
  *
- * The obvious design stores a full value map per episode. It works until the
- * writer asks the question every spreadsheet fails at — *what did this look like
- * forty chapters ago?* — or edits chapter 12 and needs 13 through 200 to follow.
+ * A character's stats belong to the character, not to the file that happened to
+ * be open when they were typed. Level 10 is level 10 in chapter 4, in chapter
+ * 200, and on the character's own sheet.
  *
- * So an episode stores **only what changed in it**. A character's state at any
- * point is the fold of every delta from the first episode to that one. This
- * buys, in one move:
+ * This used to be a per-episode delta store folded in episode order, and it was
+ * wrong in a way writers hit immediately: values typed anywhere that is not a
+ * *document* — a character sheet, most obviously, which is exactly where a
+ * writer goes to fill in a character — landed under a key no fold ever read,
+ * because `episodeOrder` lists documents only. The stats were on screen on the
+ * sheet and gone in every chapter. Values written in one folder were also
+ * invisible from another, and values written in chapter 12 invisible in chapter
+ * 3, since a fold only ever carried forward.
  *
- *  - **arbitrary-point state** — fold to any index, no extra bookkeeping;
- *  - **downstream recalculation** — edit an early episode and every later fold
- *    already includes it, because nothing downstream was ever a copy;
- *  - **a storage budget that scales with edits, not with length** — 300 chapters
- *    × 10 characters is a few hundred changed fields, not 3,000 full sheets;
- *  - **the growth arrow for free** — `previous` is the fold one episode back,
- *    so `14 [F] → 16(+2)[F]` is read, not computed against a guess.
+ * So: `values:<charId>` is the character's state, read identically from every
+ * file. Writing a stat anywhere changes it everywhere.
+ *
+ * ## What the per-file keys are still for
+ *
+ * The growth arrow (`14 [F] → 16(+2)[F]`, the `{{changed}}` block, the dot on
+ * the row) needs a baseline, and it should appear in the file where the writer
+ * made the change and nowhere else. Two small per-file maps carry that:
+ *
+ *  - `delta:<fileId>:<charId>` — what this file set. Drives "carry over
+ *    instead", which puts a value back to what it read before this file.
+ *  - `prev:<fileId>:<charId>` — what those attributes read *before* this file
+ *    first touched them. The arrow's left-hand side.
+ *
+ * Neither is ever folded into `values`. They are annotations on a global state,
+ * not the state itself.
  *
  * ## Episode order is the app's, not ours
  *
  * Chapters are documents in the project tree and the app already orders them by
  * lexorank. Re-deriving that would be a second source of truth that drifts the
- * first time a writer drags a chapter. `episodeOrder` reads the tree.
+ * first time a writer drags a chapter. `episodeOrder` reads the tree. It no
+ * longer decides what a status window *reads* — only the episode number a
+ * template prints.
  *
  * ## Everything is synced
  *
@@ -46,7 +62,9 @@ import { presetById, type Preset } from './presets';
 
 const KEY_LOCAL_NAMES = 'localCharacters';
 const schemaKey = (charId: string) => `schema:${charId}`;
+const valuesKey = (charId: string) => `values:${charId}`;
 const deltaKey = (episodeId: string, charId: string) => `delta:${episodeId}:${charId}`;
+const prevKey = (episodeId: string, charId: string) => `prev:${episodeId}:${charId}`;
 const blocksKey = (episodeId: string) => `blocks:${episodeId}`;
 
 /** How far back the episode list reaches. */
@@ -126,12 +144,12 @@ export function renameLocalCharacter(app: HostApi, id: string, name: string): vo
 }
 
 /**
- * Forget a local character and its sheet.
+ * Forget a local character, its sheet and its stats.
  *
- * Its per-episode deltas are **not** swept: they are keyed by episode and there
- * is no index of which episodes a character appears in, so a sweep would mean
- * reading every episode's key. They are inert once the character is gone, and
- * `pruneDeltas` clears them if the writer ever asks.
+ * The per-file `delta:` / `prev:` records are **not** swept: they are keyed by
+ * file and there is no index of which files a character appears in, so a sweep
+ * would mean reading every file's key. Nothing reads them once the character's
+ * own state is gone.
  */
 export function removeLocalCharacter(app: HostApi, id: string): void {
   if (!isLocalCharacter(id)) return;
@@ -140,6 +158,7 @@ export function removeLocalCharacter(app: HostApi, id: string): void {
   delete next[id];
   app.storage.set(KEY_LOCAL_NAMES, next, { scope: 'synced' });
   app.storage.set(schemaKey(id), undefined, { scope: 'synced' });
+  app.storage.set(valuesKey(id), undefined, { scope: 'synced' });
 }
 
 // ── the sheet's shape ───────────────────────────────────────────────────────
@@ -207,38 +226,123 @@ export function episodeOrder(app: HostApi, scope: EpisodeScope, currentId?: stri
   }
 }
 
-// ── deltas and the fold ─────────────────────────────────────────────────────
+// ── the character's state ───────────────────────────────────────────────────
 
-/** What changed in one episode for one character. */
+/** A map that is only worth a key while it has entries. */
+function writeMap(app: HostApi, key: string, map: ValueMap): void {
+  const empty = Object.keys(map).length === 0;
+  app.storage.set(key, empty ? undefined : map, { scope: 'synced' });
+}
+
+/** What this file set for this character. */
 export function readDelta(app: HostApi, episodeId: string, charId: string): ValueMap {
   return app.storage.get<ValueMap>(deltaKey(episodeId, charId)) ?? {};
 }
 
-function writeDelta(app: HostApi, episodeId: string, charId: string, delta: ValueMap): void {
-  const empty = Object.keys(delta).length === 0;
-  app.storage.set(deltaKey(episodeId, charId), empty ? undefined : delta, { scope: 'synced' });
+/** What those attributes read before this file first touched them. */
+export function readPrev(app: HostApi, episodeId: string, charId: string): ValueMap {
+  return app.storage.get<ValueMap>(prevKey(episodeId, charId)) ?? {};
 }
 
-/** Does this character have anything written in this episode? */
-export function hasEntry(app: HostApi, episodeId: string, charId: string): boolean {
-  return Object.keys(readDelta(app, episodeId, charId)).length > 0;
+/**
+ * Every file id in the project, depth-first. Any file type can parent any other
+ * here, so the walk recurses into everything and collects everything.
+ *
+ * Only the one-time migration needs this; the render path never walks. Held per
+ * host because the first render after an upgrade migrates *every* character,
+ * and walking the tree once per character turns a project with fifty sheets
+ * into fifty walks. Staleness can't matter: a file created after this ran has
+ * no pre-upgrade values to find.
+ */
+const fileIdCache = new WeakMap<HostApi, string[]>();
+
+function allFileIds(app: HostApi): string[] {
+  const cached = fileIdCache.get(app);
+  if (cached) return cached;
+
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const walk = (parentId: string | null): void => {
+    for (const child of app.project.children(parentId)) {
+      if (seen.has(child.id)) continue;
+      seen.add(child.id);
+      if (!child.deletedAt) out.push(child.id);
+      walk(child.id);
+    }
+  };
+  walk(null);
+
+  fileIdCache.set(app, out);
+  return out;
+}
+
+/**
+ * Rebuild a character's state from the per-episode deltas of the old model.
+ *
+ * Runs once per character, the first time anything asks for its values. Without
+ * it the fix would read as data loss: every stat a writer had already typed
+ * lives in a `delta:` key that nothing global would ever look at.
+ *
+ * Project order decides who wins a conflict, so chapter 12's figure beats
+ * chapter 3's — the same thing "the latest state" meant before. The character's
+ * own sheet is applied last on purpose: a sheet-backed character's own file is
+ * the most deliberate statement of that character's numbers, and under the old
+ * model it was also the one place the writer could type them and see nothing
+ * anywhere else.
+ *
+ * Returns `undefined` when the project can't be read (no `project.read` grant,
+ * or a host that predates the API), so the migration is retried later rather
+ * than persisted half-done.
+ */
+function migrateFromDeltas(app: HostApi, charId: string): ValueMap | undefined {
+  if (!app.project.available) return undefined;
+  try {
+    let merged: ValueMap = {};
+    for (const fileId of allFileIds(app)) {
+      merged = { ...merged, ...readDelta(app, fileId, charId) };
+    }
+    return { ...merged, ...readDelta(app, charId, charId) };
+  } catch {
+    return undefined;
+  }
+}
+
+/** The character's stats, wherever the writer is. */
+export function readValues(app: HostApi, charId: string): ValueMap {
+  const stored = app.storage.get<ValueMap>(valuesKey(charId));
+  if (stored) return stored;
+
+  const migrated = migrateFromDeltas(app, charId);
+  if (!migrated) return {};
+  // Persisted even when empty — the stored `{}` is what stops the walk from
+  // running again on every render.
+  app.storage.set(valuesKey(charId), migrated, { scope: 'synced' });
+  return migrated;
+}
+
+function writeValues(app: HostApi, charId: string, values: ValueMap): void {
+  app.storage.set(valuesKey(charId), values, { scope: 'synced' });
+}
+
+/** Does this character have a status window filled in at all? */
+export function hasValues(app: HostApi, charId: string): boolean {
+  return Object.keys(readValues(app, charId)).length > 0;
 }
 
 export interface FoldResult {
-  /** State at the end of `episodeId`. */
+  /** The character's state. The same everywhere. */
   values: ValueMap;
-  /** State at the end of the episode before it — the diff baseline. */
+  /** What it read before this file touched it — the diff baseline. */
   previous: ValueMap;
   /** Position of `episodeId` in the order, or -1 when it isn't a listed episode. */
   index: number;
 }
 
 /**
- * Fold every delta up to and including `episodeId`.
+ * The character's state, plus this file's baseline for the growth arrow.
  *
- * Linear in the number of episodes, and each step is a synchronous storage read
- * of a small object — a 300-chapter manuscript folds in well under a frame. It
- * is called on render, not on keystroke; the pane holds the result.
+ * Two storage reads regardless of manuscript length — the old fold was linear
+ * in the number of episodes.
  */
 export function foldTo(
   app: HostApi,
@@ -247,70 +351,93 @@ export function foldTo(
   charId: string
 ): FoldResult {
   const index = episodes.findIndex((episode) => episode.id === episodeId);
-
-  // An episode outside the configured scope (a scratch file, a different
-  // folder) still gets to carry a status window: everything before it folds,
-  // and its own delta applies on top.
-  const upto = index === -1 ? episodes.length : index;
-
-  let previous: ValueMap = {};
-  for (let i = 0; i < upto; i += 1) {
-    const episode = episodes[i];
-    if (!episode) continue;
-    previous = { ...previous, ...readDelta(app, episode.id, charId) };
-  }
-
-  const values = { ...previous, ...readDelta(app, episodeId, charId) };
+  const values = readValues(app, charId);
+  const previous = { ...values, ...readPrev(app, episodeId, charId) };
   return { values, previous, index };
 }
 
 /**
- * Record a value for one attribute in one episode.
+ * Set one attribute, for this character, everywhere.
  *
- * Writes to the delta **only when the value differs from what carries forward**;
- * setting a stat back to the inherited figure removes the entry rather than
- * storing a no-op. That is what keeps the store proportional to edits, and it
- * keeps `changed` honest — a row that reads the same as last chapter should not
- * appear in the growth list.
+ * The per-file bookkeeping alongside it is what keeps the arrow honest: the
+ * first edit in a file records what the attribute read on the way in, and
+ * typing a stat up and back down again erases the record rather than leaving a
+ * row marked "changed" while reading exactly as it did before.
  */
 export function setValue(
   app: HostApi,
   episodeId: string,
   charId: string,
   attrId: string,
-  value: AttributeValue,
-  inherited: AttributeValue | undefined
+  value: AttributeValue
 ): void {
-  const delta = readDelta(app, episodeId, charId);
-  const next = { ...delta };
+  const values = readValues(app, charId);
+  const current = values[attrId];
+  if (valuesEqual(value, current)) return;
 
-  if (valuesEqual(value, inherited)) {
-    delete next[attrId];
+  const prev = readPrev(app, episodeId, charId);
+  const delta = readDelta(app, episodeId, charId);
+  const nextPrev = { ...prev };
+  const nextDelta = { ...delta };
+
+  // The arrow's left-hand side: what this file found, not what it last wrote.
+  const baseline = attrId in prev ? prev[attrId] : current;
+  if (!(attrId in prev) && current !== undefined) nextPrev[attrId] = current;
+
+  if (valuesEqual(value, baseline)) {
+    delete nextPrev[attrId];
+    delete nextDelta[attrId];
   } else {
-    next[attrId] = value;
+    nextDelta[attrId] = value;
   }
-  writeDelta(app, episodeId, charId, next);
-}
 
-/** Drop one attribute's entry for this episode — "inherit from the last one". */
-export function clearValue(app: HostApi, episodeId: string, charId: string, attrId: string): void {
-  const delta = readDelta(app, episodeId, charId);
-  if (!(attrId in delta)) return;
-  const next = { ...delta };
-  delete next[attrId];
-  writeDelta(app, episodeId, charId, next);
-}
-
-/** Drop everything this character has in this episode. */
-export function clearEpisode(app: HostApi, episodeId: string, charId: string): void {
-  writeDelta(app, episodeId, charId, {});
+  writeValues(app, charId, { ...values, [attrId]: value });
+  writeMap(app, prevKey(episodeId, charId), nextPrev);
+  writeMap(app, deltaKey(episodeId, charId), nextDelta);
 }
 
 /**
- * Remove delta entries for attributes the sheet no longer defines.
+ * Undo this file's change to one attribute — "carry over instead".
+ *
+ * Puts the value back to what it read before this file touched it, which is a
+ * global write like any other: the point of the button is that the number was
+ * never meant to change here.
+ */
+export function clearValue(app: HostApi, episodeId: string, charId: string, attrId: string): void {
+  const delta = readDelta(app, episodeId, charId);
+  if (!(attrId in delta)) return;
+
+  const prev = readPrev(app, episodeId, charId);
+  const values = { ...readValues(app, charId) };
+  if (attrId in prev) values[attrId] = prev[attrId] as AttributeValue;
+  else delete values[attrId];
+
+  const nextDelta = { ...delta };
+  const nextPrev = { ...prev };
+  delete nextDelta[attrId];
+  delete nextPrev[attrId];
+
+  writeValues(app, charId, values);
+  writeMap(app, deltaKey(episodeId, charId), nextDelta);
+  writeMap(app, prevKey(episodeId, charId), nextPrev);
+}
+
+/** Undo every change this file made to this character. */
+export function clearEpisode(app: HostApi, episodeId: string, charId: string): void {
+  for (const attrId of Object.keys(readDelta(app, episodeId, charId))) {
+    clearValue(app, episodeId, charId, attrId);
+  }
+}
+
+/**
+ * Remove entries for attributes the sheet no longer defines.
  *
  * A rename in the editor keeps the id, so this only fires when a row is deleted
  * outright. Called after a schema edit rather than on a timer.
+ *
+ * The character's own state is what has to be cleaned; the per-file records are
+ * swept for the episodes in scope as a courtesy, and anything left elsewhere is
+ * inert — nothing reads a `delta:` or `prev:` entry whose attribute is gone.
  */
 export function pruneDeltas(
   app: HostApi,
@@ -319,15 +446,25 @@ export function pruneDeltas(
   schema: CharacterSchema
 ): void {
   const live = new Set(schema.attrs.map((attr) => attr.id));
-  for (const episode of episodes) {
-    const delta = readDelta(app, episode.id, charId);
+
+  const keep = (map: ValueMap): ValueMap | undefined => {
     const kept: ValueMap = {};
     let dropped = false;
-    for (const [attrId, value] of Object.entries(delta)) {
+    for (const [attrId, value] of Object.entries(map)) {
       if (live.has(attrId)) kept[attrId] = value;
       else dropped = true;
     }
-    if (dropped) writeDelta(app, episode.id, charId, kept);
+    return dropped ? kept : undefined;
+  };
+
+  const values = keep(readValues(app, charId));
+  if (values) writeValues(app, charId, values);
+
+  for (const episode of episodes) {
+    const delta = keep(readDelta(app, episode.id, charId));
+    if (delta) writeMap(app, deltaKey(episode.id, charId), delta);
+    const prev = keep(readPrev(app, episode.id, charId));
+    if (prev) writeMap(app, prevKey(episode.id, charId), prev);
   }
 }
 

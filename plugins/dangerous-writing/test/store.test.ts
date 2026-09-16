@@ -13,7 +13,8 @@ const baseConfig: SessionConfig = {
   durationSec: 10,
   wordTarget: 5,
   fuseSec: 5,
-  hardcore: false
+  hardcore: false,
+  clipboard: 'all'
 };
 
 /** A fake target surface: a mutable word count + a wipe that zeroes it. */

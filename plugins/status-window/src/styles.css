@@ -77,13 +77,17 @@
 
 /* ── the character picker ─────────────────────────────────────────────────── */
 
+/*
+ * The foreshadowing pane's tab strip arrangement: no padding above — the strip
+ * starts at the pane's top edge and the space lives below it, before the
+ * hairline. Horizontally it carries the row cards' 0.5rem gutter, so the
+ * picker's left edge lands on the same line as the rows beneath it.
+ */
 .pnsv-sw-top {
   display: flex;
   align-items: center;
   gap: var(--sw-gap);
-  /* Tighter than the body inset — this strip is a control, not a text line,
-     and the picker button carries its own inner padding. */
-  padding: 0.5rem 0.625rem;
+  padding: 0 0.5rem 0.5rem;
   border-bottom: 1px solid hsl(var(--border));
 }
 
@@ -93,15 +97,17 @@
   min-width: 0;
 }
 
-/* The app's Select trigger (outline): rounded-lg, --input hairline, bg-card,
-   shadow-sm — at the pane's compact height. */
+/* The app's Select trigger at its default size: h-10, px-3, rounded-lg,
+   --input hairline, bg-card, shadow-sm. Default rather than `sm` because this
+   is the pane's primary control and it carries a portrait — `sm` squeezed a
+   1.25rem avatar into a 2rem box. */
 .pnsv-sw-picker-button {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--sw-gap);
   width: 100%;
-  height: 2.25rem;
+  height: 2.5rem;
   padding: 0 0.75rem;
   border: 1px solid hsl(var(--input));
   border-radius: calc(var(--radius) + 0.1rem);
@@ -111,6 +117,8 @@
   font: inherit;
   text-align: start;
   cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .pnsv-sw-picker-button:hover {
@@ -161,36 +169,104 @@
   color: hsl(var(--muted-foreground));
 }
 
+/* `SelectIcon`: `MonoIcon`'s default box (h-4.5), the trigger's own colour at
+   opacity-50 — not a muted glyph, and not a size of its own. */
 .pnsv-sw-chevron {
-  width: 1rem;
-  height: 1rem;
+  width: 1.125rem;
+  height: 1.125rem;
   flex: none;
-  color: hsl(var(--muted-foreground));
+  opacity: 0.5;
 }
 
-/* The app's floating panel (`DropdownMenuContent`): bg-popover, rounded-xl,
-   border-transparent, p-1, shadow `var(--floating-ring), var(--shadow-xl)`. */
+/*
+ * The app's dropdown entrance — `animate-dropdown-bounce-in` from
+ * `tailwind.config.js`, keyframes and easing included. Every floating panel in
+ * the app arrives this way; one that simply appears is the other half of what
+ * reads as someone else's menu.
+ */
+@keyframes pnsv-sw-dropdown-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(-6px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.01) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* The app's floating panel (`DropdownMenuContent`): rounded-xl,
+   border-transparent, p-1, `bg-popover/95` over `backdrop-blur-sm`, shadow
+   `var(--floating-ring), var(--shadow-xl)`. */
 /* Same portal treatment as .pnsv-sw-dd-menu — fixed against the picker button,
    never clipped by the pane, above the host's dialogs. */
+/*
+ * Both panels are portalled onto <body> (see `useMenuPanel`), so they sit
+ * OUTSIDE `.pnsv-sw` and inherit none of its scale tokens. Every `var(--sw-*)`
+ * inside them resolved to nothing — which makes the declaration invalid at
+ * computed-value time, so `font-size` fell back to the inherited root. The app's
+ * root is `html { font-size: 14px }`, so the picker's rows were rendering at
+ * 14px while the pane (and every menu in the app, which is `text-sm`) reads at
+ * 0.875rem = 12.25px. Restating the tokens here is what keeps the panel on the
+ * same scale as the surface that opened it.
+ */
+.pnsv-sw-menu,
+.pnsv-sw-dd-menu {
+  --sw-text: 0.875rem;
+  --sw-meta: 0.75rem;
+  --sw-gap: 0.5rem;
+  font-size: var(--sw-text);
+}
+
+/*
+ * No native scrollbar. The app's global one is `width: 0.5rem` and it takes
+ * layout space, so on a panel that scrolls it ate 8px off the right edge only —
+ * the rows sat in a 4px gutter on the left and a 12px one on the right, with a
+ * bare strip down the side. The app's own Select never shows one either (Radix
+ * swaps it for the scroll buttons), and `useMenuPanel` already drives the wheel
+ * by hand, so nothing is lost but the strip.
+ */
+.pnsv-sw-menu,
+.pnsv-sw-dd-menu,
+.pnsv-sw-kind-menu {
+  scrollbar-width: none;
+}
+
+.pnsv-sw-menu::-webkit-scrollbar,
+.pnsv-sw-dd-menu::-webkit-scrollbar,
+.pnsv-sw-kind-menu::-webkit-scrollbar {
+  display: none;
+}
+
+/* Height is set inline by `useMenuPanel` (capped at MENU_CAP = 384px, the app's
+   `max-h-96`), measured against the room the trigger actually has — a
+   `max-height` here would be dead code that reads like the real limit. */
 .pnsv-sw-menu {
   position: fixed;
   z-index: 60;
   pointer-events: auto;
-  max-height: 18rem;
   overflow-y: auto;
   margin: 0;
   padding: 0.25rem;
   list-style: none;
-  background: hsl(var(--popover));
+  background: hsl(var(--popover) / 0.95);
+  backdrop-filter: blur(4px);
   color: hsl(var(--popover-foreground));
   border: 1px solid transparent;
   border-radius: calc(var(--radius) + 0.25rem);
   box-shadow:
     var(--floating-ring, 0 0 0 1px hsl(var(--border))),
     var(--shadow-xl, var(--shadow-md));
+  transform-origin: top;
+  animation: pnsv-sw-dropdown-in 0.3s cubic-bezier(0.47, 1.14, 0.41, 1);
 }
 
-/* DropdownMenuItem: px-2 py-1.5 gap-2.5 rounded-lg text-sm, hover bg-muted. */
+/* DropdownMenuItem: px-2 py-1.5 gap-2.5 rounded-lg text-sm, hover bg-muted,
+   `transition-colors`. */
 .pnsv-sw-menu-item {
   display: flex;
   align-items: center;
@@ -205,15 +281,24 @@
   font: inherit;
   text-align: start;
   cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .pnsv-sw-menu-item:hover {
   background: hsl(var(--muted));
 }
 
-.pnsv-sw-menu-item[data-active='true'] {
-  background: hsl(var(--muted));
-  font-weight: 500;
+/*
+ * Selection is the check in the left slot, NOT a fill. `[data-active]` used to
+ * paint the same `--muted` the hover does, so the moment the pointer touched any
+ * other row the two were indistinguishable — the list stopped saying which
+ * character was actually selected. The app's `SelectItem` reserves `pl-8` for a
+ * check and keeps the fill for hover/focus only; the plugin's own `.pnsv-sw-dd-item`
+ * already does exactly that, and this was the one menu that didn't.
+ */
+.pnsv-sw-menu-item {
+  position: relative;
+  padding-left: 2rem;
 }
 
 /* Icon + name, grouped left of the badge. */
@@ -223,6 +308,13 @@
   gap: 0.5rem;
   min-width: 0;
   flex: 1 1 auto;
+}
+
+.pnsv-sw-menu-meta {
+  flex: none;
+  font-size: var(--sw-meta);
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
 }
 
 .pnsv-sw-menu-name {
@@ -245,21 +337,30 @@
 }
 
 /* `작성됨` / `추가하기`. The written state borrows the app's badge-secondary. */
+/*
+ * The app's `Badge` at `sizeVariant="xs"`: h-5, px-1, rounded-lg, text-xs,
+ * font-medium, `transition-colors`. It was rounded-sm at the surface's own meta
+ * size with no height — which, in a row's trailing slot, gave it the silhouette
+ * of a small button. It is a state; the row's own click is what selects the
+ * character.
+ */
 .pnsv-sw-badge {
   flex: none;
-  padding: 0.0625rem 0.375rem;
+  display: inline-flex;
+  align-items: center;
+  height: 1.25rem;
+  padding: 0 0.25rem;
   border: 1px solid hsl(var(--border));
-  border-radius: calc(var(--radius) - 0.1rem);
-  font-size: var(--sw-meta);
+  border-radius: calc(var(--radius) + 0.1rem);
+  font-size: 0.75rem;
+  font-weight: 500;
+  /* `outline` badge is text-foreground; muted because this is the *absent*
+     state, and the app's own language for "not yet" is the muted token. */
   color: hsl(var(--muted-foreground));
   white-space: nowrap;
-}
-
-.pnsv-sw-badge[data-written='true'] {
-  border-color: transparent;
-  background: hsl(var(--primary) / 0.1);
-  color: hsl(var(--primary));
-  font-weight: 500;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .pnsv-sw-add {
@@ -290,10 +391,19 @@
   padding: 0.75rem var(--sw-inset);
 }
 
-.pnsv-sw-empty,
-.pnsv-sw-hint {
+.pnsv-sw-empty {
   margin: 0;
   padding: 0 var(--sw-inset);
+  color: hsl(var(--muted-foreground));
+  font-size: var(--sw-meta);
+}
+
+/* The hint only ever sits inside the row's action bar, which owns its own
+   inset — it shared the pane inset with `.pnsv-sw-empty` and carried a stray
+   1rem indent into the flex row. */
+.pnsv-sw-hint {
+  margin: 0;
+  min-width: 0;
   color: hsl(var(--muted-foreground));
   font-size: var(--sw-meta);
 }
@@ -331,25 +441,41 @@
   color: hsl(var(--muted-foreground));
 }
 
-/* The task row: px-3 py-2 (the pane inset as the row's own padding, so the
-   hover fill spans the pane), gap-3, rounded-lg. */
+/*
+ * A row is an inset rounded block, not a full-bleed strip. The app's task row is
+ * a `rounded-lg` fill sitting in a gutter, and here the expanded editor belongs
+ * to the same block — so the wrap carries the radius and clips the editor's fill
+ * to it, and the two read as one card rather than a strip with a panel stuck
+ * underneath.
+ */
+.pnsv-sw-row-wrap {
+  margin: 0 0.5rem;
+  border-radius: calc(var(--radius) + 0.1rem);
+  overflow: hidden;
+}
+
+/* The task row: `gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-muted`.
+   The horizontal padding tops the wrap's 0.5rem gutter up to `--sw-inset`, so
+   the text stays on the pane's one alignment line while the fill stops short of
+   the edges — the same arrangement the app's list rows use. */
 .pnsv-sw-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 0.75rem;
   width: 100%;
-  padding: 0.375rem var(--sw-inset);
+  padding: 0.5rem calc(var(--sw-inset) - 0.5rem);
   border: 0;
   background: transparent;
   color: inherit;
   font: inherit;
   text-align: start;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .pnsv-sw-row:hover {
-  background: hsl(var(--muted) / 0.5);
+  background: hsl(var(--muted));
 }
 
 .pnsv-sw-row-wrap[data-open='true'] .pnsv-sw-row {
@@ -402,11 +528,13 @@
 
 /* ── the expanded row editor ──────────────────────────────────────────────── */
 
+/* Inset to match the row above it — same gutter arithmetic, so the fields line
+   up with the row's name rather than starting half a step to the right. */
 .pnsv-sw-editor {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 0.5rem var(--sw-inset) 0.75rem;
+  padding: 0.5rem calc(var(--sw-inset) - 0.5rem) 0.75rem;
   background: hsl(var(--muted) / 0.35);
 }
 
@@ -430,7 +558,10 @@
   min-width: 0;
 }
 
+/* Indented onto the field's own text line — the input carries px-2, so a label
+   flush to the cell edge hangs half a step left of the value it names. */
 .pnsv-sw-cell-label {
+  padding: 0 0.5rem;
   font-size: var(--sw-meta);
   color: hsl(var(--muted-foreground));
 }
@@ -512,6 +643,9 @@
   font-weight: 400;
   white-space: nowrap;
   cursor: pointer;
+  user-select: none;
+  -webkit-app-region: no-drag;
+  transition: all 0.15s ease;
 }
 
 .pnsv-sw-ghostbtn:hover:not(:disabled) {
@@ -527,14 +661,23 @@
   outline-offset: 2px;
 }
 
+/* variant="outline": `border bg-card hover:bg-muted/50 shadow-sm`. The app's
+   Button outline takes plain `border` (--border); --input is the *field*
+   hairline, which is why these read a shade heavier than the app's. */
 .pnsv-sw-ghostbtn[data-variant='outline'] {
-  border-color: hsl(var(--input));
+  border-color: hsl(var(--border));
   background: hsl(var(--card));
   box-shadow: var(--shadow-sm);
 }
 
 .pnsv-sw-ghostbtn[data-variant='outline']:hover:not(:disabled) {
-  background: hsl(var(--muted));
+  background: hsl(var(--muted) / 0.5);
+}
+
+/* Only the action that destroys something turns destructive, and only on
+   hover — the same restraint the foreshadowing row's actions use. */
+.pnsv-sw-ghostbtn[data-tone='destructive']:hover:not(:disabled) {
+  color: hsl(var(--destructive));
 }
 
 .pnsv-sw-ghostbtn[data-icon='true'] {
@@ -547,10 +690,13 @@
   color: hsl(var(--foreground));
 }
 
+/* Every glyph in the plugin is `MonoIcon`'s default h-4.5 w-4.5, the way the
+   app's own side panes draw theirs (an `sm` icon Button holds a full-size
+   MonoIcon). A smaller one reads as a different icon set. */
 .pnsv-sw-ghostbtn svg {
   flex: none;
-  width: 1rem;
-  height: 1rem;
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 .pnsv-sw-ghostbtn[data-icon='true'] svg {
@@ -573,9 +719,17 @@
   position: relative;
 }
 
+/* An ordinary outline button at its natural width, on the right end of the row
+   — a full-bleed dashed bar is a drop zone's language, not an action's. The
+   `margin-inline-start: auto` rather than a flex parent, because the menu below
+   it is in flow and must keep the full width. */
+/* `display: flex`, not inline-flex: an auto margin on an inline-level box
+   computes to 0, which is why the centring attempt before this did nothing. */
 .pnsv-sw-kinds > summary {
   list-style: none;
   display: flex;
+  width: fit-content;
+  margin-inline-start: auto;
   align-items: center;
   justify-content: center;
 }
@@ -591,12 +745,15 @@
   padding: 0.25rem;
   max-height: 20rem;
   overflow-y: auto;
-  background: hsl(var(--popover));
+  background: hsl(var(--popover) / 0.95);
+  backdrop-filter: blur(4px);
   border: 1px solid transparent;
   border-radius: calc(var(--radius) + 0.25rem);
   box-shadow:
     var(--floating-ring, 0 0 0 1px hsl(var(--border))),
     var(--shadow-xl, var(--shadow-md));
+  transform-origin: top;
+  animation: pnsv-sw-dropdown-in 0.3s cubic-bezier(0.47, 1.14, 0.41, 1);
 }
 
 .pnsv-sw-kind-item {
@@ -612,6 +769,7 @@
   font: inherit;
   text-align: start;
   cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .pnsv-sw-kind-item:hover {
@@ -646,7 +804,11 @@
   min-width: 0;
 }
 
+/* Holds a real `X` now, not a `×` character, so it needs to centre a box. */
 .pnsv-sw-kind-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: none;
   width: 1.5rem;
   height: 1.5rem;
@@ -660,6 +822,7 @@
   line-height: 1;
   cursor: pointer;
   opacity: 0;
+  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
 }
 
 .pnsv-sw-kind-row:hover .pnsv-sw-kind-remove,
@@ -683,50 +846,88 @@
 
 /* ── buttons ──────────────────────────────────────────────────────────────── */
 
-/* The app's Button: h-9, px-4, rounded-md, medium weight. */
+/*
+ * The app's `Button` at `sizeVariant="sm"` — h-8, p-2, rounded-lg
+ * (`calc(var(--radius) + 0.1rem)`), so it pairs with `.pnsv-sw-input`, which is
+ * the same height. `font-normal` is the cva base; only the default variant is
+ * medium.
+ */
 .pnsv-sw-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.375rem;
-  height: 2.25rem;
-  padding: 0 1rem;
+  height: 2rem;
+  padding: 0 0.5rem;
   border: 1px solid transparent;
-  border-radius: calc(var(--radius));
+  border-radius: calc(var(--radius) + 0.1rem);
   background: transparent;
   color: inherit;
   font: inherit;
   font-size: var(--sw-text);
-  font-weight: 500;
+  font-weight: 400;
+  line-height: 1;
   cursor: pointer;
   white-space: nowrap;
+  user-select: none;
+  /* the app's `no-drag`, for the Electron title bar */
+  -webkit-app-region: no-drag;
+  transition: all 0.15s ease;
 }
 
+/* active:scale-[0.98] */
+.pnsv-sw-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/*
+ * variant="primary" = the app's `default`, and it is never a flat fill: a
+ * primary/95 hairline over a gradient that darkens toward the bottom
+ * (`bg-gradient-to-t to-primary from-[l*0.9]`) with `shadow-sm`. The flat fill
+ * stays first as the fallback for engines without relative colour syntax.
+ *
+ * No `flex: 1 1 auto` — a stretched confirm button is not how the app reads;
+ * `.pnsv-sw-foot` right-aligns it instead, and the add form's input takes the
+ * slack on its own (`width: 100%`).
+ */
 .pnsv-sw-button[data-variant='primary'] {
-  flex: 1 1 auto;
-  background: hsl(var(--primary));
+  font-weight: 500;
   color: hsl(var(--primary-foreground));
+  border-color: hsl(var(--primary) / 0.95);
+  background: hsl(var(--primary));
+  background: linear-gradient(
+    180deg,
+    hsl(var(--primary)),
+    hsl(from hsl(var(--primary)) h s calc(l * 0.9))
+  );
+  box-shadow: var(--shadow-sm);
 }
 
+/* Hover darkens the same gradient one step — the native hover, no colour shift. */
 .pnsv-sw-button[data-variant='primary']:hover:not(:disabled) {
   background: hsl(var(--primary) / 0.9);
+  background: linear-gradient(
+    180deg,
+    hsl(from hsl(var(--primary)) h s calc(l * 0.9)),
+    hsl(from hsl(var(--primary)) h s calc(l * 0.85))
+  );
 }
 
-.pnsv-sw-button[data-variant='ghost'] {
-  width: 100%;
+/* variant="outline": `border bg-card hover:bg-muted/50 shadow-sm`. */
+.pnsv-sw-button[data-variant='outline'] {
   border-color: hsl(var(--border));
-  border-style: dashed;
-  color: hsl(var(--muted-foreground));
+  background: hsl(var(--card));
+  box-shadow: var(--shadow-sm);
 }
 
-.pnsv-sw-button[data-variant='ghost']:hover {
+.pnsv-sw-button[data-variant='outline']:hover:not(:disabled) {
   background: hsl(var(--muted) / 0.5);
-  color: hsl(var(--foreground));
 }
 
+/* `disabled:pointer-events-none disabled:opacity-20` */
 .pnsv-sw-button:disabled {
-  opacity: 0.5;
-  cursor: default;
+  opacity: 0.2;
+  pointer-events: none;
 }
 
 .pnsv-sw-button:focus-visible,
@@ -735,25 +936,44 @@
   outline-offset: 2px;
 }
 
-/* The app's icon button: square, h-9, rounded-md, --input hairline. */
+/*
+ * The app's `outline` icon button at the same `sm` box as `.pnsv-sw-button`:
+ * square h-8, rounded-lg, and — the part that was missing — `bg-card` with
+ * `shadow-sm`, so it sits next to the confirm button as a real control rather
+ * than a hairline outline on the pane.
+ */
 .pnsv-sw-icon-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: none;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2rem;
+  height: 2rem;
   padding: 0;
   border: 1px solid hsl(var(--input));
-  border-radius: calc(var(--radius));
-  background: transparent;
+  border-radius: calc(var(--radius) + 0.1rem);
+  background: hsl(var(--card));
+  box-shadow: var(--shadow-sm);
   color: hsl(var(--muted-foreground));
   cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: all 0.15s ease;
 }
 
 .pnsv-sw-icon-button:hover {
   background: hsl(var(--muted) / 0.5);
   color: hsl(var(--foreground));
+}
+
+.pnsv-sw-icon-button:active {
+  transform: scale(0.98);
+}
+
+/* In the picker strip they flank a default-size Select trigger, so they take
+   the matching square (the app's icon button at `sizeVariant="default"`). */
+.pnsv-sw-top .pnsv-sw-icon-button {
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
 .pnsv-sw-icon-button[data-active='true'] {
@@ -762,8 +982,8 @@
 }
 
 .pnsv-sw-icon-button svg {
-  width: 1.0625rem;
-  height: 1.0625rem;
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 /* ── chips (preset picker) ────────────────────────────────────────────────── */
@@ -783,17 +1003,41 @@
   font: inherit;
   font-size: var(--sw-meta);
   cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: all 0.15s ease;
 }
 
 .pnsv-sw-chip:hover {
   background: hsl(var(--muted) / 0.5);
 }
 
+.pnsv-sw-chip:active {
+  transform: scale(0.98);
+}
+
+/* Selected: the same filled-primary the app's default `Button` wears — the
+   gradient, the primary/95 hairline and shadow-sm, not a flat fill. Pill radius
+   is the chip's own; everything else is the app's. */
 .pnsv-sw-chip[data-active='true'] {
-  border-color: transparent;
+  border-color: hsl(var(--primary) / 0.95);
   background: hsl(var(--primary));
+  background: linear-gradient(
+    180deg,
+    hsl(var(--primary)),
+    hsl(from hsl(var(--primary)) h s calc(l * 0.9))
+  );
+  box-shadow: var(--shadow-sm);
   color: hsl(var(--primary-foreground));
   font-weight: 500;
+}
+
+.pnsv-sw-chip[data-active='true']:hover {
+  background: hsl(var(--primary) / 0.9);
+  background: linear-gradient(
+    180deg,
+    hsl(from hsl(var(--primary)) h s calc(l * 0.9)),
+    hsl(from hsl(var(--primary)) h s calc(l * 0.85))
+  );
 }
 
 /* A library entry in the settings tab — a label, not a control. */
@@ -807,6 +1051,11 @@
 
 .pnsv-sw-chip[data-static='true']:hover {
   background: transparent;
+}
+
+/* No press feedback on a label — it is a chip-shaped piece of text. */
+.pnsv-sw-chip[data-static='true']:active {
+  transform: none;
 }
 
 .pnsv-sw-chip-x {
@@ -1222,10 +1471,11 @@
  *
  *   trigger  outline — h-10 (sm h-8) rounded-lg border-input bg-card shadow-sm
  *            px-3 text-sm, hover bg-muted, ChevronDown at 50%
- *   panel    rounded-xl border-transparent bg-popover p-1,
- *            shadow `var(--floating-ring), var(--shadow-xl)`
- *   item     rounded-lg py-1.5 pl-8 pr-2 text-sm, hover/focus bg-muted,
- *            check in an absolute h-3.5 w-3.5 slot at left-2
+ *   panel    rounded-xl border-transparent p-1, bg-popover/95 over
+ *            backdrop-blur-sm, shadow `var(--floating-ring), var(--shadow-xl)`,
+ *            entering on `animate-dropdown-bounce-in`
+ *   item     rounded-lg py-1.5 pl-8 pr-2 text-sm, hover/focus bg-muted with
+ *            `transition-colors`, check in an absolute h-3.5 w-3.5 slot at left-2
  */
 .pnsv-sw-dd {
   position: relative;
@@ -1292,21 +1542,34 @@
   margin: 0;
   padding: 0.25rem;
   list-style: none;
-  background: hsl(var(--popover));
+  background: hsl(var(--popover) / 0.95);
+  backdrop-filter: blur(4px);
   color: hsl(var(--popover-foreground));
   border: 1px solid transparent;
   border-radius: calc(var(--radius) + 0.25rem);
   box-shadow:
     var(--floating-ring, 0 0 0 1px hsl(var(--border))),
     var(--shadow-xl, var(--shadow-md));
+  transform-origin: top;
+  animation: pnsv-sw-dropdown-in 0.3s cubic-bezier(0.47, 1.14, 0.41, 1);
 }
 
+/* The panel's entrance is decoration, not information. */
+@media (prefers-reduced-motion: reduce) {
+  .pnsv-sw-menu,
+  .pnsv-sw-dd-menu,
+  .pnsv-sw-kind-menu {
+    animation: none;
+  }
+}
 
 .pnsv-sw-dd-item {
   position: relative;
   display: flex;
   width: 100%;
   align-items: center;
+  /* An option may carry a leading icon; the check stays absolute in the slot. */
+  gap: 0.5rem;
   padding: 0.375rem 0.5rem 0.375rem 2rem;
   border: 0;
   border-radius: calc(var(--radius) + 0.1rem);
@@ -1317,6 +1580,7 @@
   text-align: start;
   cursor: pointer;
   white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .pnsv-sw-dd-item:hover,
@@ -1325,11 +1589,14 @@
   outline: none;
 }
 
-.pnsv-sw-dd-check {
+/* `SelectItem`'s indicator is a plain `<MonoIcon type="Check" />` — its default
+   h-4.5, not a shrunken one. Sits in the pl-8 slot at left-2. */
+.pnsv-sw-dd-check,
+.pnsv-sw-menu-check {
   position: absolute;
   left: 0.5rem;
-  width: 0.875rem;
-  height: 0.875rem;
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 .pnsv-sw-dd-item-label {
@@ -1386,10 +1653,14 @@
 
 /* Right-hand cluster of a row's actions, so the destructive one sits at the
    far edge and never next to the one you actually meant to press. */
-.pnsv-sw-row-actions-end {
+/* The row's non-destructive actions, grouped left; `삭제` sits alone on the
+   right of the `space-between`, so the one irreversible action is the only
+   thing on that edge. */
+.pnsv-sw-row-actions-start {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
+  min-width: 0;
 }
 
 /* ── preview ──────────────────────────────────────────────────────────────── */
@@ -1427,9 +1698,11 @@
 
 /* ── footer ───────────────────────────────────────────────────────────────── */
 
+/* Right-aligned, confirm last — the way the app's own dialog footers read. */
 .pnsv-sw-foot {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: var(--sw-gap);
   padding: 0.625rem var(--sw-inset);
   border-top: 1px solid hsl(var(--border));
@@ -1531,4 +1804,23 @@
  */
 .pnsv-sw-block {
   box-shadow: -0.5rem 0 0 -0.4375rem hsl(var(--primary) / 0.45);
+}
+
+/*
+ * The shared glyph box for `Icon` (`icons.tsx`) — `MonoIcon`'s default
+ * h-4.5 w-4.5. These sites used to print a literal `＋` / `✓` / `↺` / `×` / `‹`,
+ * which is text: it takes the row's font size and weight, so it landed small and
+ * thin beside everything the app draws.
+ */
+.pnsv-sw-glyph {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* The tag reading `✓ 기본` is icon + label, so it needs the gap a button has. */
+.pnsv-sw-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
 }

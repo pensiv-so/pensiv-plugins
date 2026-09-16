@@ -1,4 +1,5 @@
 import { useEffect, useReducer } from 'react';
+import type { ClipboardMode } from './clipboard';
 
 /**
  * The Dangerous Writing session run-state — a module-level singleton, like the
@@ -28,6 +29,8 @@ export interface SessionConfig {
   fuseSec: number;
   /** Hardcore: shorter fuse + less warning. Surfaces read it to delay the visuals. */
   hardcore: boolean;
+  /** How much of the clipboard stays usable during the run (see {@link ClipboardMode}). */
+  clipboard: ClipboardMode;
   /** The file the session is armed on, for the safety bail-out. */
   startFileId?: string;
 }
@@ -56,7 +59,8 @@ const DEFAULT_CONFIG: SessionConfig = {
   durationSec: 600,
   wordTarget: 500,
   fuseSec: 5,
-  hardcore: false
+  hardcore: false,
+  clipboard: 'all'
 };
 
 const safeWords = (hooks: SessionHooks): number => {

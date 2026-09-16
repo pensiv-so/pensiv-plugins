@@ -149,7 +149,9 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
       />
       {remoteTitle ? <p className="pnsv-fs-hint">{t('noteRemoteHint')}</p> : null}
       <div className="pnsv-fs-actions">
-        <button type="button" className="pnsv-fs-btn" onClick={onCancel}>
+        {/* Outline, not ghost — the app pairs a bordered cancel with the filled
+            confirm in its own dialog footers (`PluginInstallDialog`). */}
+        <button type="button" className="pnsv-fs-btn" data-variant="outline" onClick={onCancel}>
           {t('cancel')}
         </button>
         <button

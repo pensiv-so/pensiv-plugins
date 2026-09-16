@@ -24,6 +24,7 @@
  */
 import * as React from 'react';
 import { createPortal } from 'react-dom';
+import { Icon, type UiIconName } from './icons';
 
 export const Section: React.FC<{
   title: string;
@@ -145,6 +146,13 @@ IconGhostButton.displayName = 'IconGhostButton';
 export interface DropdownOption {
   value: string;
   label: string;
+  /**
+   * A leading app icon. `label` is a plain string, so an option that wanted a
+   * glyph used to prefix the *text* with one (`＋ 새 프리셋`) — which renders at
+   * the row's font size and weight and reads as a small, thin character next to
+   * everything the app draws. Name the icon instead and the list draws it.
+   */
+  icon?: UiIconName;
 }
 
 /** .25rem — the gap between a trigger and its panel. */
@@ -308,6 +316,7 @@ export const Dropdown: React.FC<{
         onClick={() => setOpen((was) => !was)}
         onKeyDown={onEscape}
       >
+        {current?.icon ? <Icon name={current.icon} /> : null}
         <span className="pnsv-sw-dd-value">{current?.label ?? value}</span>
         {/* The app's ChevronDown at opacity-50, from its own sprite. */}
         <svg
@@ -360,6 +369,7 @@ export const Dropdown: React.FC<{
                     <path d="M20 6 9 17l-5-5" />
                   </svg>
                 ) : null}
+                {option.icon ? <Icon name={option.icon} /> : null}
                 <span className="pnsv-sw-dd-item-label">{option.label}</span>
               </button>
             </li>

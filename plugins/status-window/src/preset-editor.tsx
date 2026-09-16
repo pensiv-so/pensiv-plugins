@@ -33,6 +33,7 @@
  * for the session.
  */
 import * as React from 'react';
+import { Icon } from './icons';
 import { resolveLocalizedText, type HostApi, type LocalizedText } from '@pensiv/plugin-sdk';
 import { createT, type StringKey } from './i18n';
 import {
@@ -220,7 +221,7 @@ export const PresetEditor: React.FC<{ app: HostApi }> = ({ app }) => {
                     ? `${label(entry.name)} · ${t('isDefault')}`
                     : label(entry.name)
               })),
-              { value: NEW_PRESET, label: `＋ ${t('newPreset')}` }
+              { value: NEW_PRESET, label: t('newPreset'), icon: 'plus' }
             ]}
             onChange={(next) => (next === NEW_PRESET ? addPreset() : setSelectedId(next))}
           />
@@ -237,7 +238,10 @@ export const PresetEditor: React.FC<{ app: HostApi }> = ({ app }) => {
 
           <Row label={t('makeDefault')} description={t('settingsPresetHint')}>
             {isDefault ? (
-              <span className="pnsv-sw-tag">✓ {t('isDefault')}</span>
+              <span className="pnsv-sw-tag">
+                <Icon name="check" />
+                {t('isDefault')}
+              </span>
             ) : (
               <GhostButton
                 onClick={() => {
@@ -431,7 +435,8 @@ export const PresetEditor: React.FC<{ app: HostApi }> = ({ app }) => {
                   bump();
                 }}
               >
-                ↺ {t('restoreDefaults')}
+                <Icon name="rotateCcw" />
+                {t('restoreDefaults')}
               </GhostButton>
             </div>
           ) : null}
@@ -524,7 +529,8 @@ const LibrarySection: React.FC<{
             bump();
           }}
         >
-          ↺ {t('restoreDefaults')}
+          <Icon name="rotateCcw" />
+          {t('restoreDefaults')}
         </GhostButton>
       }
     >
