@@ -269,6 +269,53 @@ describe('migration from per-episode deltas', () => {
     expect(readValues(host, CHAR)).toEqual({ str: stat(50) });
   });
 
+  /** Counts synced writes, so "reading wrote nothing" is checked rather than assumed. */
+  const countWrites = (host: HostApi): (() => number) => {
+    let writes = 0;
+    const set = host.storage.set.bind(host.storage);
+    host.storage.set = (key, value, options) => {
+      writes += 1;
+      set(key, value, options);
+    };
+    return () => writes;
+  };
+
+  it('writes no marker when there is nothing to migrate', () => {
+    const host = hostWithProject([episode('ep1')]);
+    const writes = countWrites(host);
+
+    expect(readValues(host, CHAR)).toEqual({});
+    expect(readValues(host, CHAR)).toEqual({});
+    expect(host.storage.get(`values:${CHAR}`)).toBeUndefined();
+    expect(writes()).toBe(0);
+  });
+
+  /** The character picker asks every character in the project. */
+  it('lets the picker check every character without writing anything', () => {
+    const host = hostWithProject([episode('ep1')]);
+    const writes = countWrites(host);
+
+    for (const id of ['a', 'b', 'c', 'd']) expect(hasValues(host, id)).toBe(false);
+    expect(writes()).toBe(0);
+  });
+
+  it('drops the empty marker an older version left when there is nothing behind it', () => {
+    const host = hostWithProject([episode('ep1')]);
+    host.storage.set(`values:${CHAR}`, {}, { scope: 'synced' });
+
+    expect(readValues(host, CHAR)).toEqual({});
+    expect(host.storage.get(`values:${CHAR}`)).toBeUndefined();
+  });
+
+  it('keeps an emptied sheet empty instead of re-migrating the deltas under it', () => {
+    const host = hostWithProject([episode('ep1')]);
+    seedDelta(host, 'ep1', { str: stat(10) });
+    host.storage.set(`values:${CHAR}`, {}, { scope: 'synced' });
+
+    expect(readValues(host, CHAR)).toEqual({});
+    expect(host.storage.get(`values:${CHAR}`)).toEqual({});
+  });
+
   it('does not persist a half-done migration when the project is unreadable', () => {
     // `fakeHost` has `project.available: false` — no walk is possible, so the
     // migration must stay pending rather than bake in an empty sheet.
