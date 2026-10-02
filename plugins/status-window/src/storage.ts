@@ -307,15 +307,52 @@ function migrateFromDeltas(app: HostApi, charId: string): ValueMap | undefined {
   }
 }
 
+/**
+ * Characters whose migration walk found nothing to recover, per host, for this
+ * session. This used to be remembered by persisting `{}` under `values:<charId>` —
+ * and since the character picker asks every character whether it has a status
+ * window, opening it once wrote one synced key, and one full settings sync, per
+ * character in the project. Nothing needs that across sessions: the walk is a
+ * handful of storage reads, fine to repeat once per session.
+ */
+const emptyWalks = new WeakMap<HostApi, Set<string>>();
+
+const emptyWalksFor = (app: HostApi): Set<string> => {
+  let checked = emptyWalks.get(app);
+  if (!checked) {
+    checked = new Set();
+    emptyWalks.set(app, checked);
+  }
+  return checked;
+};
+
 /** The character's stats, wherever the writer is. */
 export function readValues(app: HostApi, charId: string): ValueMap {
   const stored = app.storage.get<ValueMap>(valuesKey(charId));
-  if (stored) return stored;
+  if (stored && Object.keys(stored).length > 0) return stored;
+
+  const checked = emptyWalksFor(app);
+  if (checked.has(charId)) return stored ?? {};
 
   const migrated = migrateFromDeltas(app, charId);
-  if (!migrated) return {};
-  // Persisted even when empty — the stored `{}` is what stops the walk from
-  // running again on every render.
+  // The project can't be read: retry later, and change nothing in the meantime.
+  if (!migrated) return stored ?? {};
+
+  if (stored) {
+    // An empty record is either an older version's "already migrated" marker or a
+    // sheet the writer emptied. Only the marker is safe to drop: next to real deltas
+    // the `{}` is what stops them from being migrated back over the writer's clear.
+    if (Object.keys(migrated).length === 0) {
+      app.storage.set(valuesKey(charId), undefined, { scope: 'synced' });
+    }
+    checked.add(charId);
+    return {};
+  }
+
+  if (Object.keys(migrated).length === 0) {
+    checked.add(charId);
+    return migrated;
+  }
   app.storage.set(valuesKey(charId), migrated, { scope: 'synced' });
   return migrated;
 }

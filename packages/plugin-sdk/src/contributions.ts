@@ -204,6 +204,14 @@ export interface PaneProps {
   projectId?: string;
   /** The split-view pane this pane is mounted in. */
   paneId: string;
+  /**
+   * The tab this pane is rendering. Unlike `paneId` it survives a split (the
+   * pane is re-parented, which remounts it), a move to another pane, and a
+   * reopen of a closed tab, while a freshly opened tab gets a new one — so key
+   * per-tab state on it.
+   * Undefined on hosts without tabs (mobile).
+   */
+  tabId?: string;
 }
 
 /**
