@@ -16,6 +16,15 @@ function resolveNavigationTarget(raw: string): string {
   return GOOGLE_SEARCH(t);
 }
 
+/**
+ * The page each browser tab was last on, keyed by tab id. A split re-parents the
+ * pane, which remounts this component and recreates the `<webview>`; without
+ * this the tab would boot back to the homepage and lose the page the user was
+ * on. Module-scoped rather than `app.storage`, which rides synced user settings
+ * and must not be written on every navigation.
+ */
+const lastUrlByTab = new Map<string, string>();
+
 /** Minimal Electron `<webview>` surface we drive (no Electron types in the plugin). */
 interface WebviewElement extends HTMLElement {
   loadURL(url: string): Promise<void>;
@@ -90,28 +99,41 @@ const IconCopy = () => (
 const IconMinus = () => <Svg><path d="M5 12h14" /></Svg>;
 const IconPlus = () => <Svg><path d="M5 12h14M12 5v14" /></Svg>;
 
-export const BrowserPane: React.FC<PaneProps> = ({ app }) => {
+export const BrowserPane: React.FC<PaneProps> = ({ app, paneId, tabId }) => {
   const cfg = app.platform.webviewConfig;
-  const homepage = (app.storage.get<string>('homepageUrl')?.trim() || DEFAULT_BROWSER_URL) as string;
+  const tabKey = tabId ?? paneId;
+  // Resolved like an address-bar entry: `<webview src>` resolves a scheme-less
+  // value against the host page, so a raw `chatgpt.com` would load
+  // `https://app.pensiv.so/chatgpt.com` (the app's 404 page).
+  const storedHomepage = app.storage.get<string>('homepageUrl');
+  const homepage = resolveNavigationTarget(
+    typeof storedHomepage === 'string' ? storedHomepage : ''
+  );
   const showBookmarkBar = app.storage.get<boolean>('showBookmarkBar') ?? true;
   const bookmarks = (app.storage.get<Bookmark[]>('bookmarks') ?? []).filter(
     (b) => b.visible !== false && b.url
   );
 
-  const initialUrl = React.useRef(homepage);
+  const initialUrl = React.useRef(lastUrlByTab.get(tabKey) ?? homepage);
   const webviewRef = React.useRef<WebviewElement | null>(null);
-  const [address, setAddress] = React.useState(homepage);
+  const [address, setAddress] = React.useState(initialUrl.current);
   const [canBack, setCanBack] = React.useState(false);
   const [canFwd, setCanFwd] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [zoom, setZoom] = React.useState(100);
 
-  const navigate = React.useCallback((raw: string) => {
-    const url = resolveNavigationTarget(raw);
-    setAddress(url);
-    setLoading(true);
-    webviewRef.current?.loadURL(url).catch(() => {});
-  }, []);
+  const navigate = React.useCallback(
+    (raw: string) => {
+      const url = resolveNavigationTarget(raw);
+      setAddress(url);
+      setLoading(true);
+      // Remember the requested URL too, not just a committed `did-navigate`, so a
+      // remount mid-load (or after a failed load) retries it instead of the homepage.
+      lastUrlByTab.set(tabKey, url);
+      webviewRef.current?.loadURL(url).catch(() => {});
+    },
+    [tabKey]
+  );
 
   const setZoomPct = React.useCallback((pct: number) => {
     const clamped = Math.max(30, Math.min(300, Math.round(pct / 10) * 10));
@@ -145,7 +167,10 @@ export const BrowserPane: React.FC<PaneProps> = ({ app }) => {
       syncNav();
       try {
         const url = w.getURL();
-        if (url && url !== 'about:blank') setAddress(url);
+        if (url && url !== 'about:blank') {
+          setAddress(url);
+          lastUrlByTab.set(tabKey, url);
+        }
       } catch {
         /* ignore */
       }
@@ -169,7 +194,7 @@ export const BrowserPane: React.FC<PaneProps> = ({ app }) => {
       w.removeEventListener('did-navigate-in-page', onNavigate);
       w.removeEventListener('ipc-message', onIpc);
     };
-  }, [cfg, navigate]);
+  }, [cfg, navigate, tabKey]);
 
   if (!cfg) {
     return (
