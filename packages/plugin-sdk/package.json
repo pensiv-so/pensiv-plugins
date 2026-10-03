@@ -35,8 +35,8 @@
     }
   },
   "devDependencies": {
-    "@tiptap/core": "^2.0.0",
-    "@types/react": "^18.3.0"
+    "@tiptap/core": "^3.31.3",
+    "@types/react": "^19.3.0"
   },
   "publishConfig": {
     "access": "public"
