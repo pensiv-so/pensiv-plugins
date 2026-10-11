@@ -11,6 +11,7 @@ import {
   type WidgetProps
 } from '@pensiv/plugin-sdk';
 import './styles.css';
+import { createGoalTracker, hasReading, shouldCelebrate } from './celebration';
 import { confettiBurst, confettiConfigForCorner, readWidgetCorner } from './confetti';
 import { DailyGoalSheet } from './sheet';
 
@@ -395,23 +396,19 @@ function DailyGoalWidget({ app }: WidgetProps) {
   const current = goalProgress(app, totals, type);
   const pct = Math.min(100, target > 0 ? (current / target) * 100 : 0);
   const achieved = target > 0 && current >= target;
+  const ready = hasReading(totals);
 
-  // Confetti once per day, persisted — so a reload (totals briefly load as 0,
-  // then jump to achieved) doesn't re-fire it for a goal already celebrated today.
+  // Confetti once per day, persisted. No baseline is taken while the totals are
+  // still loading (they read as all zeros until the host's cache fills).
   const today = new Date().toISOString().slice(0, 10);
-  const prevAchieved = React.useRef<boolean | null>(null);
+  const tracker = React.useRef(createGoalTracker());
   React.useEffect(() => {
-    if (prevAchieved.current === null) {
-      prevAchieved.current = achieved;
+    if (!shouldCelebrate(tracker.current, app.storage, { achieved, hasReading: ready, today })) {
       return;
     }
-    if (achieved && !prevAchieved.current && app.storage.get<string>('celebratedOn') !== today) {
-      const cfg = confettiConfigForCorner(readWidgetCorner(WIDGET_STORAGE_KEY));
-      confettiBurst({ particleCount: 50, spread: 55, angle: cfg.angle, origin: cfg.origin });
-      app.storage.set('celebratedOn', today);
-    }
-    prevAchieved.current = achieved;
-  }, [achieved]);
+    const cfg = confettiConfigForCorner(readWidgetCorner(WIDGET_STORAGE_KEY));
+    confettiBurst({ particleCount: 50, spread: 55, angle: cfg.angle, origin: cfg.origin });
+  }, [achieved, ready]);
 
   return (
     <div className="pnsv-goal-card" role="status" aria-live="polite">

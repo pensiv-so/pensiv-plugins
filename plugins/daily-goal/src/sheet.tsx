@@ -12,6 +12,7 @@ import {
   SheetStack,
   SheetStatRow
 } from '@pensiv/plugin-ui';
+import { createGoalTracker, hasReading, shouldCelebrate } from './celebration';
 import { confettiBurst } from './confetti';
 import { goalProgress, sessionTodaySafe } from './main';
 
@@ -69,22 +70,18 @@ export const DailyGoalSheet: React.FC<WidgetProps> = ({ app }) => {
   const pick = (p: { words: number; chars: number }) => (type === 'words' ? p.words : p.chars);
   const current = goalProgress(app, totals, type);
   const achieved = target > 0 && current >= target;
+  const ready = hasReading(totals);
 
   // Confetti once per day, persisted — mirrors the widget so phone & tablet
-  // celebrate the same way and a reload doesn't re-fire it.
+  // celebrate the same way, and no baseline is taken while the totals load.
   const today = new Date().toISOString().slice(0, 10);
-  const prevAchieved = React.useRef<boolean | null>(null);
+  const tracker = React.useRef(createGoalTracker());
   React.useEffect(() => {
-    if (prevAchieved.current === null) {
-      prevAchieved.current = achieved;
+    if (!shouldCelebrate(tracker.current, app.storage, { achieved, hasReading: ready, today })) {
       return;
     }
-    if (achieved && !prevAchieved.current && app.storage.get<string>('celebratedOn') !== today) {
-      confettiBurst({ particleCount: 50, spread: 55, angle: 90, origin: { x: 0.5, y: 0.35 } });
-      app.storage.set('celebratedOn', today);
-    }
-    prevAchieved.current = achieved;
-  }, [achieved]);
+    confettiBurst({ particleCount: 50, spread: 55, angle: 90, origin: { x: 0.5, y: 0.35 } });
+  }, [achieved, ready]);
 
   const rows = [
     showTotal && {
