@@ -147,6 +147,42 @@ describe('shouldCelebrate', () => {
   });
 });
 
+describe('a day with nothing written yet', () => {
+  /** The host's first fill on such a day: loaded, and all zeros. */
+  const EMPTY_DAY = totalsOf(0);
+
+  it('celebrates a first reading that already reaches the goal', () => {
+    // e.g. a paste counted toward the goal, or a burst typed inside one flush.
+    const { store, storage } = fakeStorage();
+    const tracker = createGoalTracker();
+
+    expect(render(tracker, storage, UNFILLED)).toBe(false); // not loaded yet
+    expect(render(tracker, storage, EMPTY_DAY)).toBe(false); // loaded: nothing written
+    expect(render(tracker, storage, totalsOf(1200))).toBe(true);
+    expect(store.celebratedDay).toBe(DAY);
+  });
+
+  it('does not celebrate a shifted-day window landing over the goal after a zero reading', () => {
+    const { storage } = fakeStorage();
+    const tracker = createGoalTracker();
+    const fourAm: SessionBasis = { day: '2026-10-10', source: '1:2026-10-09T19:00:00.000Z:server' };
+
+    expect(render(tracker, storage, EMPTY_DAY)).toBe(false); // midnight fallback, empty
+    expect(render(tracker, storage, totalsOf(1300, 0, 0, fourAm))).toBe(false);
+  });
+
+  it('keeps all-zero totals out on a host without `basis`', () => {
+    // Such a host answers zeros before its first fill too, so zeros can't be
+    // trusted there: the first non-zero totals are the baseline, as before.
+    const { store, storage } = fakeStorage();
+    const tracker = createGoalTracker();
+
+    expect(render(tracker, storage, legacy(0))).toBe(false);
+    expect(render(tracker, storage, legacy(1500))).toBe(false);
+    expect(store.celebratedDay).toBeUndefined();
+  });
+});
+
 describe('once per local writing day', () => {
   it('runs in KST', () => {
     expect(kst('2026-10-11T08:00').getHours()).toBe(8);
@@ -277,6 +313,10 @@ describe('hasReading', () => {
         net: { words: 0, chars: 0 }
       })
     ).toBe(false);
+  });
+
+  it('is true for zero totals the host has filled', () => {
+    expect(hasReading(totalsOf(0))).toBe(true);
   });
 
   it('counts a day whose net is zero as a reading', () => {

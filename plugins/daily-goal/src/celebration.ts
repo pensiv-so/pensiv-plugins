@@ -50,11 +50,16 @@ export const createGoalTracker = (): GoalTracker => ({ achieved: null, source: u
  *
  * The session cache answers all zeros until its first fill lands — on a cold
  * start, and again after a sign-out or sign-in — and the goal surfaces are
- * mounted before that. A day with nothing written yet reads all zeros too; not
- * taking a baseline from it costs nothing, since the first edit brings a small
- * reading that becomes the baseline instead.
+ * mounted before that. The host marks a filled reading with `basis`, so zeros
+ * that carry one are real: nothing written yet today, a baseline like any other,
+ * from which a first paste or burst that already reaches the goal celebrates.
+ *
+ * A host from before `basis` can't say. There, all-zero totals are taken for
+ * "not loaded", and the first non-zero totals become the baseline — which
+ * misses a goal reached by the day's very first reading.
  */
 export function hasReading(totals: SessionTotals): boolean {
+  if (totals.basis) return true;
   const groups = [totals.added, totals.removed, totals.net, totals.pasted];
   return groups.some((p) => !!p && (p.words > 0 || p.chars > 0));
 }
