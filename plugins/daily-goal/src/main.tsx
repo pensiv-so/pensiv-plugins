@@ -11,7 +11,7 @@ import {
   type WidgetProps
 } from '@pensiv/plugin-sdk';
 import './styles.css';
-import { createGoalTracker, hasReading, shouldCelebrate } from './celebration';
+import { createGoalTracker, hasReading, shouldCelebrate, writingDay } from './celebration';
 import { confettiBurst, confettiConfigForCorner, readWidgetCorner } from './confetti';
 import { DailyGoalSheet } from './sheet';
 
@@ -313,6 +313,15 @@ export function dayStartHour(app: WidgetProps['app']): number {
   return Math.min(23, Math.max(0, Math.trunc(hour)));
 }
 
+/**
+ * The writing day `totals` cover, which the once-a-day confetti is keyed on. A
+ * host without `countToday` answers on midnight whatever the setting says.
+ */
+export function goalDay(app: WidgetProps['app'], totals: SessionTotals): string {
+  const hour = typeof app.session.countToday === 'function' ? dayStartHour(app) : 0;
+  return writingDay(totals, hour);
+}
+
 export function sessionTodaySafe(app: WidgetProps['app']): SessionTotals {
   try {
     const opts = ruleOptions(app);
@@ -397,18 +406,19 @@ function DailyGoalWidget({ app }: WidgetProps) {
   const pct = Math.min(100, target > 0 ? (current / target) * 100 : 0);
   const achieved = target > 0 && current >= target;
   const ready = hasReading(totals);
+  const source = totals.basis?.source;
+  const day = goalDay(app, totals);
 
-  // Confetti once per day, persisted. No baseline is taken while the totals are
-  // still loading (they read as all zeros until the host's cache fills).
-  const today = new Date().toISOString().slice(0, 10);
+  // Confetti once per writing day, persisted. No baseline is taken while the
+  // totals are still loading (all zeros until the host's cache fills), and a new
+  // one is taken when the host rebuilds them on another basis.
   const tracker = React.useRef(createGoalTracker());
   React.useEffect(() => {
-    if (!shouldCelebrate(tracker.current, app.storage, { achieved, hasReading: ready, today })) {
-      return;
-    }
+    const reading = { achieved, hasReading: ready, source, day };
+    if (!shouldCelebrate(tracker.current, app.storage, reading)) return;
     const cfg = confettiConfigForCorner(readWidgetCorner(WIDGET_STORAGE_KEY));
     confettiBurst({ particleCount: 50, spread: 55, angle: cfg.angle, origin: cfg.origin });
-  }, [achieved, ready]);
+  }, [achieved, ready, source]);
 
   return (
     <div className="pnsv-goal-card" role="status" aria-live="polite">

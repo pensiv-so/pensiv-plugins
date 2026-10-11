@@ -14,7 +14,7 @@ import {
 } from '@pensiv/plugin-ui';
 import { createGoalTracker, hasReading, shouldCelebrate } from './celebration';
 import { confettiBurst } from './confetti';
-import { goalProgress, sessionTodaySafe } from './main';
+import { goalDay, goalProgress, sessionTodaySafe } from './main';
 
 /**
  * Mobile **bottom-sheet body** for the daily goal (phone tray). Composed from the
@@ -71,17 +71,17 @@ export const DailyGoalSheet: React.FC<WidgetProps> = ({ app }) => {
   const current = goalProgress(app, totals, type);
   const achieved = target > 0 && current >= target;
   const ready = hasReading(totals);
+  const source = totals.basis?.source;
+  const day = goalDay(app, totals);
 
-  // Confetti once per day, persisted — mirrors the widget so phone & tablet
-  // celebrate the same way, and no baseline is taken while the totals load.
-  const today = new Date().toISOString().slice(0, 10);
+  // Confetti once per writing day, persisted — mirrors the widget so phone &
+  // tablet celebrate the same way.
   const tracker = React.useRef(createGoalTracker());
   React.useEffect(() => {
-    if (!shouldCelebrate(tracker.current, app.storage, { achieved, hasReading: ready, today })) {
-      return;
-    }
+    const reading = { achieved, hasReading: ready, source, day };
+    if (!shouldCelebrate(tracker.current, app.storage, reading)) return;
     confettiBurst({ particleCount: 50, spread: 55, angle: 90, origin: { x: 0.5, y: 0.35 } });
-  }, [achieved, ready]);
+  }, [achieved, ready, source]);
 
   const rows = [
     showTotal && {
