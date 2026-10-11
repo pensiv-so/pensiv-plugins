@@ -11,6 +11,7 @@ import {
   type WidgetProps
 } from '@pensiv/plugin-sdk';
 import './styles.css';
+import { createGoalTracker, hasDocument, shouldCelebrate } from './celebration';
 import { confettiBurst, confettiConfigForCorner, readWidgetCorner } from './confetti';
 import { DocumentGoalSheet } from './sheet';
 
@@ -203,29 +204,17 @@ function DocumentGoalWidget({ app }: WidgetProps) {
 
   const pct = Math.min(100, target > 0 ? (count / target) * 100 : 0);
   const achieved = target > 0 && count >= target;
+  const ready = hasDocument(app, count);
 
   // Confetti once per document, persisted (native stored it in doc metadata).
-  // Reset the transition tracker when the focused document changes.
-  const prevAchieved = React.useRef<boolean | null>(null);
-  const prevFileId = React.useRef<string | undefined>(fileId);
+  // The tracker resets itself when the focused document changes.
+  const tracker = React.useRef(createGoalTracker(fileId));
   useEffect(() => {
-    if (prevFileId.current !== fileId) {
-      prevAchieved.current = null;
-      prevFileId.current = fileId;
-    }
-    if (prevAchieved.current === null) {
-      prevAchieved.current = achieved;
-      return;
-    }
-    const celebrated = app.storage.get<Record<string, boolean>>('celebratedDocs') ?? {};
-    const already = fileId ? celebrated[fileId] === true : true;
-    if (achieved && !prevAchieved.current && !already && fileId) {
-      const cfg = confettiConfigForCorner(readWidgetCorner(WIDGET_STORAGE_KEY));
-      confettiBurst({ particleCount: 50, spread: 55, angle: cfg.angle, origin: cfg.origin });
-      app.storage.set('celebratedDocs', { ...celebrated, [fileId]: true });
-    }
-    prevAchieved.current = achieved;
-  }, [achieved, fileId]);
+    const reading = { fileId, achieved, hasDocument: ready };
+    if (!shouldCelebrate(tracker.current, app.storage, reading)) return;
+    const cfg = confettiConfigForCorner(readWidgetCorner(WIDGET_STORAGE_KEY));
+    confettiBurst({ particleCount: 50, spread: 55, angle: cfg.angle, origin: cfg.origin });
+  }, [achieved, fileId, ready]);
 
   return (
     <div className="pnsv-goal-card" role="status" aria-live="polite">
