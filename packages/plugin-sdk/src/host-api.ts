@@ -137,6 +137,31 @@ export interface SessionTotals {
    * (`countToday`) don't filter pasted text — it counts in full.
    */
   pasted?: SessionProgress;
+  /**
+   * What these totals were read from. Absent before the host's first fill (the
+   * all-zero totals of a cold start or a fresh sign-in) and on hosts from before
+   * this field.
+   */
+  basis?: SessionBasis;
+}
+
+/** See {@link SessionTotals.basis}. */
+export interface SessionBasis {
+  /**
+   * The writing day the totals cover, `YYYY-MM-DD` in local time: the date the
+   * window starts on, so with `dayStartHour: 4` the hours before 4am still
+   * belong to the previous day. Key "once a day" state on this rather than on a
+   * date of your own, and it can't disagree with the totals.
+   */
+  day: string;
+  /**
+   * Changes when the totals are rebuilt from something other than writing:
+   * another account, another window (a new day, a different `dayStartHour`),
+   * or the cross-device baseline arriving after an offline or failed fetch.
+   * Opaque — compare it with `===`. A jump in the totals across a change is not
+   * progress, so a goal widget should take a fresh baseline there.
+   */
+  source: string;
 }
 
 /**
