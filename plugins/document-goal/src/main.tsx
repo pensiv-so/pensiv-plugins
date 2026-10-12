@@ -72,9 +72,9 @@ const settings: SettingsSchema = {
           type: 'number',
           label: L('Target', '목표', 'ターゲット'),
           description: L(
-            'Set your daily writing target',
-            '일일 작성 목표를 설정하세요',
-            '毎日の執筆目標を設定する'
+            'Set the writing target each document should reach',
+            '문서마다 도달할 작성 목표를 설정하세요',
+            '各文書で達成する執筆目標を設定する'
           ),
           default: 5000,
           min: 10,
