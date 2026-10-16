@@ -13,6 +13,7 @@ import {
   SheetStack,
   SheetStatRow
 } from '@pensiv/plugin-ui';
+import { createGoalTracker, hasDocument, shouldCelebrate } from './celebration';
 import { confettiBurst, confettiConfigForCorner, readWidgetCorner } from './confetti';
 import { measureSafe } from './main';
 
@@ -64,28 +65,16 @@ export const DocumentGoalSheet: React.FC<WidgetProps> = ({ app }) => {
   const count = measureSafe(app, type);
 
   const achieved = target > 0 && count >= target;
+  const ready = hasDocument(app, count);
 
   // Confetti once per document, persisted — mirrors the widget.
-  const prevAchieved = React.useRef<boolean | null>(null);
-  const prevFileId = React.useRef<string | undefined>(fileId);
+  const tracker = React.useRef(createGoalTracker(fileId));
   useEffect(() => {
-    if (prevFileId.current !== fileId) {
-      prevAchieved.current = null;
-      prevFileId.current = fileId;
-    }
-    if (prevAchieved.current === null) {
-      prevAchieved.current = achieved;
-      return;
-    }
-    const celebrated = app.storage.get<Record<string, boolean>>('celebratedDocs') ?? {};
-    const already = fileId ? celebrated[fileId] === true : true;
-    if (achieved && !prevAchieved.current && !already && fileId) {
-      const cfg = confettiConfigForCorner(readWidgetCorner(WIDGET_STORAGE_KEY));
-      confettiBurst({ particleCount: 50, spread: 55, angle: cfg.angle, origin: cfg.origin });
-      app.storage.set('celebratedDocs', { ...celebrated, [fileId]: true });
-    }
-    prevAchieved.current = achieved;
-  }, [achieved, fileId]);
+    const reading = { fileId, achieved, hasDocument: ready };
+    if (!shouldCelebrate(tracker.current, app.storage, reading)) return;
+    const cfg = confettiConfigForCorner(readWidgetCorner(WIDGET_STORAGE_KEY));
+    confettiBurst({ particleCount: 50, spread: 55, angle: cfg.angle, origin: cfg.origin });
+  }, [achieved, fileId, ready]);
 
   return (
     <SheetStack>

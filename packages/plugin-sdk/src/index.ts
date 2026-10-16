@@ -109,6 +109,7 @@ export type {
   SessionApi,
   SessionProgress,
   SessionTotals,
+  SessionBasis,
   SessionHistoryDay,
   StorageApi,
   StorageOptions,
