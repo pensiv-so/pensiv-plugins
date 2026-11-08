@@ -144,6 +144,7 @@ export const DangerousWritingOverlay: React.FC<WidgetProps> = ({ app }) => {
                   stats={{
                     goalType: cfg.goalType,
                     words: store.progressWords,
+                    countsChars: cfg.countsChars,
                     elapsedMs:
                       store.endedAt && store.startedAt ? store.endedAt - store.startedAt : 0
                   }}

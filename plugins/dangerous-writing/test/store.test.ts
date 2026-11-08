@@ -12,6 +12,8 @@ const baseConfig: SessionConfig = {
   goalType: 'time',
   durationSec: 10,
   wordTarget: 5,
+  countUnit: 'words',
+  countsChars: false,
   fuseSec: 5,
   hardcore: false,
   clipboard: 'all'

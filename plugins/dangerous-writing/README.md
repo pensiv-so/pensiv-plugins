@@ -11,7 +11,7 @@ Inspired by Squibler's [Dangerous Writing Prompt App](https://www.squibler.io/da
 ### Usage
 
 1. Open a document and hit the 🔥 button in the toolbar.
-2. Pick a goal: survive for a set **time**, or reach a **word count**.
+2. Pick a goal: survive for a set **time**, or write a set **amount** — counted the way your editor's word counter does, or in words or characters of your choice.
 3. Start writing, and keep the fuse alive by never pausing too long.
 4. Reach your goal and your words are safe. Stall out and the page is wiped.
 
@@ -19,10 +19,10 @@ Inspired by Squibler's [Dangerous Writing Prompt App](https://www.squibler.io/da
 
 ### Features
 
-- **Two goals**: outlast a timer or hit a word target
+- **Two goals**: outlast a timer or hit a target amount, in words or characters (with or without spaces)
 - **Adjustable fuse**: set how long you can pause before the wipe (3–10s)
 - **Hardcore mode**: a shorter fuse and almost no warning
-- **Clipboard lock**: block copy and paste for the run — no stashing a backup of the page you might burn, and no filling a word goal with text you never wrote. Block both (the default), block pasting only, or allow both
+- **Clipboard lock**: block copy and paste for the run — no stashing a backup of the page you might burn, and no filling an amount goal with text you never wrote. Block both (the default), block pasting only, or allow both
 - **Full-screen tension**: the screen reddens as the fuse burns
 
 ### ⚠️ Warning

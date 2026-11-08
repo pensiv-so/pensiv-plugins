@@ -1,5 +1,6 @@
 import { useEffect, useReducer } from 'react';
 import type { ClipboardMode } from './clipboard';
+import type { CountUnit } from './unit';
 
 /**
  * The Dangerous Writing session run-state — a module-level singleton, like the
@@ -14,17 +15,25 @@ import type { ClipboardMode } from './clipboard';
  * The "danger" is a single rule: a fuse that burns down while you are *not*
  * typing. Every keystroke calls {@link activity} and resets it; if it ever
  * reaches zero, {@link fail} fires and the document is wiped. Reaching the goal
- * (time elapsed, or words written) calls {@link succeed} and the text is safe.
+ * (time elapsed, or an amount written) calls {@link succeed} and the text is safe.
+ *
+ * "Words" below means the session's count in its {@link CountUnit} — words or
+ * characters; the store only compares numbers.
  */
 export type Status = 'idle' | 'running' | 'success' | 'failed';
+/** `words` is the amount goal (stored under that name before it could count characters). */
 export type GoalType = 'time' | 'words';
 
 export interface SessionConfig {
   goalType: GoalType;
   /** Target duration for a `time` goal, in seconds. */
   durationSec: number;
-  /** Target word count for a `words` goal (words added since the session began). */
+  /** Target amount for a `words` goal, in `countUnit` (added since the session began). */
   wordTarget: number;
+  /** What the session counts, for the goal and the result alike. */
+  countUnit: CountUnit;
+  /** Whether that count is in characters (else words), as resolved when the config was read. */
+  countsChars: boolean;
   /** Idle limit before a wipe, in seconds (already hardcore-adjusted). */
   fuseSec: number;
   /** Hardcore: shorter fuse + less warning. Surfaces read it to delay the visuals. */
@@ -45,8 +54,9 @@ export interface SessionHooks {
 /** End-of-session figures handed to the host feedback callbacks. */
 export interface SessionStats {
   goalType: GoalType;
-  /** Words written during the session (added since it began). */
+  /** Amount written during the session (added since it began), in `countUnit`. */
   words: number;
+  countsChars: boolean;
   elapsedMs: number;
 }
 
@@ -58,6 +68,8 @@ const DEFAULT_CONFIG: SessionConfig = {
   goalType: 'time',
   durationSec: 600,
   wordTarget: 500,
+  countUnit: 'editor',
+  countsChars: false,
   fuseSec: 5,
   hardcore: false,
   clipboard: 'all'
@@ -228,6 +240,7 @@ class DangerStore {
     return {
       goalType: this.config.goalType,
       words: this.progressWords,
+      countsChars: this.config.countsChars,
       elapsedMs: this.startedAt ? Date.now() - this.startedAt : 0
     };
   }

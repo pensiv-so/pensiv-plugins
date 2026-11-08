@@ -1,19 +1,21 @@
-import type { HostApi } from '@pensiv/plugin-sdk';
+import type { CountOptions, HostApi } from '@pensiv/plugin-sdk';
 import { dwStore, type SessionHooks } from './store';
 import { readConfig } from './settings';
 import { STR, tr } from './i18n';
+import { sessionCountOptions } from './unit';
 
 /**
- * Document-mode target: the session counts and wipes the REAL active editor.
- * The wipe uses `resetHistory: true` so it cannot be undone — the SDK's stated
- * "dangerous writing wiping the document for real". Both calls are guarded so a
- * missing editor degrades to a no-op rather than throwing on the hot path.
+ * Document-mode target: the session counts (with `options`, fixed for the whole run)
+ * and wipes the REAL active editor. The wipe uses `resetHistory: true` so it cannot be
+ * undone — the SDK's stated "dangerous writing wiping the document for real". Both
+ * calls are guarded so a missing editor degrades to a no-op rather than throwing on
+ * the hot path.
  */
-export function documentHooks(app: HostApi): SessionHooks {
+export function documentHooks(app: HostApi, options: CountOptions | undefined): SessionHooks {
   return {
     words: () => {
       try {
-        return app.editor.count({ countType: 'word' });
+        return app.editor.count(options);
       } catch {
         return 0;
       }
@@ -39,7 +41,7 @@ export function armDocument(app: HostApi): boolean {
   }
   const cfg = readConfig(app);
   cfg.startFileId = app.app.fileId;
-  dwStore.start(cfg, documentHooks(app));
+  dwStore.start(cfg, documentHooks(app, sessionCountOptions(app, cfg.countUnit)));
   app.ui.toast(tr(app, STR.docArmed));
   return true;
 }
