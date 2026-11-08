@@ -6,9 +6,12 @@ import { readConfig } from './settings';
 import { STR, tr, fmt } from './i18n';
 import { formatClock } from './format';
 import { CogIcon } from './components';
+import { amountLabel } from './unit';
 
 const TIME_PRESETS = [5, 10, 20]; // minutes
 const WORD_PRESETS = [250, 500, 1000];
+// A character runs ~5× shorter than a word (a Korean 어절 ~3–4 글자 plus its space).
+const CHAR_PRESETS = [1000, 3000, 5000];
 
 /**
  * The exact toolbar button the user last clicked. In split view each pane has its
@@ -94,6 +97,7 @@ export const DangerLauncherPopover: React.FC<{ app: HostApi; closing?: boolean }
   const durationSec = parseInt(app.storage.get<string>('durationSec') ?? '600', 10) || 600;
   const wordTarget = app.storage.get<number>('wordTarget') ?? 500;
   const live = readConfig(app);
+  const amountPresets = live.countsChars ? CHAR_PRESETS : WORD_PRESETS;
   const docFocused = app.app.fileType === 'document' && !!app.app.fileId;
 
   const pickTime = (min: number) => {
@@ -125,7 +129,7 @@ export const DangerLauncherPopover: React.FC<{ app: HostApi; closing?: boolean }
   const goalLabel =
     goalType === 'time'
       ? fmt(tr(app, STR.nMinutes), { n: String(Math.round(durationSec / 60)) })
-      : fmt(tr(app, STR.nWords), { n: wordTarget.toLocaleString() });
+      : amountLabel(app, live.countsChars, wordTarget);
   // Show the EFFECTIVE fuse (hardcore-adjusted) — the sentence must tell the
   // truth about what actually burns the page.
   const fuseLabel = fmt(tr(app, STR.nSeconds), { n: String(live.fuseSec) });
@@ -156,14 +160,14 @@ export const DangerLauncherPopover: React.FC<{ app: HostApi; closing?: boolean }
         </button>
       ))}
       <span className="dw-menu-sep" />
-      {WORD_PRESETS.map((n) => (
+      {amountPresets.map((n) => (
         <button
           key={`w${n}`}
           className="dw-menu-item"
           data-on={goalType === 'words' && wordTarget === n}
           onClick={() => pickWords(n)}
         >
-          {fmt(tr(app, STR.nWords), { n: n.toLocaleString() })}
+          {amountLabel(app, live.countsChars, n)}
         </button>
       ))}
     </>
@@ -196,9 +200,7 @@ export const DangerLauncherPopover: React.FC<{ app: HostApi; closing?: boolean }
   const leftLabel =
     cfg.goalType === 'time'
       ? formatClock(store.remainingMs)
-      : fmt(tr(app, STR.nWords), {
-          n: Math.max(0, cfg.wordTarget - store.progressWords).toLocaleString()
-        });
+      : amountLabel(app, cfg.countsChars, Math.max(0, cfg.wordTarget - store.progressWords));
   const runSentence = tr(app, cfg.goalType === 'time' ? STR.runTime : STR.runWords)
     .split(/(\{left\})/g)
     .map((part, i) =>

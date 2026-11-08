@@ -3,6 +3,7 @@ import type { HostApi } from '@pensiv/plugin-sdk';
 import { STR, tr, fmt } from './i18n';
 import { formatElapsed } from './format';
 import type { SessionStats } from './store';
+import { amountLabel } from './unit';
 
 /** The flame glyph for the live strip — the app's `Fire` (Lucide 1.5). */
 export const FireIcon: React.FC<{ size?: string }> = ({ size = '1rem' }) => (
@@ -51,7 +52,7 @@ export interface ResultCardProps {
 
 /**
  * The end-of-session result, in the contract's voice — the number talks:
- * "312 words burned." / "487 words survived." A one-line explanation and
+ * "312 words burned." / "1,487자가 살아남았습니다." A one-line explanation and
  * right-aligned actions; the word count glows destructive on a burn.
  */
 export const ResultCard: React.FC<ResultCardProps> = ({
@@ -62,7 +63,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({
   children
 }) => {
   const success = status === 'success';
-  const count = fmt(tr(app, STR.nWords), { n: (stats?.words ?? 0).toLocaleString() });
+  const count = amountLabel(app, stats?.countsChars ?? false, stats?.words ?? 0);
   const title = tr(app, success ? STR.survivedTitle : STR.burnedTitle)
     .split(/(\{count\})/g)
     .map((part, i) =>

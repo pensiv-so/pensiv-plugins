@@ -42,6 +42,7 @@ export const STR = {
   // Token / menu value labels.
   nMinutes: L('{n} minutes', '{n}분', '{n}分'),
   nWords: L('{n} words', '{n}단어', '{n}語'),
+  nChars: L('{n} characters', '{n}자', '{n}字'),
   nSeconds: L('{n} seconds', '{n}초', '{n}秒'),
 
   // The contract while a session runs ({left} is the live countdown / words left).

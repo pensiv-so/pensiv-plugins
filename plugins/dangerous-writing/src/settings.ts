@@ -2,6 +2,7 @@ import type { HostApi, SettingsSchema } from '@pensiv/plugin-sdk';
 import { L } from './i18n';
 import { toClipboardMode } from './clipboard';
 import type { GoalType, SessionConfig } from './store';
+import { countsCharacters, toCountUnit } from './unit';
 
 /**
  * The plugin's settings tab — the goal, the difficulty, and how much clipboard
@@ -20,14 +21,15 @@ export const settingsSchema: SettingsSchema = {
           type: 'radio',
           label: L('Goal type', '목표 유형', '目標の種類'),
           description: L(
-            'Survive for a length of time, or write a number of words.',
-            '일정 시간을 버티거나, 정해진 단어 수를 작성하세요.',
-            '一定時間を生き延びるか、一定の単語数を書くか。'
+            'Survive for a length of time, or write a set amount.',
+            '일정 시간을 버티거나, 정해진 분량을 작성하세요.',
+            '一定時間を生き延びるか、決めた分量を書くか。'
           ),
           default: 'time',
           options: [
             { value: 'time', label: L('Time', '시간', '時間') },
-            { value: 'words', label: L('Words', '단어', '単語') }
+            // Stored as `words` from before the amount could be counted in characters.
+            { value: 'words', label: L('Amount', '분량', '分量') }
           ]
         },
         {
@@ -50,17 +52,43 @@ export const settingsSchema: SettingsSchema = {
         {
           key: 'wordTarget',
           type: 'number',
-          label: L('Word target', '단어 목표', '単語の目標'),
+          label: L('Target amount', '목표 분량', '目標の分量'),
           description: L(
-            'Words to write before you are safe.',
-            '안전해지기까지 작성할 단어 수.',
-            '安全になるまでに書く単語数。'
+            'How much to write before you are safe, in the unit below.',
+            '안전해지기까지 작성할 분량. 아래 단위로 셉니다.',
+            '安全になるまでに書く分量。下の単位で数えます。'
           ),
           default: 500,
           min: 25,
           max: 100000,
           step: 25,
           visibleWhen: { key: 'goalType', equals: 'words' }
+        },
+        {
+          key: 'countUnit',
+          type: 'select',
+          label: L('Count by', '세는 단위', '数える単位'),
+          description: L(
+            'What the target and the result count. "Editor setting" counts the way your editor’s word counter does.',
+            '목표와 결과를 무엇으로 셀지. "에디터 설정 따름"은 에디터 글자 수 표시와 같은 방식으로 셉니다.',
+            '目標と結果を何で数えるか。「エディター設定に従う」はエディターの文字数表示と同じ方法で数えます。'
+          ),
+          default: 'editor',
+          options: [
+            {
+              value: 'editor',
+              label: L('Editor setting', '에디터 설정 따름', 'エディター設定に従う')
+            },
+            { value: 'words', label: L('Words', '단어 수', '単語数') },
+            {
+              value: 'chars',
+              label: L('Characters (with spaces)', '글자 수 (공백 포함)', '文字数（スペース含む）')
+            },
+            {
+              value: 'chars_nospace',
+              label: L('Characters (no spaces)', '글자 수 (공백 제외)', '文字数（スペース除く）')
+            }
+          ]
         }
       ]
     },
@@ -153,5 +181,16 @@ export function readConfig(app: HostApi): SessionConfig {
   const hardcore = app.storage.get<boolean>('hardcore') ?? false;
   const fuseSec = hardcore ? Math.max(2, baseFuse - 2) : baseFuse;
   const clipboard = toClipboardMode(app.storage.get<string>('clipboard'));
-  return { goalType, durationSec, wordTarget, fuseSec, hardcore, clipboard };
+  const countUnit = toCountUnit(app.storage.get<string>('countUnit'));
+  const countsChars = countsCharacters(app, countUnit);
+  return {
+    goalType,
+    durationSec,
+    wordTarget,
+    countUnit,
+    countsChars,
+    fuseSec,
+    hardcore,
+    clipboard
+  };
 }
