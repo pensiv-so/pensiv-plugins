@@ -12,6 +12,7 @@ import {
   SheetStack,
   SheetStatRow
 } from '@pensiv/plugin-ui';
+import { defaultGoalType, type GoalType } from './goalType';
 import { createGoalTracker, hasReading, shouldCelebrate } from './celebration';
 import { confettiBurst } from './confetti';
 import { goalDay, goalProgress, sessionTodaySafe } from './main';
@@ -54,7 +55,7 @@ const CogIcon: React.FC = () => (
 );
 
 export const DailyGoalSheet: React.FC<WidgetProps> = ({ app }) => {
-  const type = (app.storage.get<string>('type') ?? 'words') as 'words' | 'characters';
+  const type = (app.storage.get<string>('type') ?? defaultGoalType(app.app.locale)) as GoalType;
   const target = app.storage.get<number>('target') ?? 1000;
   const showTotal = app.storage.get<boolean>('showTotal') ?? true;
   const showAdded = app.storage.get<boolean>('showAdded') ?? true;

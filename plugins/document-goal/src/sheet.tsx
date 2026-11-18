@@ -13,6 +13,7 @@ import {
   SheetStack,
   SheetStatRow
 } from '@pensiv/plugin-ui';
+import { defaultGoalType, type GoalType } from './goalType';
 import { createGoalTracker, hasDocument, shouldCelebrate } from './celebration';
 import { confettiBurst, confettiConfigForCorner, readWidgetCorner } from './confetti';
 import { measureSafe } from './main';
@@ -54,7 +55,7 @@ const CogIcon: React.FC = () => (
 );
 
 export const DocumentGoalSheet: React.FC<WidgetProps> = ({ app }) => {
-  const type = (app.storage.get<string>('type') ?? 'words') as 'words' | 'characters';
+  const type = (app.storage.get<string>('type') ?? defaultGoalType(app.app.locale)) as GoalType;
   const target = app.storage.get<number>('target') ?? 5000;
   const unit = type === 'words' ? tr(app, STR.words) : tr(app, STR.chars);
   const fileId = app.app.fileId;

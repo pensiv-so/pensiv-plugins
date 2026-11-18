@@ -11,6 +11,7 @@ import {
   type WidgetProps
 } from '@pensiv/plugin-sdk';
 import './styles.css';
+import { defaultGoalType, type GoalType } from './goalType';
 import { createGoalTracker, hasReading, shouldCelebrate, writingDay } from './celebration';
 import { confettiBurst, confettiConfigForCorner, readWidgetCorner } from './confetti';
 import { DailyGoalSheet } from './sheet';
@@ -54,7 +55,7 @@ const charCustom: FieldConditions = [
   { key: 'useEditorCounting', equals: false }
 ];
 
-const settings: SettingsSchema = {
+const settingsSchema = (defaultType: GoalType): SettingsSchema => ({
   fields: [
     {
       type: 'group',
@@ -68,7 +69,7 @@ const settings: SettingsSchema = {
             '단어 또는 글자 수를 추적할지 선택하세요',
             '語数と文字数のどちらで数えるかを選びます'
           ),
-          default: 'words',
+          default: defaultType,
           options: [
             { value: 'words', label: STR.words },
             { value: 'characters', label: STR.chars }
@@ -253,7 +254,7 @@ const settings: SettingsSchema = {
       ]
     }
   ]
-};
+});
 
 const ZERO: SessionTotals = {
   added: { words: 0, chars: 0 },
@@ -270,7 +271,7 @@ const bool = (app: WidgetProps['app'], key: string) => app.storage.get<boolean>(
  * configured word counter, read from settings — safe even with no editor focused).
  */
 function ruleOptions(app: WidgetProps['app']): CountOptions | undefined {
-  const type = app.storage.get<string>('type') ?? 'words';
+  const type = app.storage.get<string>('type') ?? defaultGoalType(app.app.locale);
   if (type !== 'characters') return undefined;
   if (app.storage.get<boolean>('useEditorCounting') ?? true) {
     return { ...app.editor.wordCounter(), countType: 'character' };
@@ -361,7 +362,7 @@ export function goalProgress(
 
 /** Progress for the configured goal type (chip accent / goal-met checks). */
 export function dailyProgress(app: WidgetProps['app']): number {
-  const type = (app.storage.get<string>('type') ?? 'words') as 'words' | 'characters';
+  const type = (app.storage.get<string>('type') ?? defaultGoalType(app.app.locale)) as GoalType;
   return goalProgress(app, sessionTodaySafe(app), type);
 }
 
@@ -386,7 +387,7 @@ const CogIcon: React.FC = () => (
 );
 
 function DailyGoalWidget({ app }: WidgetProps) {
-  const type = (app.storage.get<string>('type') ?? 'words') as 'words' | 'characters';
+  const type = (app.storage.get<string>('type') ?? defaultGoalType(app.app.locale)) as GoalType;
   const target = app.storage.get<number>('target') ?? 1000;
   const showTotal = app.storage.get<boolean>('showTotal') ?? true;
   const showAdded = app.storage.get<boolean>('showAdded') ?? true;
@@ -462,7 +463,7 @@ function DailyGoalWidget({ app }: WidgetProps) {
 /** Compact tray chip (mobile): two stacked lines — progress value + unit —
  *  matching the native `PaneDailyGoalChip`. White + difference blend (host owns the pill). */
 function DailyGoalChip({ app }: WidgetProps) {
-  const type = (app.storage.get<string>('type') ?? 'words') as 'words' | 'characters';
+  const type = (app.storage.get<string>('type') ?? defaultGoalType(app.app.locale)) as GoalType;
   // Derived in render from live settings + session, so switching the goal type
   // updates the pill immediately; `change` drives session ticks.
   const [, bump] = React.useReducer((n: number) => n + 1, 0);
@@ -498,7 +499,10 @@ function DailyGoalChip({ app }: WidgetProps) {
 
 export default class DailyGoalPlugin extends Plugin {
   onload(): void {
-    this.addSettingTab({ title: tr(this.app, STR.title), schema: settings });
+    this.addSettingTab({
+      title: tr(this.app, STR.title),
+      schema: settingsSchema(defaultGoalType(this.app.app.locale))
+    });
     this.registerWidget({
       id: 'daily-goal',
       surface: 'floating',

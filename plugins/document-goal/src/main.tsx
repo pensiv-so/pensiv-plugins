@@ -11,6 +11,7 @@ import {
   type WidgetProps
 } from '@pensiv/plugin-sdk';
 import './styles.css';
+import { defaultGoalType, type GoalType } from './goalType';
 import { createGoalTracker, hasDocument, shouldCelebrate } from './celebration';
 import { confettiBurst, confettiConfigForCorner, readWidgetCorner } from './confetti';
 import { DocumentGoalSheet } from './sheet';
@@ -47,7 +48,7 @@ const charCustom: FieldConditions = [
   { key: 'useEditorCounting', equals: false }
 ];
 
-const settings: SettingsSchema = {
+const settingsSchema = (defaultType: GoalType): SettingsSchema => ({
   fields: [
     {
       type: 'group',
@@ -61,7 +62,7 @@ const settings: SettingsSchema = {
             '단어 또는 글자 수를 추적할지 선택하세요',
             '語数と文字数のどちらで数えるかを選びます'
           ),
-          default: 'words',
+          default: defaultType,
           options: [
             { value: 'words', label: L('Words', '단어', '語') },
             { value: 'characters', label: L('Chars', '글자', '文字') }
@@ -143,7 +144,7 @@ const settings: SettingsSchema = {
       ]
     }
   ]
-};
+});
 
 const bool = (app: WidgetProps['app'], key: string) => app.storage.get<boolean>(key) ?? true;
 
@@ -188,7 +189,7 @@ export function measureSafe(app: WidgetProps['app'], type: 'words' | 'characters
 }
 
 function DocumentGoalWidget({ app }: WidgetProps) {
-  const type = (app.storage.get<string>('type') ?? 'words') as 'words' | 'characters';
+  const type = (app.storage.get<string>('type') ?? defaultGoalType(app.app.locale)) as GoalType;
   const target = app.storage.get<number>('target') ?? 5000;
   const unit = type === 'words' ? tr(app, STR.words) : tr(app, STR.chars);
   const fileId = app.app.fileId;
@@ -253,7 +254,7 @@ function DocumentGoalWidget({ app }: WidgetProps) {
  *  matching the native `PaneDocumentGoalChip`. Host owns the pill; the tray gates
  *  visibility to document panes via the widget's `shouldRender`. */
 function DocumentGoalChip({ app }: WidgetProps) {
-  const type = (app.storage.get<string>('type') ?? 'words') as 'words' | 'characters';
+  const type = (app.storage.get<string>('type') ?? defaultGoalType(app.app.locale)) as GoalType;
   // Derived in render from live settings + content, so changing the goal type /
   // counting rules recomputes the pill immediately; `update` drives content ticks.
   const [, bump] = useReducer((n: number) => n + 1, 0);
@@ -288,7 +289,10 @@ function DocumentGoalChip({ app }: WidgetProps) {
 
 export default class DocumentGoalPlugin extends Plugin {
   onload(): void {
-    this.addSettingTab({ title: tr(this.app, STR.title), schema: settings });
+    this.addSettingTab({
+      title: tr(this.app, STR.title),
+      schema: settingsSchema(defaultGoalType(this.app.app.locale))
+    });
     this.registerWidget({
       id: 'document-goal',
       surface: 'floating',
@@ -311,7 +315,8 @@ export default class DocumentGoalPlugin extends Plugin {
       // Accent ring when the document goal is met (native parity).
       chipAccent: ({ app, projectId }) => {
         if (!projectId || app.app.fileType !== 'document') return false;
-        const type = (app.storage.get<string>('type') ?? 'words') as 'words' | 'characters';
+        const type = (app.storage.get<string>('type') ??
+          defaultGoalType(app.app.locale)) as GoalType;
         const target = app.storage.get<number>('target') ?? 5000;
         return target > 0 && measureSafe(app, type) >= target;
       },
