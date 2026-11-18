@@ -33,7 +33,8 @@ const tr = (app: HostApi, t: LocalizedText) => resolveLocalizedText(t, app.app.l
 const STR = {
   title: L('Document Goal', '문서 목표', '文書目標'),
   words: L('Words', '단어', '語'),
-  chars: L('Chars', '글자', '文字')
+  chars: L('Chars', '글자', '文字'),
+  chipThisDoc: L('This doc', '이 문서', 'この文書')
 };
 
 const CogIcon: React.FC = () => (
@@ -260,7 +261,7 @@ function DocumentGoalChip({ app }: WidgetProps) {
   const [, bump] = useReducer((n: number) => n + 1, 0);
   useEffect(() => app.editor.on('update', bump), [app]);
   const count = measureSafe(app, type);
-  const unitShort = type === 'words' ? tr(app, STR.words) : tr(app, STR.chars);
+  const unitShort = tr(app, STR.chipThisDoc);
   const line: React.CSSProperties = {
     width: '100%',
     textAlign: 'center',

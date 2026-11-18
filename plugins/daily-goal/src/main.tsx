@@ -29,7 +29,8 @@ const STR = {
   chars: L('Chars', '글자', '文字'),
   addedToday: L('added today', '오늘 입력', '今日の追加'),
   removedToday: L('removed today', '오늘 지움', '今日の削除'),
-  netToday: L('net today', '오늘 순증', '今日の純増')
+  netToday: L('net today', '오늘 순증', '今日の純増'),
+  chipToday: L('Today', '오늘', '今日')
 };
 
 /**
@@ -470,7 +471,7 @@ function DailyGoalChip({ app }: WidgetProps) {
   React.useEffect(() => app.session.on('change', bump), [app]);
   const totals = sessionTodaySafe(app);
   const current = goalProgress(app, totals, type);
-  const unitShort = type === 'words' ? tr(app, STR.words) : tr(app, STR.chars);
+  const unitShort = tr(app, STR.chipToday);
   const line: React.CSSProperties = {
     width: '100%',
     textAlign: 'center',
