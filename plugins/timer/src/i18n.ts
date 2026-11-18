@@ -10,11 +10,11 @@ export const L = (en: string, ko: string, ja: string): LocalizedText => ({ en, k
  * plugin renders itself.
  */
 export const STR = {
-  start: L('Start', '시작', '始める'),
+  start: L('Start', '시작', '開始'),
   pause: L('Pause', '일시정지', '一時停止'),
-  resume: L('Resume', '재개', '再開する'),
+  resume: L('Resume', '재개', '再開'),
   cancel: L('Cancel', '취소', 'キャンセル'),
-  restart: L('Restart', '다시 시작', '再起動'),
+  restart: L('Restart', '다시 시작', 'リスタート'),
   stop: L('Stop', '중지', '停止'),
   settings: L('Settings', '설정', '設定'),
   timer: L('Timer', '타이머', 'タイマー'),

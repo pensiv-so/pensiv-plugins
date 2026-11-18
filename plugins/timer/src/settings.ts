@@ -16,7 +16,7 @@ export const settingsSchema: SettingsSchema = {
           type: 'list',
           itemType: 'number',
           label: L('Timer Presets (min)', '타이머 프리셋(분)', 'タイマーのプリセット (分)'),
-          description: L('Quick-select timer durations', '빠르게 선택할 타이머 시간', 'タイマー期間のクイック選択'),
+          description: L('Quick-select timer durations', '빠르게 선택할 타이머 시간', 'よく使う時間をすぐ選べます'),
           default: [5, 30, 50],
           minItems: 3,
           maxItems: 3,
@@ -35,7 +35,7 @@ export const settingsSchema: SettingsSchema = {
           description: L(
             'Choose between countdown timer or stopwatch',
             '카운트다운 타이머 또는 스톱워치 중 선택하세요',
-            'カウントダウンタイマーまたはストップウォッチのいずれかを選択してください'
+            'カウントダウンタイマーかストップウォッチを選びます'
           ),
           default: 'timer',
           options: [
@@ -55,7 +55,7 @@ export const settingsSchema: SettingsSchema = {
           description: L(
             'Display a draggable timer widget on screen',
             '드래그 가능한 타이머 위젯을 화면에 표시합니다',
-            'ドラッグ可能なタイマー ウィジェットを画面上に表示する'
+            'ドラッグできるタイマーウィジェットを画面に表示します'
           ),
           default: false,
           // Floating widget is a desktop/tablet surface — phones use the tray chip.
@@ -68,12 +68,12 @@ export const settingsSchema: SettingsSchema = {
           description: L(
             'Choose how the timer button appears',
             '타이머 버튼 표시 방식을 선택하세요',
-            'タイマーボタンの表示方法を選択します'
+            'タイマーボタンの表示方法を選びます'
           ),
           default: 'expanded',
           options: [
             { value: 'compact', label: L('Compact', '컴팩트', 'コンパクト') },
-            { value: 'expanded', label: L('Expanded', '확장', '拡張された') }
+            { value: 'expanded', label: L('Expanded', '확장', '拡大') }
           ],
           // Menu-bar button is a desktop/tablet concept — not shown on phones.
           formFactors: ['desktop', 'tablet', 'web']

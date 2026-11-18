@@ -30,8 +30,8 @@ const tr = (app: HostApi, t: LocalizedText) => resolveLocalizedText(t, app.app.l
 
 const STR = {
   total: L('Total', '합계', '合計'),
-  target: L('Target', '목표', 'ターゲット'),
-  words: L('Words', '단어', '言葉'),
+  target: L('Target', '목표', '目標'),
+  words: L('Words', '단어', '語'),
   chars: L('Chars', '글자', '文字'),
   settings: L('Document goal settings', '문서 목표 설정', '文書目標の設定')
 };

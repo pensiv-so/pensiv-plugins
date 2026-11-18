@@ -24,11 +24,11 @@ const tr = (app: HostApi, t: LocalizedText) => resolveLocalizedText(t, app.app.l
 const STR = {
   title: L('Daily Goal', '일일 목표', '毎日の目標'),
   total: L('Total', '합계', '合計'),
-  words: L('Words', '단어', '言葉'),
+  words: L('Words', '단어', '語'),
   chars: L('Chars', '글자', '文字'),
-  addedToday: L('added today', '오늘 입력', '今日追加されました'),
-  removedToday: L('removed today', '오늘 지움', '今日削除されました'),
-  netToday: L('net today', '오늘 순증', '今日純増')
+  addedToday: L('added today', '오늘 입력', '今日の追加'),
+  removedToday: L('removed today', '오늘 지움', '今日の削除'),
+  netToday: L('net today', '오늘 순증', '今日の純増')
 };
 
 /**
@@ -66,7 +66,7 @@ const settings: SettingsSchema = {
           description: L(
             'Choose whether to track words or characters',
             '단어 또는 글자 수를 추적할지 선택하세요',
-            '単語または文字を追跡するかどうかを選択します'
+            '語数と文字数のどちらで数えるかを選びます'
           ),
           default: 'words',
           options: [
@@ -77,8 +77,8 @@ const settings: SettingsSchema = {
         {
           key: 'target',
           type: 'number',
-          label: L('Target', '목표', 'ターゲット'),
-          description: L('Set your daily writing target', '일일 작성 목표를 설정하세요', '毎日の執筆目標を設定する'),
+          label: L('Target', '목표', '目標'),
+          description: L('Set your daily writing target', '일일 작성 목표를 설정하세요', '1日の執筆目標を設定します'),
           default: 1000,
           min: 10,
           max: 1000000
@@ -209,18 +209,18 @@ const settings: SettingsSchema = {
           fields: [
             { key: 'wcIncludeSpace', type: 'toggle', label: L('Include spaces', '공백 포함', 'スペースを含める'), sample: 'a b', default: true },
             { key: 'wcIncludeIndent', type: 'toggle', label: L('Include indentation', '들여쓰기 포함', 'インデントを含める'), sample: '··line', default: true },
-            { type: 'divider', label: L('Quotes', '따옴표', '引用') },
-            { key: 'wcQuoteStraightDouble', type: 'toggle', label: L('Straight double quote', '직선 쌍따옴표', 'まっすぐな二重引用符'), sample: '"', default: true },
-            { key: 'wcQuoteStraightSingle', type: 'toggle', label: L('Straight single quote', '직선 홑따옴표', '直接の一重引用符'), sample: "'", default: true },
-            { key: 'wcQuoteCurlyDouble', type: 'toggle', label: L('Curly double quotes', '곡선 쌍따옴표', '二重引用符'), sample: '“ ”', default: true },
-            { key: 'wcQuoteCurlySingle', type: 'toggle', label: L('Curly single quotes', '곡선 홑따옴표', '波状の一重引用符'), sample: '‘ ’', default: true },
-            { key: 'wcQuoteGuillemets', type: 'toggle', label: L('Guillemets', '겔레멧·인용 괄호', 'ギルメッツ'), sample: '« » ‹ ›', default: true },
-            { type: 'divider', label: L('Brackets', '괄호', 'ブラケット') },
+            { type: 'divider', label: L('Quotes', '따옴표', '引用符') },
+            { key: 'wcQuoteStraightDouble', type: 'toggle', label: L('Straight double quote', '직선 쌍따옴표', '直線の二重引用符'), sample: '"', default: true },
+            { key: 'wcQuoteStraightSingle', type: 'toggle', label: L('Straight single quote', '직선 홑따옴표', '直線の一重引用符'), sample: "'", default: true },
+            { key: 'wcQuoteCurlyDouble', type: 'toggle', label: L('Curly double quotes', '곡선 쌍따옴표', '曲線の二重引用符'), sample: '“ ”', default: true },
+            { key: 'wcQuoteCurlySingle', type: 'toggle', label: L('Curly single quotes', '곡선 홑따옴표', '曲線の一重引用符'), sample: '‘ ’', default: true },
+            { key: 'wcQuoteGuillemets', type: 'toggle', label: L('Guillemets', '프랑스식 따옴표', 'ギユメ'), sample: '« » ‹ ›', default: true },
+            { type: 'divider', label: L('Brackets', '괄호', '括弧') },
             { key: 'wcParenRound', type: 'toggle', label: L('Round brackets', '소괄호', '丸括弧'), sample: '( )', default: true },
             { key: 'wcParenSquare', type: 'toggle', label: L('Square brackets', '대괄호', '角括弧'), sample: '[ ]', default: true },
             { key: 'wcParenCurlyBraces', type: 'toggle', label: L('Curly braces', '중괄호', '中括弧'), sample: '{ }', default: true },
             { key: 'wcParenAngle', type: 'toggle', label: L('Angle brackets', '꺾쇠 괄호', '山括弧'), sample: '< >', default: true },
-            { key: 'wcParenCjk', type: 'toggle', label: L('CJK brackets', '한중 괄호', '日中韓ブラケット'), sample: '「」 《》', default: true },
+            { key: 'wcParenCjk', type: 'toggle', label: L('CJK brackets', '한중일 괄호', '日中韓括弧'), sample: '「」 《》', default: true },
             { type: 'divider' },
             {
               key: 'wcIncludeSpecialChars',
@@ -243,7 +243,7 @@ const settings: SettingsSchema = {
           description: L(
             'Display a draggable progress widget on screen',
             '드래그 가능한 진행률 위젯을 화면에 표시합니다',
-            'ドラッグ可能な進捗ウィジェットを画面上に表示する'
+            'ドラッグできる進捗ウィジェットを画面に表示します'
           ),
           // Shown by default (preserves prior always-on behavior); toggle off to hide.
           default: true,

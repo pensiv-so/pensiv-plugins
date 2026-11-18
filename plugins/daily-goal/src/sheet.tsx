@@ -28,11 +28,11 @@ const tr = (app: HostApi, t: LocalizedText) => resolveLocalizedText(t, app.app.l
 
 const STR = {
   total: L('Total', '합계', '合計'),
-  words: L('Words', '단어', '言葉'),
+  words: L('Words', '단어', '語'),
   chars: L('Chars', '글자', '文字'),
-  addedToday: L('Added today', '오늘 입력', '今日追加'),
-  removedToday: L('Removed today', '오늘 지움', '今日削除'),
-  netToday: L('Net today', '오늘 순증', '今日純増'),
+  addedToday: L('Added today', '오늘 입력', '今日の追加'),
+  removedToday: L('Removed today', '오늘 지움', '今日の削除'),
+  netToday: L('Net today', '오늘 순증', '今日の純増'),
   settings: L('Daily goal settings', '일일 목표 설정', '毎日の目標設定')
 };
 
